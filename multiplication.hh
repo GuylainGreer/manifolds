@@ -2,14 +2,15 @@
 #define MANIFOLDS_FUNCTION_MULTIPLICATION_HH
 
 #include "function.hh"
+#include "full_function_defs.hh"
 
 namespace manifolds {
 
 template <class ... Functions>
-struct Multiplication : Function, MultiFunction
+struct MultiplicationImpl : Function, MultiFunction
 {
-  Multiplication(){}
-  Multiplication(const Functions & ... functions):
+  MultiplicationImpl(){}
+  MultiplicationImpl(const Functions & ... functions):
     functions(functions...){}
 
   template <class ... Args>
@@ -35,6 +36,8 @@ struct Multiplication : Function, MultiFunction
 private:
   std::tuple<Functions...> functions;
 };
+
+  DEF_FF_TEMPLATE(Multiplication)
 
 }
 #endif

@@ -6,7 +6,7 @@ struct Test
 {
   bool operator==(const Test& o) const
   {
-    return this == &o;
+    return true;
   }
 };
 

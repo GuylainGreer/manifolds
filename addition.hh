@@ -2,17 +2,21 @@
 #define MANIFOLDS_FUNCTION_ADDITION_HH
 
 #include "function.hh"
+#include "full_function_defs.hh"
 #include <tuple>
 
 namespace manifolds {
 
 template <class ... Functions>
-struct Addition : MultiFunction, Function
+struct AdditionImpl : MultiFunction, Function
 {
-  Addition(){}
+  AdditionImpl(){}
 
-  Addition(Functions ... fs):
+  AdditionImpl(Functions ... fs):
     functions(fs...){}
+
+  AdditionImpl(std::tuple<Functions...> f):
+    functions(f){}
 
   template <class ... Args>
   auto operator()(Args && ... args) const
@@ -34,9 +38,16 @@ struct Addition : MultiFunction, Function
 	eval<next_N>(std::forward<Args>(args)...);
   }
 
+  auto GetFunctions() const
+  {
+    return functions;
+  }
+
 private:
   std::tuple<Functions...> functions;
 };
+
+  DEF_FF_TEMPLATE(Addition)
 
 }
 #endif

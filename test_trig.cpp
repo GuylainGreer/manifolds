@@ -1,5 +1,6 @@
 #include <complex>
 #include "trig.hh"
+#include "full_function_defs.hh"
 #include <boost/test/unit_test.hpp>
 #include <limits>
 

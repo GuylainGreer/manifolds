@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include "addition.hh"
 #include "variables.hh"
+#include "full_function_defs.hh"
 
 BOOST_AUTO_TEST_CASE(addition_test)
 {

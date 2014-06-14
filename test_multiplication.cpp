@@ -1,5 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include "multiplication.hh"
+#include "full_function_defs.hh"
 #include "variables.hh"
 
 BOOST_AUTO_TEST_CASE(multiplication_test)

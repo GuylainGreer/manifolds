@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include "full_function_defs.hh"
 #include "variables.hh"
+#include "trig.hh"
 
 BOOST_AUTO_TEST_CASE(full_function_test)
 {

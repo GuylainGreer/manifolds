@@ -1,6 +1,7 @@
 #ifndef MANIFOLDS_FUNCTION_COMPOSITION_HH
 #define MANIFOLDS_FUNCTION_COMPOSITION_HH
 
+#include "is_function.hh"
 #include "function.hh"
 
 namespace manifolds {
@@ -12,11 +13,14 @@ struct Composition : Function, MultiFunction
   Composition(const Functions & ... functions):
     functions(functions...){}
 
-  template <class ... Args>
-  auto operator()(Args && ... args) const
+  template <class Arg, class ... Args,
+	    class = typename std::enable_if<
+	      !is_function<Arg>::value
+	      >::type>
+  auto operator()(Arg arg, Args && ... args) const
   {
     static const int last = sizeof...(Functions)-1;
-    return eval<last-1>(std::get<last>(functions)(args...));
+    return eval<last-1>(std::get<last>(functions)(arg, args...));
   }
 
   template <int N, class Arg>
@@ -29,6 +33,23 @@ struct Composition : Function, MultiFunction
     else
       return eval<next_N>(std::forward<result>
 			  (std::get<N>(functions)(arg)));
+  }
+
+  template <class InnerFunc>
+  using prepare = typename std::remove_reference<
+    typename std::remove_cv<
+      InnerFunc>::type
+    >::type;
+
+  //Return a composite function
+  template <class InnerFunc, class = typename std::enable_if<
+			       is_function<InnerFunc>::value
+			       >::type>
+  auto operator()(InnerFunc && f) const
+  {
+    return Composition<
+      Composition,
+      prepare<InnerFunc>>(*this, f);
   }
 
 private:
