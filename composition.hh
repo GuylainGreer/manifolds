@@ -7,8 +7,11 @@
 namespace manifolds {
 
 template <class ... Functions>
-struct Composition : Function, MultiFunction
+struct Composition : MultiFunction
 {
+  static const bool stateless =
+    and_<is_stateless<Functions>...>::value;
+
   Composition(){}
   Composition(const Functions & ... functions):
     functions(functions...){}

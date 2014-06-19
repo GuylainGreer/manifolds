@@ -8,9 +8,12 @@
 namespace manifolds {
 
 template <class ... Functions>
-struct AdditionImpl : MultiFunction, Function
+struct AdditionImpl : MultiFunction
 {
   AdditionImpl(){}
+
+  static const bool stateless =
+    and_<is_stateless<Functions>...>::value;
 
   AdditionImpl(Functions ... fs):
     functions(fs...){}

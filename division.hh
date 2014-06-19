@@ -7,8 +7,12 @@
 namespace manifolds {
 template <class Numerator,
 	  class Denominator>
-struct DivisionImpl
+struct DivisionImpl : MultiFunction
 {
+  static const bool stateless =
+    and_<is_stateless<Numerator>,
+	 is_stateless<Denominator>>::value;
+
   DivisionImpl(){}
   DivisionImpl(Numerator n, Denominator d):
     n(n),d(d){}

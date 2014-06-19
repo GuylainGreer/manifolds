@@ -9,6 +9,7 @@
 #define STD_FUNCTION(classname , funcname)		\
   struct classname##Impl : Function			\
   {							\
+    static const bool stateless = true;			\
     inline friend std::ostream &			\
       operator<<(std::ostream & s, classname##Impl){	\
       return s << #funcname;}				\
@@ -36,17 +37,20 @@ namespace manifolds
   STD_FUNCTION(ACosh, acosh)
   STD_FUNCTION(ATanh, atanh)
   STD_FUNCTION(Exp, exp)
+
+  struct PowImpl : MultiFunction
+  {
+    static const bool stateless = true;
+    template <class T, class U>
+    auto operator()(T && t, U && u) const
+    {
+      return std::pow(t, u);
+    }
+  };
+
+  DEF_FULL_FUNCTION(Pow)
 }
 
 #undef STD_FUNCTION
-
-struct PowImpl
-{
-  template <class T, class U>
-  auto operator()(T && t, U && u) const
-  {
-    return std::pow(t, u);
-  }
-};
 
 #endif

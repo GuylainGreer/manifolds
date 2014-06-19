@@ -7,8 +7,11 @@
 namespace manifolds {
 
 template <class ... Functions>
-struct MultiplicationImpl : Function, MultiFunction
+struct MultiplicationImpl : MultiFunction
 {
+  static const bool stateless =
+    and_<is_stateless<Functions>...>::value;
+
   MultiplicationImpl(){}
   MultiplicationImpl(const Functions & ... functions):
     functions(functions...){}
@@ -31,6 +34,11 @@ struct MultiplicationImpl : Function, MultiFunction
     else
       return std::forward<result>(std::get<N>(functions)(args...)) *
 	eval<next_N>(std::forward<Args>(args)...);
+  }
+
+  auto GetFunctions() const
+  {
+    return functions;
   }
 
 private:
