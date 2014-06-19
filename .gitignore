@@ -22,3 +22,9 @@
 
 #Emacs backup files
 *~
+
+#Created executable
+test
+
+#Scons build files
+.sconsign.dblite
