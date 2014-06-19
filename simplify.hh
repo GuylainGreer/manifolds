@@ -15,7 +15,7 @@
 namespace manifolds {
 //Default, don't do anything
   template <class A, class ForEnableIf = void>
-struct Simplify
+struct Simplification
 {
   typedef A type;
 
@@ -77,7 +77,7 @@ struct Simplify
       {
 	typedef typename boost::mpl::not_<
 	  typename boost::is_same<
-	  typename Simplify<Variadic<Left,T> >::type,
+	  typename Simplification<Variadic<Left,T> >::type,
 	    Variadic<Left,T>
 	    >::type>::type type;
       };
@@ -105,7 +105,7 @@ struct Simplify
 		     (std::declval<std::tuple<Rights...>>()))
 		    merged_next_right;
 
-    typedef typename Simplify<
+    typedef typename Simplification<
       Variadic<
 	Left,
 	typename std::tuple_element<
@@ -211,7 +211,7 @@ struct Simplify
 		       std::tuple<Results...> result,
 		       std::integral_constant<int, merge_index>)
   {
-    auto merger = Simplify<
+    auto merger = Simplification<
       Variadic<Left,typename std::tuple_element<
 		      merge_index, std::tuple<Rights...>>::type>
       >::Combine(std::get<0>(left), std::get<merge_index>(right));
@@ -242,7 +242,7 @@ struct Simplify
 
   template <template <class...> class Variadic,
 	    class ... Args1, class ... Args2>
-  struct Simplify<Variadic<Variadic<Args1...>, Args2...> >
+  struct Simplification<Variadic<Variadic<Args1...>, Args2...> >
   {
     typedef typename merge_and_simplify_result<
       Variadic,
@@ -264,11 +264,11 @@ struct Simplify
 
   template <template <class...> class Variadic,
 	    class ... Args1, class ... Args2>
-  struct Simplify<Variadic<Variadic<Args1...>,
+  struct Simplification<Variadic<Variadic<Args1...>,
 			   Variadic<Args2...>>> :
-    Simplify<Variadic<Variadic<Args1...>, Args2...>>
+    Simplification<Variadic<Variadic<Args1...>, Args2...>>
   {
-    typedef Simplify<
+    typedef Simplification<
       Variadic<Variadic<Args1...>, Args2...>> base;
     typedef typename base::type type;
 
@@ -294,6 +294,12 @@ struct Simplify
 		     sizeof...(Args2)>());
     }
   };
+
+  template <class F>
+  auto Simplify(F f)
+  {
+    return Simplification<F>::Combine(f);
+  }
 }
 
 #endif
