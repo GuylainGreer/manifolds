@@ -6,6 +6,7 @@
 #include <ratio>
 #include <array>
 #include <type_traits>
+#include <ostream>
 
 namespace manifolds
 {
@@ -17,6 +18,7 @@ namespace manifolds
 	    class Order>
   struct PolynomialImpl : Function
   {
+    static const bool stateless = false;
     template <class Type, std::size_t N>
     PolynomialImpl(std::array<Type, N> t):
       coeffs(t){}
@@ -58,15 +60,29 @@ namespace manifolds
 	     sizeof...(InputTypes)+1>>(coeff_arr);
   }
 
+  template <class A, class B, class N>
+  std::ostream & operator<<(std::ostream & s,
+			    Polynomial<A,B,N> p)
+  {
+    s << "Polynomial(";
+    for(int i = 0; i < N::value; i++)
+      {
+	s << p.GetCoeffs()[i];
+	if(i != N::value-1)
+	  s << ' ';
+      }
+    return s << ")";
+  }
 }
 
 #include "simplify.hh"
 #include "addition.hh"
+#include "multiplication.hh"
 
 namespace manifolds {
   template <class InputType, class OutputType,
 	    int order1, int order2>
-  struct Simplify<Addition<
+  struct Simplification<Addition<
     Polynomial<InputType, OutputType,
 	       std::integral_constant<int,order1>>,
 		    Polynomial<
@@ -93,13 +109,15 @@ namespace manifolds {
       return t2.GetCoeffs();
     }
 
-    static type Combine(Polynomial<
+    static type Combine(Addition<Polynomial<
 			InputType, OutputType,
-			std::integral_constant<int,order1>> p1,
+			std::integral_constant<int,order1>>,
 			Polynomial<
 			InputType, OutputType,
-			std::integral_constant<int,order2>> p2)
+			std::integral_constant<int,order2>>> p)
     {
+      auto p1 = std::get<0>(p.GetFunctions());
+      auto p2 = std::get<1>(p.GetFunctions());
       typedef std::integral_constant<
 	bool, (order1>order2)> yes_no;
       if(order1 > order2)
@@ -119,13 +137,10 @@ namespace manifolds {
     }
   };
 
-  /*  template <class A>
-  struct Simplify<
+  template <class A>
+  struct Simplification<
     Addition<A,A>,
-    typename std::enable_if<
-      std::is_same<typename Simplify<Addition<A,A>>::type,
-		   Addition<A,A>>::value
-		   >::type>
+    typename std::enable_if<is_stateless<A>::value>::type>
   {
     typedef Composition<
       Polynomial<double,double,std::integral_constant<int,2>>,
@@ -133,11 +148,111 @@ namespace manifolds {
 
     static type Combine(Addition<A,A> a)
     {
-      return {GetPolynomial<double>(0.0,1.0),
+      return {GetPolynomial<double>(0.0,2.0),
 	  A()};
     }
+  };
 
-    };*/
+  template <class InputType, class OutputType,
+	    int order1, int order2>
+  struct Simplification<Multiplication<
+    Polynomial<InputType, OutputType,
+	       std::integral_constant<int,order1>>,
+		    Polynomial<
+		      InputType, OutputType,
+		      std::integral_constant<int,order2>>>>
+  {
+    static const int new_order = order1 + order2 - 1;
+    typedef Polynomial<
+      InputType, OutputType,
+      std::integral_constant<int, new_order>> type;
+
+    static type Combine(Multiplication<Polynomial<
+			InputType, OutputType,
+			std::integral_constant<int,order1>>,
+			Polynomial<
+			InputType, OutputType,
+			std::integral_constant<int,order2>>> p)
+    {
+      auto p1 = std::get<0>(p.GetFunctions());
+      auto p2 = std::get<1>(p.GetFunctions());
+      std::array<double,new_order> r;
+      std::fill(r.begin(), r.end(), 0);
+      for(unsigned j = 0; j < order1; j++)
+	for(unsigned i = 0; i < order2; i++)
+	  r[i+j] += p1.GetCoeffs()[j] * p2.GetCoeffs()[i];
+      return {r};
+    }
+  };
+
+  template <class InputType, class OutputType,
+	    int order1, int order2>
+  struct Simplification<Composition<
+    Polynomial<InputType, OutputType,
+	       std::integral_constant<int,order1>>,
+		    Polynomial<
+		      InputType, OutputType,
+		      std::integral_constant<int,order2>>>>
+  {
+    static const int new_order = (order1-1) * (order2-1) + 1;
+    typedef Polynomial<
+      InputType, OutputType,
+      std::integral_constant<int, new_order>> type;
+
+    template <class T, class U>
+      static auto Multiply(const T & t, const U & u)
+    {
+      return Simplification<Multiplication<T,U>>::
+	Combine(Multiplication<T,U>(t,u));
+    }
+
+    template <class T, class U>
+      static auto Add(const T & t, const U & u)
+    {
+      return Simplification<Addition<T,U>>::
+	Combine(Addition<T,U>(t,u));
+    }
+
+    template <class T, class U>
+      static auto Accumulate(const T & t, const U & u,
+			     std::integral_constant<int,-1>)
+    {
+      return GetPolynomial<double>(0);
+    }
+
+    template <int index, class T, class U>
+      static auto Accumulate(const T & t, const U & u,
+			     std::integral_constant<int,index>)
+    {
+      static const int last_coeff =
+	std::tuple_size<decltype(t.GetCoeffs())>::value-1;
+      auto m1 =
+	GetPolynomial<double>
+	(std::get<last_coeff-index>(t.GetCoeffs()));
+      auto m2 = GetPolynomial<double>(0,1);
+      auto m3 = Accumulate(t, u, std::integral_constant<
+			   int,index-1>());
+      typedef Multiplication<decltype(m2),decltype(m3)> mul_type;
+      auto m4 = Simplification<mul_type>::Combine(mul_type(m2,m3));
+      typedef Addition<decltype(m1), decltype(m4)> add_type;
+      return Simplification
+<add_type>::Combine(add_type(m1,m4));
+    }
+
+    static type Combine(Multiplication<Polynomial<
+			InputType, OutputType,
+			std::integral_constant<int,order1>>,
+			Polynomial<
+			InputType, OutputType,
+			std::integral_constant<int,order2>>> p)
+    {
+      auto p1 = std::get<0>(p.GetFunctions());
+      auto p2 = std::get<1>(p.GetFunctions());
+      std::array<double,new_order> r;
+      std::fill(r.begin(), r.end(), 0);
+      return {r};
+    }
+  };
 }
 
 #endif
