@@ -8,8 +8,9 @@
 namespace manifolds {
 
   template <int N>
-  struct VariableImpl : Function, MultiFunction
+  struct VariableImpl : MultiFunction
   {
+    static const bool stateless = true;
     template <class ... Args>
     auto&& operator()(Args && ... args) const
     {
