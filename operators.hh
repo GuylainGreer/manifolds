@@ -13,10 +13,7 @@ namespace manifolds
   template <class A, class B>
   auto operator+(A a, B b)
   {
-    typedef Addition<A,B> type;
-    type r(a,b);
-    typedef Simplify<type> type2;
-    return type2::Combine(r);
+    return Simplify(Addition<A,B>(a,b));
   }
 
   template <class A>
@@ -34,7 +31,7 @@ namespace manifolds
   template <class A, class B>
   auto operator*(A a, B b)
   {
-    return Multiplication<A,B>(a,b);
+    return Simplify(Multiplication<A,B>(a,b));
   }
 
   template <class A, class B>
