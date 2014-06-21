@@ -7,6 +7,7 @@
 #include <array>
 #include <type_traits>
 #include <ostream>
+#include <iostream>
 
 namespace manifolds
 {
@@ -18,6 +19,7 @@ namespace manifolds
 	    class Order>
   struct PolynomialImpl : Function
   {
+    static const int num_coeffs = Order::value;
     static const bool stateless = false;
     template <class Type, std::size_t N>
     PolynomialImpl(std::array<Type, N> t):
@@ -78,6 +80,7 @@ namespace manifolds
 #include "simplify.hh"
 #include "addition.hh"
 #include "multiplication.hh"
+#include "zero.hh"
 
 namespace manifolds {
   template <class InputType, class OutputType,
@@ -217,29 +220,27 @@ namespace manifolds {
       static auto Accumulate(const T & t, const U & u,
 			     std::integral_constant<int,-1>)
     {
-      return GetPolynomial<double>(0);
+      return zero;
     }
 
     template <int index, class T, class U>
       static auto Accumulate(const T & t, const U & u,
-			     std::integral_constant<int,index>)
+			     std::integral_constant<int,index> i)
     {
+      auto t_coeffs = t.GetCoeffs();
       static const int last_coeff =
-	std::tuple_size<decltype(t.GetCoeffs())>::value-1;
+	std::tuple_size<decltype(t_coeffs)>::value-1;
       auto m1 =
 	GetPolynomial<double>
-	(std::get<last_coeff-index>(t.GetCoeffs()));
-      auto m2 = GetPolynomial<double>(0,1);
+	(std::get<last_coeff-index>(t_coeffs));
+      auto m2 = u;
       auto m3 = Accumulate(t, u, std::integral_constant<
 			   int,index-1>());
-      typedef Multiplication<decltype(m2),decltype(m3)> mul_type;
-      auto m4 = Simplification<mul_type>::Combine(mul_type(m2,m3));
-      typedef Addition<decltype(m1), decltype(m4)> add_type;
-      return Simplification
-<add_type>::Combine(add_type(m1,m4));
+      auto m4 = Multiply(m2,m3);
+      return Add(m1,m4);
     }
 
-    static type Combine(Multiplication<Polynomial<
+    static auto Combine(Composition<Polynomial<
 			InputType, OutputType,
 			std::integral_constant<int,order1>>,
 			Polynomial<
@@ -248,9 +249,9 @@ namespace manifolds {
     {
       auto p1 = std::get<0>(p.GetFunctions());
       auto p2 = std::get<1>(p.GetFunctions());
-      std::array<double,new_order> r;
-      std::fill(r.begin(), r.end(), 0);
-      return {r};
+      return
+	Accumulate(p1, p2, std::integral_constant<
+		   int,order1-1>());
     }
   };
 }
