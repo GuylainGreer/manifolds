@@ -8,7 +8,7 @@
 #include <tuple>
 #include <type_traits>
 #include <boost/preprocessor/cat.hpp>
-#include <boost/preprocessor/seq/for_each.hpp>
+#include "simplify.hh"
 
 namespace manifolds {
 
@@ -28,15 +28,16 @@ struct FunctionCommon
 			       >::type>
   auto operator()(InnerFunc && f) const
   {
-    return Composition<
-      FunctionImpl, prepare<InnerFunc>>
-      (*static_cast<const FunctionImpl*>(this), f);
+    return Simplify(Composition<
+		    FunctionImpl, prepare<InnerFunc>>
+		    (*static_cast<const FunctionImpl*>(this), f));
   }
 
   //Expand the tuple
   template <class ... Args>
   auto operator()(std::tuple<Args...> && t) const
   {
+    //static_assert(false, "Not implemented yet!");
     return (*static_cast<const FunctionImpl*>(this))();
   }
 };
