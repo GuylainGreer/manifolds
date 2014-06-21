@@ -4,9 +4,6 @@
 #include <boost/test/unit_test.hpp>
 #include <ratio>
 
-template <int n, int d>
-using r = std::ratio<n,d>;
-
 BOOST_AUTO_TEST_CASE(polynomial_test)
 {
   using namespace manifolds;
@@ -37,5 +34,18 @@ BOOST_AUTO_TEST_CASE(polynomial_test)
   BOOST_CHECK_EQUAL(p4(0), p(0)*p2(0));
   BOOST_CHECK_EQUAL(p4(1), p(1)*p2(1));
   BOOST_CHECK_EQUAL(p4(2), p(2)*p2(2));
+
+  auto p5 = Simplify(p3(p4));
+
+  static_assert(std::is_same<
+		decltype(p5),
+		Polynomial<double,double,
+		std::integral_constant<int,7>>>::value,
+		"Failed to simplify polynomial composition");
+  auto p6 = Composition<decltype(p3), decltype(p4)>(p3,p4);
+  for(int i = -3; i < 4; i++)
+    {
+      BOOST_CHECK_EQUAL(p5(i), p6(i));
+    }
 }
 
