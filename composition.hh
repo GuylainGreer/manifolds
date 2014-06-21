@@ -55,6 +55,11 @@ struct Composition : MultiFunction
       prepare<InnerFunc>>(*this, f);
   }
 
+  auto GetFunctions() const
+  {
+    return functions;
+  }
+
 private:
   std::tuple<Functions...> functions;
 };
