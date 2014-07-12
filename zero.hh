@@ -5,14 +5,14 @@
 #include <ostream>
 
 namespace manifolds {
-struct ZeroImpl
+  struct ZeroImpl : MultiFunction
 {
   static const bool stateless = true;
 
-  template <class Arg, class ... Args>
-  auto operator()(Arg arg, Args...) const
+  template <class ... Args>
+  auto operator()(Args...) const
   {
-    return Arg(0);
+    return 0;
   }
 };
 
