@@ -3,6 +3,8 @@
 
 #include "function.hh"
 #include "full_function_defs.hh"
+#include "simplify_variadic.hh"
+#include <utility>
 #include <tuple>
 
 namespace manifolds {
@@ -52,5 +54,33 @@ private:
 
   DEF_FF_TEMPLATE(Addition)
 
+  template <class F>
+  auto Add(F f)
+  {
+    return f;
+  }
+
+  template <class F, class ... Funcs>
+  auto Add(F f, Funcs ... fs)
+  {
+    return f + Add(fs...);
+  }
+
+  template <class ... Functions>
+  struct Simplification<
+    Addition<Functions...>,
+    typename std::enable_if<(sizeof...(Functions)>2)>::type>
+  {
+    typedef decltype(SimplifyV<Addition>
+		     (std::declval<std::tuple<Functions...>>(),
+		      std::true_type{})) type;
+
+    static type Combine(Addition<Functions...> a)
+    {
+      return SimplifyV<Addition>(a.GetFunctions(),
+				 std::true_type{});
+    }
+  };
 }
+
 #endif
