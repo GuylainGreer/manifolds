@@ -14,9 +14,7 @@ namespace manifolds
 
   //Somewhat confusingly,
   //order here refers to the number of coefficients
-  template <class OutputUnits,
-	    class InputUnits,
-	    class Order>
+  template <class CoeffType, class Order>
   struct PolynomialImpl : Function
   {
     static const int num_coeffs = Order::value;
@@ -26,13 +24,15 @@ namespace manifolds
       coeffs(t){}
 
     template <class T>
-    auto operator()(T && t) const
+    auto operator()(T t) const
     {
-      auto unitless = t/InputUnits(1);
-      double result = 0;
+      typename std::common_type<
+	T,CoeffType>::type result = 0, t2 = t;
       for(auto i = coeffs.rbegin(); i != coeffs.rend(); i++)
-	result = result * unitless + *i;
-      return OutputUnits(result);
+	{
+	  result = result * t2 + *i;
+	}
+      return result;
     }
 
     const auto & GetCoeffs() const
@@ -40,63 +40,80 @@ namespace manifolds
       return coeffs;
     }
 
+    void Print(std::ostream & s) const
+    {
+      s << "Polynomial(";
+      for(int i = 0; i < Order::value; i++)
+	{
+	  s << coeffs[i];
+	  if(i != Order::value-1)
+	    s << ' ';
+	}
+      s << ")";
+    }
   private:
 
-    std::array<double,Order::value> coeffs;
+    std::array<CoeffType,Order::value> coeffs;
   };
 
   DEF_FF_TEMPLATE(Polynomial)
-
-  template <class OutputType, class InputType,
-	    class ... InputTypes>
-  auto GetPolynomial(InputType first, InputTypes ... coeffs)
-  {
-    typedef typename std::common_type<InputType, double>::type
-      real_type;
-    std::array<double, sizeof...(InputTypes)+1>
-      coeff_arr{{double(first), double(coeffs)...}};
-    return Polynomial<
-      OutputType,
-      real_type,
-      std::integral_constant<int,
-	     sizeof...(InputTypes)+1>>(coeff_arr);
-  }
-
-  template <class A, class B, class N>
+  template <class CType, int N>
   std::ostream & operator<<(std::ostream & s,
-			    Polynomial<A,B,N> p)
+			    Polynomial<CType,int_<N>> p)
   {
-    s << "Polynomial(";
-    for(int i = 0; i < N::value; i++)
-      {
-	s << p.GetCoeffs()[i];
-	if(i != N::value-1)
-	  s << ' ';
-      }
-    return s << ")";
+    p.Print(s);
+    return s;
   }
+
+  inline Polynomial<long double,int_<1>>
+    operator""_c(long double x)
+  {
+    std::array<long double, 1> a{{x}};
+    return {a};
+  }
+
+  inline Polynomial<long long unsigned,int_<1>>
+    operator""_c(long long unsigned x)
+  {
+    std::array<long long unsigned, 1> a{{x}};
+    return {a};
+  }
+
+  template <class ... InputTypes>
+  auto GetPolynomial(InputTypes ... coeffs)
+  {
+    typedef typename std::common_type<
+      double,InputTypes...>::type coeff_type;
+    std::array<coeff_type, sizeof...(InputTypes)>
+      coeff_arr{{coeff_type(coeffs)...}};
+    return Polynomial<
+      coeff_type,
+      int_<
+	     sizeof...(InputTypes)>>(coeff_arr);
+  }
+
 }
 
 #include "simplify.hh"
 #include "addition.hh"
 #include "multiplication.hh"
 #include "zero.hh"
+#include "unary_minus.hh"
 
 namespace manifolds {
-  template <class InputType, class OutputType,
-	    int order1, int order2>
+  template <int order1, int order2,
+	    class CoeffType1, class CoeffType2>
   struct Simplification<Addition<
-    Polynomial<InputType, OutputType,
-	       std::integral_constant<int,order1>>,
-		    Polynomial<
-		      InputType, OutputType,
-		      std::integral_constant<int,order2>>>>
+    Polynomial<CoeffType1, int_<order1>>,
+    Polynomial<CoeffType2, int_<order2>>>>
   {
     static const int new_order =
       order1 > order2 ? order1 : order2;
+    typedef typename std::common_type<
+      CoeffType1, CoeffType2>::type coeff_type;
     typedef Polynomial<
-      InputType, OutputType,
-      std::integral_constant<int, new_order>> type;
+      coeff_type,
+      int_< new_order>> type;
 
     template <class T1, class T2>
       static auto Init(const T1 & t1, const T2&,
@@ -113,11 +130,11 @@ namespace manifolds {
     }
 
     static type Combine(Addition<Polynomial<
-			InputType, OutputType,
-			std::integral_constant<int,order1>>,
+			CoeffType1,
+			int_<order1>>,
 			Polynomial<
-			InputType, OutputType,
-			std::integral_constant<int,order2>>> p)
+			CoeffType2,
+			int_<order2>>> p)
     {
       auto p1 = std::get<0>(p.GetFunctions());
       auto p2 = std::get<1>(p.GetFunctions());
@@ -125,14 +142,16 @@ namespace manifolds {
 	bool, (order1>order2)> yes_no;
       if(order1 > order2)
 	{
-	  std::array<double,new_order> r = Init(p1,p2,yes_no());
+	  std::array<coeff_type,new_order> r =
+	    Init(p1,p2,yes_no());
 	  for(unsigned i = 0; i < order2; i++)
 	    r[i] += p2.GetCoeffs()[i];
 	  return {r};
 	}
       else
 	{
-	  std::array<double,new_order> r = Init(p1,p2,yes_no());
+	  std::array<coeff_type,new_order> r =
+	    Init(p1,p2,yes_no());
 	  for(unsigned i = 0; i < order1; i++)
 	    r[i] += p1.GetCoeffs()[i];
 	  return {r};
@@ -140,46 +159,31 @@ namespace manifolds {
     }
   };
 
-  template <class A>
-  struct Simplification<
-    Addition<A,A>,
-    typename std::enable_if<is_stateless<A>::value>::type>
-  {
-    typedef Composition<
-      Polynomial<double,double,std::integral_constant<int,2>>,
-      A> type;
-
-    static type Combine(Addition<A,A> a)
-    {
-      return {GetPolynomial<double>(0.0,2.0),
-	  A()};
-    }
-  };
-
-  template <class InputType, class OutputType,
-	    int order1, int order2>
+  template <int order1, int order2,
+	    class CoeffType1, class CoeffType2>
   struct Simplification<Multiplication<
-    Polynomial<InputType, OutputType,
-	       std::integral_constant<int,order1>>,
-		    Polynomial<
-		      InputType, OutputType,
-		      std::integral_constant<int,order2>>>>
+    Polynomial<CoeffType1,
+	       int_<order1>>,
+    Polynomial<CoeffType2,
+	       int_<order2>>>>
   {
     static const int new_order = order1 + order2 - 1;
+    typedef typename std::common_type<
+      CoeffType1, CoeffType2>::type coeff_type;
     typedef Polynomial<
-      InputType, OutputType,
-      std::integral_constant<int, new_order>> type;
+      coeff_type,
+      int_< new_order>> type;
 
     static type Combine(Multiplication<Polynomial<
-			InputType, OutputType,
-			std::integral_constant<int,order1>>,
+			CoeffType1,
+			int_<order1>>,
 			Polynomial<
-			InputType, OutputType,
-			std::integral_constant<int,order2>>> p)
+			CoeffType2,
+			int_<order2>>> p)
     {
       auto p1 = std::get<0>(p.GetFunctions());
       auto p2 = std::get<1>(p.GetFunctions());
-      std::array<double,new_order> r;
+      std::array<coeff_type,new_order> r;
       std::fill(r.begin(), r.end(), 0);
       for(unsigned j = 0; j < order1; j++)
 	for(unsigned i = 0; i < order2; i++)
@@ -188,19 +192,19 @@ namespace manifolds {
     }
   };
 
-  template <class InputType, class OutputType,
-	    int order1, int order2>
-  struct Simplification<Composition<
-    Polynomial<InputType, OutputType,
-	       std::integral_constant<int,order1>>,
-		    Polynomial<
-		      InputType, OutputType,
-		      std::integral_constant<int,order2>>>>
+  template <int order1, int order2,
+	    class CoeffType1, class CoeffType2>
+  struct Simplification<
+    Composition<
+    Polynomial<CoeffType1,int_<order1>>,
+    Polynomial<CoeffType2,int_<order2>>>>
   {
     static const int new_order = (order1-1) * (order2-1) + 1;
+    typedef typename std::common_type<
+      CoeffType1, CoeffType2>::type coeff_type;
     typedef Polynomial<
-      InputType, OutputType,
-      std::integral_constant<int, new_order>> type;
+      coeff_type,
+      int_< new_order>> type;
 
     template <class T, class U>
       static auto Multiply(const T & t, const U & u)
@@ -218,42 +222,63 @@ namespace manifolds {
 
     template <class T, class U>
       static auto Accumulate(const T & t, const U & u,
-			     std::integral_constant<int,-1>)
+			     int_<-1>)
     {
       return zero;
     }
 
     template <int index, class T, class U>
       static auto Accumulate(const T & t, const U & u,
-			     std::integral_constant<int,index> i)
+			     int_<index> i)
     {
       auto t_coeffs = t.GetCoeffs();
       static const int last_coeff =
 	std::tuple_size<decltype(t_coeffs)>::value-1;
       auto m1 =
-	GetPolynomial<double>
-	(std::get<last_coeff-index>(t_coeffs));
+	GetPolynomial(std::get<last_coeff-index>(t_coeffs));
       auto m2 = u;
-      auto m3 = Accumulate(t, u, std::integral_constant<
-			   int,index-1>());
+      auto m3 = Accumulate(t, u, int_<index-1>());
       auto m4 = Multiply(m2,m3);
       return Add(m1,m4);
     }
 
     static auto Combine(Composition<Polynomial<
-			InputType, OutputType,
-			std::integral_constant<int,order1>>,
+			CoeffType1,
+			int_<order1>>,
 			Polynomial<
-			InputType, OutputType,
-			std::integral_constant<int,order2>>> p)
+			CoeffType2,
+			int_<order2>>> p)
     {
       auto p1 = std::get<0>(p.GetFunctions());
       auto p2 = std::get<1>(p.GetFunctions());
       return
-	Accumulate(p1, p2, std::integral_constant<
-		   int,order1-1>());
+	Accumulate(p1, p2, int_<order1-1>());
+    }
+  };
+
+  template <class Order, class CoeffType>
+  struct Simplification<
+    UnaryMinus<Polynomial<CoeffType, Order>>>
+  {
+    typedef typename std::conditional<
+      std::is_signed<CoeffType>::value,
+      CoeffType,
+      typename std::make_signed<
+	CoeffType>::type
+      >::type CoeffType2;
+    typedef Polynomial<CoeffType2, Order> type;
+
+    static type Combine(UnaryMinus<Polynomial<
+			CoeffType, Order>> u)
+    {
+      std::array<CoeffType2, Order::value> a;
+      for(int i = 0; i < Order::value; i++)
+	a[i] = -CoeffType2(u.GetFunction().GetCoeffs()[i]);
+      return {a};
     }
   };
 }
+
+#include "polynomial_composition_simplifications.hh"
 
 #endif
