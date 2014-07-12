@@ -5,6 +5,7 @@
 #include "trig.hh"
 #include "operators.hh"
 #include "polynomial.hh"
+#include "simplify_variadic.hh"
 
 BOOST_AUTO_TEST_CASE(simplify_test)
 {
@@ -25,9 +26,35 @@ BOOST_AUTO_TEST_CASE(simplify_test)
 		Addition<Sin,Cos,Tan>>::value,
 		"Simplification<>::Combine failed");
 
-  /*  static_assert(std::is_same<
+  static_assert(std::is_same<
 		decltype(Sin()+Sin()),
-		Composition<Polynomial<double,double,
-		std::integral_constant<int,2>>,Sin>>::value,
+		Composition<Polynomial<
+		double,
+		int_<2>>,Sin>>::value,
 		"Failed to make sin+sin == 2 * sin");
-  */}
+
+  auto ps = Sin() + Sin();
+  BOOST_CHECK_EQUAL(std::get<0>(ps.GetFunctions()).
+		    GetCoeffs()[0], 0);
+  BOOST_CHECK_EQUAL(std::get<0>(ps.GetFunctions()).
+		    GetCoeffs()[1], 2);
+
+  auto ms = Sin() * Sin();
+  BOOST_CHECK_EQUAL(std::get<0>(ms.GetFunctions()).
+		    GetCoeffs()[0], 0);
+  BOOST_CHECK_EQUAL(std::get<0>(ms.GetFunctions()).
+		    GetCoeffs()[1], 0);
+  BOOST_CHECK_EQUAL(std::get<0>(ms.GetFunctions()).
+		    GetCoeffs()[2], 1);
+
+  auto ss = Sin()(Sin());
+  auto mss = ss * ss;
+  static_assert(std::is_same<
+		decltype(mss),
+		Composition<Polynomial<
+		double,
+		int_<3>>,
+		Sin,Sin>>::value,
+		"Failed to simplify multiplication of "
+		"composition of functions.");
+}
