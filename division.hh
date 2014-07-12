@@ -23,6 +23,21 @@ struct DivisionImpl : MultiFunction
     return n(args...) / d(args...);
   }
 
+  auto GetNumerator() const
+  {
+    return n;
+  }
+
+  auto GetDenominator() const
+  {
+    return d;
+  }
+
+  auto GetFunctions() const
+  {
+    return std::make_tuple(n,d);
+  }
+
 private:
   Numerator n;
   Denominator d;
