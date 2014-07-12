@@ -12,37 +12,75 @@
 
 namespace manifolds {
 
+  template <class...Funcs>
+  struct Group : MultiFunction
+  {
+    std::tuple<Funcs...> functions;
+
+    Group(Funcs...fs):functions{fs...}{}
+
+    template <std::size_t...is, class...Args>
+    auto eval(std::integer_sequence<std::size_t,is...>,
+	      Args...args) const
+    {
+      return std::make_tuple(std::get<is>(functions)(args...)...);
+    }
+
+    template <class ... Args>
+    auto operator()(Args...args) const
+    {
+      return eval(std::index_sequence_for<Funcs...>(),
+		  args...);
+    }
+  };
 template <class FunctionImpl>
 struct FunctionCommon
 {
-
   template <class InnerFunc>
   using prepare = typename std::remove_reference<
     typename std::remove_cv<
       InnerFunc>::type
     >::type;
-
-  //Return a composite functionf
-  template <class InnerFunc, class = typename std::enable_if<
-			       is_function<InnerFunc>::value
-			       >::type>
+  template <class InnerFunc,
+	    class = typename std::enable_if<
+	      is_function<InnerFunc>::value
+	      >::type>
   auto operator()(InnerFunc && f) const
   {
     return Simplify(Composition<
 		    FunctionImpl, prepare<InnerFunc>>
 		    (*static_cast<const FunctionImpl*>(this), f));
   }
-
-  //Expand the tuple
-  template <class ... Args>
-  auto operator()(std::tuple<Args...> && t) const
+  template <class I1, class I2, class ... InnerFunc,
+	    class = typename std::enable_if<
+	      and_<is_function<I1>,
+		   is_function<I2>,
+		   is_function<InnerFunc>...>::value
+	      >::type>
+  auto operator()(I1 i1, I2 i2, InnerFunc ... f) const
   {
-    //static_assert(false, "Not implemented yet!");
-    return (*static_cast<const FunctionImpl*>(this))();
+    Group<I1, I2, InnerFunc...> g{i1,i2,f...};
+    return Simplify(Composition<
+		    FunctionImpl, decltype(g)>
+		    (*static_cast<const FunctionImpl*>(this), g));
   }
+  template <class T, std::size_t ... Indices>
+  auto helper(const T & t, std::integer_sequence<
+	      std::size_t, Indices...>) const
+  {
+    return (*static_cast<const FunctionImpl*>(this))
+      (std::get<Indices>(t)...);
+  }
+  template <class ... Args>
+  auto operator()(std::tuple<Args...> t) const
+  {
+    return helper(t, std::index_sequence_for<Args...>());
+  }
+
 };
 
 }
+
 #define DEF_FULL_FUNCTION(func)					\
   struct func : BOOST_PP_CAT(func,Impl),			\
 		FunctionCommon<func>				\
