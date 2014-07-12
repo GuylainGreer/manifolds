@@ -6,20 +6,23 @@
 #include <ostream>
 #include "full_function_defs.hh"
 
-#define STD_FUNCTION(classname , funcname)		\
-  struct classname##Impl : Function			\
-  {							\
-    static const bool stateless = true;			\
-    inline friend std::ostream &			\
-      operator<<(std::ostream & s, classname##Impl){	\
-      return s << #funcname;}				\
-    template <class T>					\
-      auto operator()(T && t) const			\
-    {							\
-      return std::funcname(t);				\
-    }							\
-  };							\
-  DEF_FULL_FUNCTION(classname)
+#define STD_FUNCTION(classname , funcname)			\
+  struct classname##Impl : Function				\
+  {								\
+    static const bool stateless = true;				\
+    template <class T>						\
+      auto operator()(T && t) const				\
+    {								\
+      return std::funcname(t);					\
+    }								\
+    void Print(std::ostream & s)const{s << #funcname;}		\
+  };								\
+  DEF_FULL_FUNCTION(classname)					\
+  template <class T> bool operator==(classname,T)		\
+  {return std::is_same<T,classname>::value;}			\
+  static const classname funcname = classname();		\
+  inline std::ostream & operator<<(std::ostream & s, classname)	\
+  {return s << #funcname;}
 
 namespace manifolds
 {
@@ -37,6 +40,7 @@ namespace manifolds
   STD_FUNCTION(ACosh, acosh)
   STD_FUNCTION(ATanh, atanh)
   STD_FUNCTION(Exp, exp)
+  STD_FUNCTION(Sqrt, sqrt)
 
   struct PowImpl : MultiFunction
   {
@@ -49,6 +53,7 @@ namespace manifolds
   };
 
   DEF_FULL_FUNCTION(Pow)
+
 }
 
 #undef STD_FUNCTION
