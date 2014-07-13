@@ -3,6 +3,7 @@
 #include "function_matrix.hh"
 #include "trig.hh"
 #include "operators.hh"
+#include "transpose.hh"
 
 BOOST_AUTO_TEST_CASE(matrix_test)
 {
@@ -34,4 +35,8 @@ BOOST_AUTO_TEST_CASE(matrix_test)
 			           -std::sin(3),
 				    std::sin(3),
 				    std::cos(3))));
+
+  auto mf2 = transpose(mf) * mf;
+  BOOST_CHECK_EQUAL(mf2(4).Coeff(0,0), 1.0);
+  BOOST_CHECK_EQUAL(mf2(4).Coeff(1,1), 1.0);
 }

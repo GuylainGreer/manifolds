@@ -1,4 +1,4 @@
-#include "tranpose.hh"
+#include "transpose.hh"
 #include <boost/test/unit_test.hpp>
 #include "matrix.hh"
 

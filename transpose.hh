@@ -2,11 +2,12 @@
 #define MANIFOLDS_FUNCTIONS_TRANSPOSE_HH
 
 #include "function.hh"
+#include "full_function_defs.hh"
 #include "matrix.hh"
 
 namespace manifolds
 {
-  struct Transpose : Function
+  struct TransposeImpl : Function
   {
     static const bool stateless = true;
 
@@ -21,6 +22,8 @@ namespace manifolds
       return t2;
     }
   };
+
+  DEF_FULL_FUNCTION(Transpose)
 
   static const Transpose transpose = Transpose();
 }

@@ -94,7 +94,8 @@ struct Simplification<
     Composition<Group<Functions...>, OtherFunctions...>>
   {
     typedef FunctionMatrix<
-      sizeof...(Functions), 1, Functions...> MType;
+      int_<sizeof...(Functions)>,
+      int_<1>, Functions...> MType;
     typedef Composition<MType, OtherFunctions...> type;
     static type Combine(Composition<Group<Functions...>,
 			OtherFunctions...> c)

@@ -23,24 +23,24 @@ namespace manifolds {
     return RowHolder<Functions...>(fs...);
   }
 
-  template <std::size_t rows, std::size_t cols,
+  template <class rows, class cols,
 	    class ... Functions>
-  struct FunctionMatrix
+  struct FunctionMatrixImpl : MultiFunction
   {
     std::tuple<Functions...> functions;
 
     template <class ... Rows>
-    FunctionMatrix(Rows...rs):
+    FunctionMatrixImpl(Rows...rs):
       functions(std::tuple_cat(rs.GetFunctions()...)){}
 
-    FunctionMatrix(std::tuple<Functions...> f):
+    FunctionMatrixImpl(std::tuple<Functions...> f):
       functions(f){}
 
     template <class ... Args, std::size_t ... indices>
     auto eval(std::integer_sequence<std::size_t,indices...>,
 	      Args...args) const
     {
-      return GetMatrix<rows,cols>
+      return GetMatrix<rows::value,cols::value>
 	(std::get<indices>(functions)(args...)...);
     }
 
@@ -51,11 +51,14 @@ namespace manifolds {
     }
   };
 
+  DEF_FF_TEMPLATE(FunctionMatrix)
+
   template <std::size_t rows, std::size_t cols,
 	    class ... Functions>
   auto GetFunctionMatrix(std::tuple<Functions...> functions)
   {
-    return FunctionMatrix<rows,cols,Functions...>(functions);
+    return FunctionMatrix<
+      int_<rows>,int_<cols>,Functions...>(functions);
   }
 
   template <class F, class...Fs>
