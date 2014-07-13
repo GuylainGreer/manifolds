@@ -33,6 +33,7 @@ namespace manifolds {
 		  args...);
     }
   };
+
 template <class FunctionImpl>
 struct FunctionCommon
 {
@@ -51,15 +52,14 @@ struct FunctionCommon
 		    FunctionImpl, prepare<InnerFunc>>
 		    (*static_cast<const FunctionImpl*>(this), f));
   }
-  template <class I1, class I2, class ... InnerFunc,
+  template <class ... InnerFunc,
 	    class = typename std::enable_if<
-	      and_<is_function<I1>,
-		   is_function<I2>,
-		   is_function<InnerFunc>...>::value
+	      and_<is_function<InnerFunc>...>::value
+	      && (sizeof...(InnerFunc) > 1)
 	      >::type>
-  auto operator()(I1 i1, I2 i2, InnerFunc ... f) const
+  auto operator()(InnerFunc ... f) const
   {
-    Group<I1, I2, InnerFunc...> g{i1,i2,f...};
+    Group<InnerFunc...> g{f...};
     return Simplify(Composition<
 		    FunctionImpl, decltype(g)>
 		    (*static_cast<const FunctionImpl*>(this), g));
