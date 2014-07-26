@@ -4,6 +4,13 @@
 #include <tuple>
 #include <utility>
 
+#include "function.hh"
+
+#include <boost/mpl/vector_c.hpp>
+#include <boost/mpl/sort.hpp>
+#include <boost/mpl/at.hpp>
+#include <boost/mpl/pop_front.hpp>
+
 namespace manifolds {
 
   template <class Tuple, std::size_t ... befores,
@@ -30,6 +37,31 @@ namespace manifolds {
     return remove_element_helper(t, befores(), afters());
   }
 
+  template <class Tuple>
+  auto remove_element(const Tuple & t,
+		      boost::mpl::vector<>)
+  {
+    return t;
+  }
+
+  template <class Tuple, class Vector>
+  auto remove_elements(const Tuple & t, Vector)
+  {
+    return remove_element<
+      boost::mpl::at_c<Vector, 0>::type::value>
+      (remove_elements(t, typename boost::mpl::pop_front<
+		       Vector>::type()));
+  }
+
+  template <int ... indices, class Tuple>
+  auto remove_elements(const Tuple & t)
+  {
+    typedef typename boost::mpl::sort<
+      boost::mpl::vector_c<int,indices...>
+      >::type sorted_list;
+    return remove_elements(t, sorted_list());
+  }
+
   template <int index, class Tuple, class E,
 	    std::size_t ... befores,
 	    std::size_t ... afters>
@@ -54,6 +86,32 @@ namespace manifolds {
        std::make_index_sequence<
        std::tuple_size<Tuple>::value - index>());
   }
+
+  template <class Tuple, class E>
+  auto push_back(const Tuple & t, const E & e)
+  {
+    return insert_element<
+      std::tuple_size<Tuple>::value>(t, e);
+  }
+
+  template <class T>
+  struct array_size;
+
+  template <class T, std::size_t n>
+  struct array_size<std::array<T,n>> :
+    int_<n>{};
+
+  template <class T, std::size_t n>
+  struct array_size<T[n]> :
+    int_<n>{};
+
+  template <class T, std::size_t n>
+  struct array_size<T(&)[n]> :
+    int_<n>{};
+
+  template <class T, std::size_t n>
+  struct array_size<const T(&)[n]> :
+    int_<n>{};
 }
 
 #endif
