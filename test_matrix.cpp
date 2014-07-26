@@ -38,5 +38,7 @@ BOOST_AUTO_TEST_CASE(matrix_test)
 
   auto mf2 = transpose(mf) * mf;
   BOOST_CHECK_EQUAL(mf2(4).Coeff(0,0), 1.0);
+  BOOST_CHECK_EQUAL(mf2(4).Coeff(0,1), 0.0);
+  BOOST_CHECK_EQUAL(mf2(4).Coeff(1,0), 0.0);
   BOOST_CHECK_EQUAL(mf2(4).Coeff(1,1), 1.0);
 }
