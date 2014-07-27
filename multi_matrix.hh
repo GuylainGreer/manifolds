@@ -2,6 +2,8 @@
 #define MANIFOLDS_FUNCTIONS_MULTI_DIMENSIONAL_MATRIX_HH
 
 #include <array>
+#include <algorithm>
+#include <iterator>
 #include "function.hh"
 #include "tuple_util.hh"
 
@@ -122,8 +124,6 @@ namespace manifolds {
 	{(unsigned)i, (unsigned)indices...};
       return Coeff(indices_a);
     }
-
-    
   };
 
   template <class ... MMatrices>
@@ -143,7 +143,7 @@ namespace manifolds {
       >::type;
 
     template <int N, int index = 0,
-	      bool = (dim_helper<index>::dimensions < N)>
+	      bool = (N < dim_helper<index>::dimensions)>
     struct dimension :
       std::tuple_element<
       index, std::tuple<MMatrices...>>::type::
@@ -162,12 +162,13 @@ namespace manifolds {
       auto bb = std::begin(b);
       for(auto aa : a)
 	bb = std::copy(std::begin(aa), std::end(aa), bb);
-      return bb;
+      return b;
     }
 
     static auto Dimension(int n)
     {
-      return Dimensions()[n];
+      auto d = Dimensions();
+      return d[n];
     }
 
     MultiMatrixGroup(MMatrices ... mms):matrices(mms...){}
@@ -199,6 +200,21 @@ namespace manifolds {
 		      
     }
 
+    template <class T, class = typename std::enable_if<
+			 array_size<T>::value == 
+			 dimensions>::type>
+    auto Coeff(const T & indices) const
+    {
+      std::array<int, array_size<T>::value> a;
+      std::copy(std::begin(indices), std::end(indices),
+		a.begin());
+      return GetCoeff(a, std::make_integer_sequence<
+		      int, std::tuple_element<
+		      0, std::tuple<MMatrices...>
+		      >::type::dimensions>(),
+		      int_<0>(), int_<0>());
+    }
+
     template <class...Indices>
     auto Coeff(Indices...indices) const
     {
@@ -206,7 +222,8 @@ namespace manifolds {
       return GetCoeff(a, std::make_integer_sequence<
 		      int, std::tuple_element<
 		      0, std::tuple<MMatrices...>
-		      >::type::dimensions>(), int_<0>(), int_<0>());
+		      >::type::dimensions>(),
+		      int_<0>(), int_<0>());
 		      
     }
 
