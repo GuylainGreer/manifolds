@@ -86,6 +86,14 @@ namespace manifolds
 	dimensions...> type;
     };
 
+    template <class Array>
+    static bool inc_pair(Array & a, int b, int c, int dim)
+    {
+      ++a[b];
+      ++a[c];
+      return a[b] == dim;
+    }
+
     template <class Arg>
     auto operator()(Arg arg) const
     {
@@ -117,9 +125,9 @@ namespace manifolds
 	      result.Coeff(out_indices) +=
 		arg.Coeff(in_indices);
 	      unsigned index = 0;
-	      while((++in_indices[reduxes[index].first],
-		     ++in_indices[reduxes[index].second]) ==
-		    arg.Dimension(reduxes[index].second))
+	      while(inc_pair(in_indices, reduxes[index].first,
+			     reduxes[index].second,
+			     arg.Dimension(reduxes[index].second)))
 		{
 		  in_indices[reduxes[index].first] = 0;
 		  in_indices[reduxes[index].second] = 0;
@@ -141,14 +149,28 @@ namespace manifolds
 		{
 		  if(++in_indices[index] == arg.Dimension(index))
 		    {
+		      int smaller_ones = 0;
+		      for(auto x : reduxes)
+			{
+			  smaller_ones +=
+			    (x.first < index) +
+			    (x.second < index);
+			}
 		      in_indices[index] =
-			out_indices[index] = 0;
+			out_indices[index-smaller_ones] = 0;
 		      if(++index == (int)Arg::dimensions)
 			return result;
 		    }
 		  else
 		    {
-		      ++out_indices[index];
+		      int smaller_ones = 0;
+		      for(auto x : reduxes)
+			{
+			  smaller_ones +=
+			    (x.first < index) +
+			    (x.second < index);
+			}
+		      ++out_indices[index-smaller_ones];
 		      break;
 		    }
 		}
