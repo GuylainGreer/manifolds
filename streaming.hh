@@ -33,8 +33,10 @@ void StreamVariadic(String var_name,
 		    std::ostream & s)
 {
   s << var_name << "{";
-  StreamVariadicHelper(s, v.GetFunctions(),
-		       std::index_sequence_for<Functions...>());
+  auto t = v.GetFunctions();
+  StreamVariadicHelper(s, t,
+		       std::make_index_sequence<
+		       std::tuple_size<decltype(t)>::value>());
   s << "}";
 }
 
