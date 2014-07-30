@@ -55,7 +55,7 @@ namespace manifolds {
 
     static std::array<int,sizeof...(sizes)> Dimensions()
     {
-      return {sizes...};
+      return {{sizes...}};
     }
 
     static auto Dimension(int n)
@@ -107,7 +107,7 @@ namespace manifolds {
 		    "number of indices as the "
 		    "matrix has dimensions");
       std::array<unsigned,sizeof...(Indices)+1> indices_a =
-	{(unsigned)i, (unsigned)indices...};
+	{{(unsigned)i, (unsigned)indices...}};
       return Coeff(indices_a);
     }
 
@@ -121,7 +121,7 @@ namespace manifolds {
 		    "number of indices as the "
 		    "matrix has dimensions");
       std::array<unsigned,sizeof...(Indices)+1> indices_a =
-	{(unsigned)i, (unsigned)indices...};
+	{{(unsigned)i, (unsigned)indices...}};
       return Coeff(indices_a);
     }
   };
@@ -218,7 +218,7 @@ namespace manifolds {
     template <class...Indices>
     auto Coeff(Indices...indices) const
     {
-      std::array<int, sizeof...(Indices)> a{int(indices)...};
+      std::array<int, sizeof...(Indices)> a{{int(indices)...}};
       return GetCoeff(a, std::make_integer_sequence<
 		      int, std::tuple_element<
 		      0, std::tuple<MMatrices...>
@@ -274,6 +274,14 @@ namespace manifolds {
 
     return type{std::tuple_cat(a.GetFunctions(),
 			       b.GetFunctions())};
+  }
+
+  template <int ... dims, class ... Coeffs>
+  auto GetMultiMatrix(Coeffs ... coeffs)
+  {
+    return MultiMatrix<
+      typename std::common_type<Coeffs...>::type,
+      dims...>(coeffs...);
   }
 }
 
