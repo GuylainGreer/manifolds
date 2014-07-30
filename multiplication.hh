@@ -60,9 +60,9 @@ private:
 
   DEF_FF_TEMPLATE(Multiplication)
 
-  template <class ... Functions>
+  template <class Func, class ... Functions>
   std::ostream & operator<<(std::ostream & s,
-			    Multiplication<Functions...> m)
+			    Multiplication<Func, Functions...> m)
   {
     StreamVariadic("Multiplication", m, s);
     return s;
@@ -103,7 +103,9 @@ private:
 
   template <class F, class ... Functions>
   struct Simplification<
-    Multiplication<F, Multiplication<Functions...>>>
+    Multiplication<F, Multiplication<Functions...>>,
+    typename std::enable_if<
+      !IsVariadic<Multiplication, F>::value>::type>
   {
     typedef Multiplication<F, Functions...> type;
 
@@ -116,4 +118,5 @@ private:
     }
   };
 }
+
 #endif
