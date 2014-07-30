@@ -17,8 +17,8 @@ namespace manifolds {
 		  std::integer_sequence<std::size_t, indices...>)
   {
     return 
-      MakeAddition(Derivative(
-        std::get<indices>(a.GetFunctions())..., v));
+      Add(Derivative(
+         std::get<indices>(a.GetFunctions())..., v));
   }
 
   template <class ... Funcs, int i>
@@ -26,6 +26,12 @@ namespace manifolds {
 		  Variable<i> v)
   {
     return Derivative(a, v, std::index_sequence_for<Funcs...>());
+  }
+
+  template <class F, int i>
+  auto Derivative(UnaryMinus<F> f, Variable<i> v)
+  {
+    return -Derivative(f.GetFunction(), v);
   }
 
   template <class Func, int i>
@@ -36,7 +42,9 @@ namespace manifolds {
   }
 
 
-  template <class Func, class ... Funcs, int i>
+  template <class Func, class ... Funcs, int i,
+	    class = typename std::enable_if<
+	      (sizeof...(Funcs)>0)>::type>
   auto Derivative(const Composition<Func,Funcs...> & c,
 		  Variable<i> v)
   {
@@ -77,9 +85,10 @@ namespace manifolds {
   auto TimesDerivHelper(const Multiplication<Funcs...> & a,
 			Variable<d_i> v)
   {
-    return TimesDerivHelper(a, v, std::make_index_sequence<i>(),
-			    std::make_index_sequence<
-			    sizeof...(Funcs)-i-1>());
+    return TimesDerivHelper<i>
+      (a, v, std::make_index_sequence<i>(),
+       std::make_index_sequence<
+       sizeof...(Funcs)-i-1>());
   }
 
   template <class ... Funcs, int i,
@@ -106,14 +115,17 @@ namespace manifolds {
     return Zero();
   }
 
-  template <class CoeffType>
-  auto Derivative(Polynomial<CoeffType, int_<1>> p)
+  template <class CoeffType, int i>
+  auto Derivative(Polynomial<CoeffType, int_<1>> p,
+		  Variable<i>)
   {
-    p.Coeff()[0] = 0;
-    return p;
+    return zero;
   }
 
-  template <class CoeffType, class Order>
+  template <class CoeffType, class Order,
+	    class = typename std::enable_if<
+	      Order::value != 1
+	      >::type>
   auto Derivative(const Polynomial<CoeffType, Order> & p,
 		  Variable<0>)
   {
@@ -143,7 +155,7 @@ namespace manifolds {
   TRIG_DERIV(ATanh, 1_c / (1_c-x*x))
   TRIG_DERIV(Exp, Exp())
   TRIG_DERIV(Sqrt, 0.5_c / Sqrt())
-  TRIG_DERIV(Zero, Zero())
+  TRIG_DERIV(Zero, zero)
 
   template <int i>
   auto Derivative(Pow, Variable<i>)
@@ -154,6 +166,11 @@ namespace manifolds {
   auto Derivative(Pow, Variable<0>)
   {
     return y * Pow()(x, y-1_c);
+  }
+
+  auto Derivative(Pow, Variable<1>)
+  {
+    return (Log()(x)) * Pow()(x, y);
   }
 
 #undef TRIG_DERIV
@@ -167,7 +184,7 @@ namespace manifolds {
   template <int i, int j>
   auto Derivative(Variable<i>, Variable<j>)
   {
-    return Zero();
+    return zero;
   }
 
   template <class T>
@@ -175,6 +192,26 @@ namespace manifolds {
   {
     return Derivative(t, x);
   }
+
+  template <int order, int i = 0>
+  struct D
+  {
+    template <class F>
+    auto operator()(F f) const
+    {
+      return D<order-1,i>()(Derivative(f, Variable<i>()));
+    }
+  };
+
+  template <int i>
+  struct D<0,i>
+  {
+    template <class F>
+    auto operator()(F f) const
+    {
+      return f;
+    }
+  };
 }
 
 #endif
