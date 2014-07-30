@@ -18,7 +18,7 @@ namespace manifolds {
 
   DEF_FULL_FUNCTION(Zero)
 
-  static const Zero zero;
+  static const Zero zero = Zero();
 
   inline std::ostream & operator<<(std::ostream & s, Zero z)
   {
