@@ -54,6 +54,14 @@ private:
 
   DEF_FF_TEMPLATE(Addition)
 
+  template <class Func, class ... Functions>
+  std::ostream & operator<<(std::ostream & s,
+			    Addition<Func, Functions...> m)
+  {
+    StreamVariadic("Addition", m, s);
+    return s;
+  }
+
   template <class F>
   auto Add(F f)
   {
