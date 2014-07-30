@@ -35,13 +35,19 @@ namespace manifolds {
       bool, value> type;
   };
 
+  template <class...Args>
+  struct and_;
+
   template <class Arg, class ... Args>
-  struct and_ : std::conditional<
+  struct and_<Arg,Args...> : std::conditional<
     Arg::value, and_<Args...>, std::false_type>::type{};
 
   template <class Arg>
   struct and_<Arg> : std::conditional<
     Arg::value, std::true_type, std::false_type>::type{};
+
+  template <>
+  struct and_<> : std::true_type{};
 
   template <int N>
   using int_ = std::integral_constant<int, N>;
