@@ -107,8 +107,8 @@ namespace manifolds
 		    "of the same dimension");
       static std::array<std::pair<int,int>,
 			sizeof...(ReductionPairs)> reduxes =
-	{std::make_pair(ReductionPairs::first,
-			ReductionPairs::second)...};
+	{{std::make_pair(ReductionPairs::first,
+			 ReductionPairs::second)...}};
       int in_indices[Arg::dimensions] = {};
       typename output_type<
 	Arg,
@@ -180,6 +180,7 @@ namespace manifolds
 	}
     }
   };
+
 }
 
 #endif
