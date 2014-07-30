@@ -3,6 +3,7 @@
 
 #include "function.hh"
 #include "full_function_defs.hh"
+#include "streaming.hh"
 
 namespace manifolds {
 template <class Numerator,
@@ -44,6 +45,13 @@ private:
 };
 
 DEF_FF_TEMPLATE(Division)
+
+template <class A, class B>
+std::ostream & operator<<(std::ostream & s, Division<A,B> d)
+{
+  StreamVariadic("Division", d, s);
+  return s;
+}
 
 }
 
