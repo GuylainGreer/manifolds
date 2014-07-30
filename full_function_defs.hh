@@ -32,16 +32,30 @@ namespace manifolds {
       return eval(std::index_sequence_for<Funcs...>(),
 		  args...);
     }
+
+    auto GetFunctions() const
+    {
+      return functions;
+    }
   };
+
+  template <class ... Funcs>
+  std::ostream & operator<<(std::ostream & s, Group<Funcs...> g)
+  {
+    StreamVariadic("Group", g, s);
+    return s;
+  }
 
 template <class FunctionImpl>
 struct FunctionCommon
 {
   template <class InnerFunc>
-  using prepare = typename std::remove_reference<
+  using prepare =
+    typename std::remove_reference<
     typename std::remove_cv<
+    typename std::remove_reference<
       InnerFunc>::type
-    >::type;
+      >::type>::type;
   template <class InnerFunc,
 	    class = typename std::enable_if<
 	      is_function<InnerFunc>::value
