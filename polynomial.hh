@@ -8,6 +8,7 @@
 #include <type_traits>
 #include <ostream>
 #include <iostream>
+#include <algorithm>
 
 namespace manifolds
 {
@@ -275,6 +276,39 @@ namespace manifolds {
       for(int i = 0; i < Order::value; i++)
 	a[i] = -CoeffType2(u.GetFunction().GetCoeffs()[i]);
       return {a};
+    }
+  };
+
+  template <class Order, class CoeffType1,
+	    class CoeffType2, class ... Funcs>
+  struct Simplification<
+    Multiplication<Composition<Polynomial<CoeffType1, Order>,
+			       Funcs...>,
+		   Polynomial<CoeffType2, int_<1>>>>
+  {
+    typedef typename std::common_type<
+      CoeffType1, CoeffType2>::type CoeffType;
+    typedef Composition<Polynomial<CoeffType, Order>,
+			Funcs...> type;
+
+    static type Combine(Multiplication<
+			Composition<Polynomial<CoeffType1, Order>,
+			Funcs...>,
+			Polynomial<CoeffType2, int_<1>>> m)
+    {
+      std::array<CoeffType, Order::value> cs;
+      auto p =
+	std::get<0>(std::get<0>(m.GetFunctions()).
+		    GetFunctions()).GetCoeffs();
+      CoeffType2 c =
+	std::get<1>(m.GetFunctions()).GetCoeffs()[0];
+      std::transform(p.begin(), p.end(), cs.begin(),
+		     [&c](auto x){return x * c;});
+      return 
+	{insert_element<0>
+	(remove_element<0>
+	 (std::get<0>(m.GetFunctions()).GetFunctions()),
+	 Polynomial<CoeffType, Order>(cs))};
     }
   };
 }
