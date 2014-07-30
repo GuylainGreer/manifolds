@@ -11,6 +11,11 @@ struct ReturnTwo : manifolds::Function
   }
 };
 
+std::ostream & operator<<(std::ostream & s, ReturnTwo)
+{
+  return s << "{1,2}";
+}
+
 BOOST_AUTO_TEST_CASE(full_function_test)
 {
   using namespace manifolds;

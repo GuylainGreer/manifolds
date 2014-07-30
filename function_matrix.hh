@@ -49,6 +49,11 @@ namespace manifolds {
     {
       return eval(std::index_sequence_for<Functions...>(), args...);
     }
+
+    auto GetFunctions() const
+    {
+      return functions;
+    }
   };
 
   DEF_FF_TEMPLATE(FunctionMatrix)
@@ -75,6 +80,17 @@ namespace manifolds {
       std::tuple_size<
 	decltype(first(rows...).GetFunctions())>::value>
       (std::tuple_cat(rows.GetFunctions()...));
+  }
+
+  template <class rows, class cols, class ... Functions>
+  std::ostream & operator<<
+  (std::ostream & s,
+   FunctionMatrix<rows, cols, Functions...> f)
+  {
+    s << "FunctionMatrix<" << rows::value << ", "
+      << cols::value << ">";
+    StreamVariadic("", f, s);
+    return s;
   }
 }
 

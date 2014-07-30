@@ -26,6 +26,12 @@ namespace manifolds
   DEF_FULL_FUNCTION(Transpose)
 
   static const Transpose transpose = Transpose();
+
+  inline std::ostream & operator<<(std::ostream & s, Transpose)
+  {
+    return s << "Transpose";
+  }
+
 }
 
 #endif

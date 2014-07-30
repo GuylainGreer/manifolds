@@ -54,6 +54,10 @@ namespace manifolds
 
   DEF_FULL_FUNCTION(Pow)
 
+  inline std::ostream & operator<<(std::ostream & s, Pow p)
+  {
+    return s << "pow";
+  }
 }
 
 #undef STD_FUNCTION
