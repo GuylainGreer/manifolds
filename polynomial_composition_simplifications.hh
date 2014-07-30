@@ -6,7 +6,9 @@ namespace manifolds {
   template <class A>
   struct Simplification<
     Addition<A,A>,
-    typename std::enable_if<is_stateless<A>::value>::type>
+    typename std::enable_if<
+      is_stateless<A>::value &&
+      !std::is_same<A,Zero>::value>::type>
   {
     typedef Composition<
       Polynomial<double,int_<2>>,
@@ -82,16 +84,23 @@ namespace manifolds {
   {
     static const int new_order = 1 + order;
     typedef Composition<Polynomial<CType, int_<new_order>>, T> type;
+
     template <class A, class B>
       static auto Mult(A a, B b)
     {
-      return Multiplication<A,B>(a,b);
+      return Simplify(Multiplication<A,B>(a,b));
     }
-    static type Combine(Addition<Composition<
+
+    static type Combine(Multiplication<Composition<
 			Polynomial<CType, int_<order>>, T>, T> a)
     {
-      return Simplify(Mult(GetPolynomial(1),
-			   std::get<0>(a.GetFunctions())))(T());
+      auto m =
+	Mult(GetPolynomial(0,1),
+	     std::get<0>(std::get<0>
+			 (a.GetFunctions()).
+			 GetFunctions()));
+      T t;
+      return m(t);
     }
   };
 
@@ -118,6 +127,20 @@ namespace manifolds {
 	decltype(std::get<0>(t))>::type T2;
       Variadic<T1, T2> v(std::get<1>(t), std::get<0>(t));
       return ref_type::Combine(v);
+    }
+  };
+
+  template <class CoeffType,
+	    class ... Functions>
+  struct Simplification<
+    Composition<Polynomial<CoeffType,int_<1>>,Functions...>>
+  {
+    typedef Polynomial<CoeffType,int_<1>> type;
+
+    static type Combine(Composition<Polynomial<
+			CoeffType,int_<1>>,Functions...> p)
+    {
+      return std::get<0>(p.GetFunctions());
     }
   };
 }
