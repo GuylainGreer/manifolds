@@ -1,5 +1,5 @@
 
-Program('test', Glob('*.cpp'),
-        CPPFLAGS='-std=c++14 -Wall -Wpedantic -g3 -ggdb')
 
-
+env = Environment(CXX = 'clang++')
+env.Program('test', Glob('*.cpp'),
+            CPPFLAGS='-std=c++1y -Wall -Wpedantic')
