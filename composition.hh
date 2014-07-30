@@ -69,9 +69,9 @@ struct Composition : MultiFunction
 			       >::type>
   auto operator()(InnerFunc f) const
   {
-    return Composition<
-      Composition,
-      prepare<InnerFunc>>(*this, f);
+    return Simplify(Composition<
+		    Composition,
+		    prepare<InnerFunc>>(*this, f));
   }
 
   auto GetFunctions() const
@@ -113,9 +113,9 @@ private:
   struct is_composition<Composition<Args...>> :
     std::true_type{};
 
-  template <class ... Args>
+  template <class Arg, class ... Args>
   std::ostream & operator<<(std::ostream & s,
-			    Composition<Args...> c)
+			    Composition<Arg,Args...> c)
   {
     StreamVariadic("Composition", c, s);
     return s;
