@@ -39,7 +39,8 @@ namespace manifolds {
   };
 
 #define VARIABLE(i, abelian, name)				\
-  static const Variable<i,abelian> name;			\
+  static const Variable<i,abelian> name =			\
+  Variable<i,abelian>();					\
   inline std::ostream & operator<<(std::ostream&s,		\
 				   Variable<i,abelian>)		\
   {return s << #name;}
