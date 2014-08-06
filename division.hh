@@ -8,7 +8,11 @@
 namespace manifolds {
 template <class Numerator,
 	  class Denominator>
-struct DivisionImpl : MultiFunction
+struct DivisionImpl :
+    Function<max<Numerator::input_dim,
+		 Denominator::input_dim>::value,
+	     max<Numerator::output_dim,
+		 Denominator::output_dim>::value>
 {
   static const bool stateless =
     and_<is_stateless<Numerator>,
@@ -55,4 +59,89 @@ std::ostream & operator<<(std::ostream & s, Division<A,B> d)
 
 }
 
+#include "multiplication.hh"
+
+namespace manifolds {
+
+  template <class N1, class N2, class D1, class D2>
+  struct Simplification<
+    Multiplication<Division<N1,D1>,
+		   Division<N2,D2>>>
+  {
+    typedef Division<
+      Multiplication<N1,N2>,
+      Multiplication<D1,D2>> type;
+
+    static type Combine(Multiplication<Division<N1,D1>,
+			Division<N2,D2>> a)
+    {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying multiplication of division "
+	"by division\n";
+#endif
+      Multiplication<N1,N2>
+	mn(std::get<0>(a.GetFunctions()).GetNumerator(),
+	   std::get<1>(a.GetFunctions()).GetNumerator());
+
+      Multiplication<D1,D2>
+	md(std::get<0>(a.GetFunctions()).GetDenominator(),
+	   std::get<1>(a.GetFunctions()).GetDenominator());
+
+      return {mn, md};
+    }
+  };
+
+  template <class N, class D, class F>
+  struct Simplification<
+    Multiplication<Division<N,D>,F>>
+  {
+    typedef Division<
+      Multiplication<N,F>, D> type;
+
+    static type Combine(Multiplication<Division<N,D>,F> a)
+    {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying multiplication of division "
+	"by function\n";
+#endif
+      Multiplication<N,F>
+	m(std::get<0>(a.GetFunctions()).GetNumerator(),
+	  std::get<1>(a.GetFunctions()));
+      return {m, std::get<0>(a.GetFunctions()).GetDenominator()};
+    }
+  };
+
+  template <class N, class D, class F>
+  struct Simplification<Division<Division<N,D>,F>>
+  {
+    typedef Division<N, Multiplication<D,F>> type;
+
+    static type Combine(Division<Division<N,D>,F> a)
+    {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying division of division by function\n";
+#endif
+      return {a.GetNumerator().GetNumerator(),
+	  Multiplication<D,F>(a.GetNumerator().GetDenominator(),
+			      a.GetDenominator())};
+    }
+  };
+
+  template <class N, class D, class F>
+  struct Simplification<F, Division<Division<N,D>>>
+  {
+    typedef Division<Multiplication<D,F>, N> type;
+
+    static type Combine(Division<Division<N,D>,F> a)
+    {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying division of division by function\n";
+#endif
+      return {Multiplication<D,F>(a.GetNumerator().
+				  GetDenominator(),
+				  a.GetDenominator()),
+	  a.GetNumerator().GetNumerator()};
+    }
+  };
+}
 #endif
