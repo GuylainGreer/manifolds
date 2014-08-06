@@ -16,7 +16,8 @@ namespace manifolds
   //Somewhat confusingly,
   //order here refers to the number of coefficients
   template <class CoeffType, class Order>
-  struct PolynomialImpl : Function
+  struct PolynomialImpl :
+    Function<1, 1>
   {
     static const int num_coeffs = Order::value;
     static const bool stateless = false;
@@ -24,9 +25,14 @@ namespace manifolds
     PolynomialImpl(std::array<Type, N> t):
       coeffs(t){}
 
-    template <class T>
-    auto operator()(T t) const
+    template <class T, class ... Ts>
+    auto operator()(T t, Ts ...) const
     {
+      static_assert(sizeof...(Ts) == 0 ||
+		    Order::value == 1,
+		    "Can only call polynomial "
+		    "with multiple arguments when "
+		    "polynomial is a constant");
       typename std::common_type<
 	T,CoeffType>::type result = 0, t2 = t;
       for(auto i = coeffs.rbegin(); i != coeffs.rend(); i++)
@@ -137,6 +143,9 @@ namespace manifolds {
 			CoeffType2,
 			int_<order2>>> p)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying addition of two polynomials\n";
+#endif
       auto p1 = std::get<0>(p.GetFunctions());
       auto p2 = std::get<1>(p.GetFunctions());
       typedef std::integral_constant<
@@ -182,6 +191,10 @@ namespace manifolds {
 			CoeffType2,
 			int_<order2>>> p)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying multiplication "
+	"of two polynomials\n";
+#endif
       auto p1 = std::get<0>(p.GetFunctions());
       auto p2 = std::get<1>(p.GetFunctions());
       std::array<coeff_type,new_order> r;
@@ -250,6 +263,9 @@ namespace manifolds {
 			CoeffType2,
 			int_<order2>>> p)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying composition of two polynomials\n";
+#endif
       auto p1 = std::get<0>(p.GetFunctions());
       auto p2 = std::get<1>(p.GetFunctions());
       return
@@ -272,6 +288,9 @@ namespace manifolds {
     static type Combine(UnaryMinus<Polynomial<
 			CoeffType, Order>> u)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying negative of polynomial\n";
+#endif
       std::array<CoeffType2, Order::value> a;
       for(int i = 0; i < Order::value; i++)
 	a[i] = -CoeffType2(u.GetFunction().GetCoeffs()[i]);
@@ -296,6 +315,10 @@ namespace manifolds {
 			Funcs...>,
 			Polynomial<CoeffType2, int_<1>>> m)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying multiplication of composed "
+	"polynomial by a constant\n";
+#endif
       std::array<CoeffType, Order::value> cs;
       auto p =
 	std::get<0>(std::get<0>(m.GetFunctions()).

@@ -10,7 +10,9 @@
 namespace manifolds {
 
 template <class ... Functions>
-struct Composition : MultiFunction
+struct Composition :
+    Function<last<Functions...>::type::input_dim,
+	     first<Functions...>::type::output_dim>
 {
   static const bool stateless =
     and_<is_stateless<Functions>...>::value;
@@ -132,6 +134,9 @@ private:
 
     static type Combine(Composition<Functions...> a)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying composition\n";
+#endif
       return SimplifyV<Composition>(a.GetFunctions(),
 				    std::false_type{});
     }
@@ -145,6 +150,9 @@ private:
 
     static type Combine(Composition<F, Composition<Functions...>> c)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Flattening composition\n";
+#endif
       auto t = c.GetFunctions();
       return {std::tuple_cat(remove_element<1>(t),
 			     std::get<1>(t).GetFunctions())};

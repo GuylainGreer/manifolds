@@ -2,6 +2,7 @@
 #define MANIFOLDS_FUNCTIONS_SIMPLIFY_VARIADIC_HH
 
 #include "simplify.hh"
+#include "typename.hh"
 #include <tuple>
 #include <iostream>
 
@@ -119,6 +120,13 @@ namespace manifolds
 	typename std::tuple_element<j, Tuple>::type
 	> VType;
       typedef typename Simplification<VType>::type SType;
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying:\n  " << get_cpp_name<
+      typename std::tuple_element<i, Tuple>::type>() << "\n  "
+      << get_cpp_name<
+      typename std::tuple_element<j, Tuple>::type>() << "\ninto "
+      << get_cpp_name<SType>() << "\n";
+#endif
       typedef typename std::is_same<
 	SType, VType>::type Simplified;
       auto next = MergeV<Variadic, i, j>(t, Simplified());

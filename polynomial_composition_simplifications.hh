@@ -16,6 +16,9 @@ namespace manifolds {
 
     static type Combine(Addition<A,A> a)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying addition of function by itself\n";
+#endif
       type b = {GetPolynomial(0.0,2.0), A()};
       return b;
     }
@@ -31,26 +34,48 @@ namespace manifolds {
 
     static type Combine(Multiplication<A,A>)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying multiplication of function "
+	"by itself\n";
+#endif
       return {GetPolynomial(0,0,1), A()};
     }
   };
 
-  template <class ... Args>
+  template <class Arg1, class Arg2, class ... Args>
   struct Simplification<
-    Multiplication<Composition<Args...>,
-		   Composition<Args...>>,
+    Multiplication<Composition<Arg1, Args...>,
+		   Composition<Arg2, Args...>>,
     typename std::enable_if<
-      is_stateless<Composition<Args...>>::value>::type>
+      and_<is_stateless<Args>...>::value &&
+      (!std::is_same<Arg1,Arg2>::value ||
+       !is_stateless<Arg1>::value ||
+       !is_stateless<Arg2>::value) &&
+      !std::is_same<
+	typename Simplification<Multiplication<Arg1,Arg2>>::type,
+	Multiplication<Arg1,Arg2>
+	>::value>::type>
   {
-    typedef Composition<Polynomial<
-			  double,
-			  int_<3>>,
-			Args...> type;
+    typedef Composition<
+      typename Simplification<
+	Multiplication<Arg1, Arg2>>::type,
+      Args...> type;
 
-    static type Combine(Multiplication<Composition<Args...>,
-			Composition<Args...>>)
+    static type Combine(Multiplication<Composition<Arg1, Args...>,
+			Composition<Arg2, Args...>> a)
     {
-      return {GetPolynomial(0,0,1), Args()...};
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying multipication of composition of "
+	"simplifiable functions\n";
+#endif
+      auto first = std::get<0>(std::get<0>(a.GetFunctions()).
+			       GetFunctions());
+      auto second = std::get<0>(std::get<1>(a.GetFunctions()).
+				GetFunctions());
+      Multiplication<decltype(first),decltype(second)>
+	m(first,second);
+      auto s = Simplify(m);
+      return {s, Args()...};
     }
   };
 
@@ -70,6 +95,10 @@ namespace manifolds {
     static type Combine(Addition<Composition<
 			Polynomial<CType, int_<order>>, T>, T> a)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying addition of composed polynomial "
+	"by inner function\n";
+#endif
       auto p = std::get<0>(std::get<0>(a.GetFunctions()).
 			   GetFunctions());
       return Simplify(Add(GetPolynomial(0,1), p))(T());
@@ -94,6 +123,10 @@ namespace manifolds {
     static type Combine(Multiplication<Composition<
 			Polynomial<CType, int_<order>>, T>, T> a)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying multiplication of composed "
+	"polynomial by inner function\n";
+#endif
       auto m =
 	Mult(GetPolynomial(0,1),
 	     std::get<0>(std::get<0>
@@ -120,6 +153,10 @@ namespace manifolds {
     static type Combine(Variadic<T, Composition<
 			Polynomial<CType, int_<order>>, T>> a)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying inverted composed "
+	"polynomial operation\n";
+#endif
       auto t = a.GetFunctions();
       typedef typename std::remove_reference<
 	decltype(std::get<1>(t))>::type T1;
@@ -140,6 +177,10 @@ namespace manifolds {
     static type Combine(Composition<Polynomial<
 			CoeffType,int_<1>>,Functions...> p)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying composition of "
+	"constant polynomial\n";
+#endif
       return std::get<0>(p.GetFunctions());
     }
   };

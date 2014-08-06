@@ -25,7 +25,9 @@ namespace manifolds {
 
   template <class rows, class cols,
 	    class ... Functions>
-  struct FunctionMatrixImpl : MultiFunction
+  struct FunctionMatrixImpl :
+    Function<max<Functions::input_dim...>::value,
+	     max<Functions::output_dim...>::value>
   {
     std::tuple<Functions...> functions;
 
@@ -54,6 +56,11 @@ namespace manifolds {
     {
       return functions;
     }
+
+    auto GetOutputs() const
+    {
+      return functions;
+    }
   };
 
   DEF_FF_TEMPLATE(FunctionMatrix)
@@ -66,19 +73,15 @@ namespace manifolds {
       int_<rows>,int_<cols>,Functions...>(functions);
   }
 
-  template <class F, class...Fs>
-  F first(F f, Fs...)
-  {
-    return f;
-  }
-
   template <class ... Rows>
   auto GetFunctionMatrix(Rows...rows)
   {
     return GetFunctionMatrix<
       sizeof...(Rows),
       std::tuple_size<
-	decltype(first(rows...).GetFunctions())>::value>
+	decltype(std::declval<
+		 typename first<Rows...>::type>().
+		 GetFunctions())>::value>
       (std::tuple_cat(rows.GetFunctions()...));
   }
 
@@ -91,6 +94,12 @@ namespace manifolds {
       << cols::value << ">";
     StreamVariadic("", f, s);
     return s;
+  }
+
+  template <class ... Functions>
+  auto GetRow(Functions ... functions)
+  {
+    return Row<Functions...>(functions...);
   }
 }
 

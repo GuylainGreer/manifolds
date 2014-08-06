@@ -3,7 +3,7 @@
 #include "variables.hh"
 #include "trig.hh"
 
-struct ReturnTwo : manifolds::Function
+struct ReturnTwo : manifolds::Function<1,2>
 {
   auto operator()() const
   {

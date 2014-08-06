@@ -13,7 +13,9 @@
 namespace manifolds {
 
   template <class...Funcs>
-  struct Group : MultiFunction
+  struct Group :
+    Function<max<Funcs::input_dim...>::value,
+	     max<Funcs::output_dim...>::value>
   {
     std::tuple<Funcs...> functions;
 
@@ -39,8 +41,9 @@ namespace manifolds {
     }
   };
 
-  template <class ... Funcs>
-  std::ostream & operator<<(std::ostream & s, Group<Funcs...> g)
+  template <class F, class ... Funcs>
+  std::ostream & operator<<(std::ostream & s,
+			    Group<F, Funcs...> g)
   {
     StreamVariadic("Group", g, s);
     return s;
@@ -60,7 +63,7 @@ struct FunctionCommon
 	    class = typename std::enable_if<
 	      is_function<InnerFunc>::value
 	      >::type>
-  auto operator()(InnerFunc && f) const
+  auto operator()(InnerFunc f) const
   {
     return Simplify(Composition<
 		    FunctionImpl, prepare<InnerFunc>>

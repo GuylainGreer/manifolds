@@ -14,6 +14,9 @@ namespace manifolds {
 
     static type Combine(A a)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "No simplification found\n";
+#endif
       return a;
     }
   };
@@ -36,6 +39,9 @@ namespace manifolds {
 
     static type Combine(Variadic<Variadic<Args1...>, Args2...> v)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Flattening variadics\n";
+#endif
       auto t =
 	std::tuple_cat(std::get<0>(v.GetFunctions()).GetFunctions(),
 		       remove_element<0>(v.GetFunctions()));
@@ -53,6 +59,9 @@ namespace manifolds {
     static type Combine(Variadic<Variadic<Args1...>,
 			Variadic<Args2...>> input)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying more variadics\n";
+#endif
       auto t1 =
 	std::get<0>(input.GetFunctions()).GetFunctions();
       auto t2 =

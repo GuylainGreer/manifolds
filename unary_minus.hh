@@ -7,7 +7,9 @@
 namespace manifolds {
 
 template <class Func>
-struct UnaryMinusImpl : MultiFunction
+struct UnaryMinusImpl :
+    Function<Func::input_dim,
+	     Func::output_dim>
 {
 
   UnaryMinusImpl(){}

@@ -10,7 +10,9 @@
 namespace manifolds {
 
 template <class ... Functions>
-struct MultiplicationImpl : MultiFunction
+struct MultiplicationImpl :
+    Function<max<Functions::input_dim...>::value,
+	     max<Functions::output_dim...>::value>
 {
   static const bool stateless =
     and_<is_stateless<Functions>...>::value;
@@ -96,6 +98,9 @@ private:
 
     static type Combine(Multiplication<Functions...> a)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying multiplication\n";
+#endif
       return SimplifyV<Multiplication>(a.GetFunctions(),
 				       Abelian{});
     }
@@ -112,6 +117,9 @@ private:
     static type Combine(Multiplication<F, 
 			Multiplication<Functions...>> t)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Flattening multiplication\n";
+#endif
       auto tu = t.GetFunctions();
       return {std::tuple_cat(remove_element<1>(tu),
 			     std::get<1>(tu).GetFunctions())};

@@ -7,7 +7,7 @@
 
 namespace manifolds
 {
-  struct TransposeImpl : Function
+  struct TransposeImpl : Function<1,1>
   {
     static const bool stateless = true;
 

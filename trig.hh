@@ -7,7 +7,7 @@
 #include "full_function_defs.hh"
 
 #define STD_FUNCTION(classname , funcname)			\
-  struct classname##Impl : Function				\
+  struct classname##Impl : Function<1,1>			\
   {								\
     static const bool stateless = true;				\
     template <class T>						\
@@ -42,7 +42,7 @@ namespace manifolds
   STD_FUNCTION(Exp, exp)
   STD_FUNCTION(Sqrt, sqrt)
 
-  struct PowImpl : MultiFunction
+  struct PowImpl : Function<2,1>
   {
     static const bool stateless = true;
     template <class T, class U>

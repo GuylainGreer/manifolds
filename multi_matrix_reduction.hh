@@ -19,7 +19,7 @@ namespace manifolds
   };
 
   template <class ... ReductionPairs>
-  struct Reduction : Function
+  struct Reduction : Function<1,1>
   {
     template <class Arg, class Array, class ... Indices,
 	      class = typename std::enable_if<
@@ -153,7 +153,7 @@ namespace manifolds
 		      for(auto x : reduxes)
 			{
 			  smaller_ones +=
-			    (x.first < index) +
+			    ((x.first) < index) +
 			    (x.second < index);
 			}
 		      in_indices[index] =
@@ -167,7 +167,7 @@ namespace manifolds
 		      for(auto x : reduxes)
 			{
 			  smaller_ones +=
-			    (x.first < index) +
+			    ((x.first) < index) +
 			    (x.second < index);
 			}
 		      ++out_indices[index-smaller_ones];

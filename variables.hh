@@ -8,11 +8,11 @@
 namespace manifolds {
 
   template <int N, bool abelian>
-  struct VariableImpl : MultiFunction
+  struct VariableImpl : Function<N+1,1>
   {
   private:
     template<class>
-    struct not_tuple:std::true_type{};
+    struct not_tuple: std::true_type{};
     template <class...As>
     struct not_tuple<std::tuple<As...>>:std::false_type{};
   public:

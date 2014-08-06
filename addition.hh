@@ -10,7 +10,9 @@
 namespace manifolds {
 
 template <class ... Functions>
-struct AdditionImpl : MultiFunction
+struct AdditionImpl : Function<
+  max<Functions::input_dim...>::value,
+  max<Functions::output_dim...>::value>
 {
   AdditionImpl(){}
 
@@ -85,6 +87,9 @@ private:
 
     static type Combine(Addition<Functions...> a)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying Addition\n";
+#endif
       return SimplifyV<Addition>(a.GetFunctions(),
 				 std::true_type{});
     }

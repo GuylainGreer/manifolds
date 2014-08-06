@@ -5,7 +5,7 @@
 #include <ostream>
 
 namespace manifolds {
-  struct ZeroImpl : MultiFunction
+  struct ZeroImpl : Function<1,1>
 {
   static const bool stateless = true;
 
@@ -38,6 +38,9 @@ namespace manifolds {
 
     static type Combine(Addition<T,Zero> t)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying adding zero\n";
+#endif
       return std::get<0>(t.GetFunctions());
     }
   };
@@ -52,6 +55,9 @@ namespace manifolds {
 
     static type Combine(Addition<Zero,T> t)
     {
+#ifdef PRINT_SIMPLFIES
+      std::cout << "Simplifying adding zero inverse\n";
+#endif
       return std::get<1>(t.GetFunctions());
     }
   };
@@ -62,6 +68,9 @@ namespace manifolds {
     typedef Zero type;
     static type Combine(Multiplication<T,Zero>)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying multiplication by zero\n";
+#endif
       return zero;
     }
   };
@@ -75,6 +84,22 @@ namespace manifolds {
 
     static type Combine(Multiplication<Zero,T> )
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying multiplication by zero inverse\n";
+#endif
+      return zero;
+    }
+  };
+
+  template <class T>
+  struct Simplification<Composition<Zero, T>>
+  {
+    typedef Zero type;
+    static type Combine(Composition<Zero, T>)
+    {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simpifying composition of zero and function\n";
+#endif
       return zero;
     }
   };

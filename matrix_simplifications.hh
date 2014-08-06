@@ -44,6 +44,9 @@ struct Simplification<
   static type Combine(Addition<Matrix<rows1,cols1,CoeffType1>,
 		      Matrix<rows2,cols2,CoeffType2>> a)
   {
+#ifdef PRINT_SIMPLIFIES
+    std::cout << "Simplifying matrix addition\n";
+#endif
     auto ms = a.GetFunctions();
     return std::get<0>(a) + std::get<1>(a);
   }
@@ -84,6 +87,9 @@ struct Simplification<
 		      Matrix<rows1,cols1,CoeffType1>,
 		      Matrix<rows2,cols2,CoeffType2>> m)
   {
+#ifdef PRINT_SIMPLIFIES
+    std::cout << "Simplifying matrix multiplication\n";
+#endif
     auto ms = m.GetFunctions();
     return std::get<0>(ms) * std::get<1>(ms);
   }
@@ -100,6 +106,9 @@ struct Simplification<
     static type Combine(Composition<Group<Functions...>,
 			OtherFunctions...> c)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying group->vector\n";
+#endif
       auto ofs = c.GetFunctions();
       MType m(std::get<0>(ofs).GetFunctions());
       auto new_tuple =
@@ -108,4 +117,5 @@ struct Simplification<
     }
   };
 }
+
 #endif
