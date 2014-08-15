@@ -102,6 +102,14 @@ namespace manifolds {
     int_<n>{};
 
   template <class T, std::size_t n>
+  struct array_size<const std::array<T,n> &> :
+    int_<n>{};
+
+  template <class T, std::size_t n>
+  struct array_size<std::array<T,n> &> :
+    int_<n>{};
+
+  template <class T, std::size_t n>
   struct array_size<T[n]> :
     int_<n>{};
 
