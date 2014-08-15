@@ -77,6 +77,33 @@ namespace manifolds
     typedef typename nth<
       sizeof...(Ts)-1, Ts...>::type type;
   };
+
+  namespace detail
+  {
+    template <class T>
+    struct sfinae_enable : std::true_type{};
+  }
+
+#define FUNC_CHECK_DEF(mname, code)		\
+  namespace detail				\
+  {						\
+    template <class T>				\
+      sfinae_enable<code>			\
+      mname##_detail(int);			\
+      template <class>				\
+	std::false_type mname##_detail(long);	\
+  }						\
+  template <class T>				\
+  struct mname :				\
+    decltype(detail::mname##_detail<T>(0)){};	\
+
+  FUNC_CHECK_DEF(has_coeff_function,
+		 decltype(std::declval<T>().
+			  Coeff(std::declval<int>(),
+				std::declval<int>())))
+
+  FUNC_CHECK_DEF(is_gettable,
+		 decltype(std::get<0>(std::declval<T>())))
 }
 
 #endif
