@@ -156,7 +156,7 @@ namespace manifolds {
     static auto Derivative(const Polynomial<CoeffType, Order> & p,
                            Variable<0> v)
     {
-      PRINT_SIMPLIFIES(p, v, "non-constant polynomial");
+      PRINT_DERIV(p, v, "non-constant polynomial");
       std::array<CoeffType, Order::value-1> d;
       for(unsigned i = 0; i < Order::value-1; i++)
 	d[i] = (i+1)*p.GetCoeffs()[i+1];

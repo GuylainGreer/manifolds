@@ -66,7 +66,7 @@ namespace manifolds {
   template <class N1, class N2, class D1, class D2>
   struct Simplification<
     Multiplication<Division<N1,D1>,
-		   Division<N2,D2>>>
+		   Division<N2,D2>>, 0>
   {
     typedef Division<
       Multiplication<N1,N2>,
@@ -93,7 +93,7 @@ namespace manifolds {
 
   template <class N, class D, class F>
   struct Simplification<
-    Multiplication<Division<N,D>,F>>
+    Multiplication<Division<N,D>,F>, 0>
   {
     typedef Division<
       Multiplication<N,F>, D> type;
@@ -112,7 +112,7 @@ namespace manifolds {
   };
 
   template <class N, class D, class F>
-  struct Simplification<Division<Division<N,D>,F>>
+  struct Simplification<Division<Division<N,D>,F>, 0>
   {
     typedef Division<N, Multiplication<D,F>> type;
 
@@ -128,7 +128,7 @@ namespace manifolds {
   };
 
   template <class N, class D, class F>
-  struct Simplification<F, Division<Division<N,D>>>
+  struct Simplification<Division<F, Division<N,D>>, 0>
   {
     typedef Division<Multiplication<D,F>, N> type;
 

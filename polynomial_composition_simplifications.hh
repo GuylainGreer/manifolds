@@ -5,15 +5,13 @@ namespace manifolds {
 
   template <class A>
   struct Simplification<
-    Addition<A,A>,
+    Addition<A,A>, 0,
     typename std::enable_if<
-      is_stateless<A>::value &&
-      !std::is_same<A,Zero>::value>::type>
+      is_stateless<A>::value>::type>
   {
     typedef Composition<
       Polynomial<double,int_<2>>,
       A> type;
-
     static type Combine(Addition<A,A> a)
     {
 #ifdef PRINT_SIMPLIFIES
@@ -26,7 +24,7 @@ namespace manifolds {
 
   template <class A>
   struct Simplification<
-    Multiplication<A,A>,
+    Multiplication<A,A>, 0,
     typename std::enable_if<is_stateless<A>::value>::type>
   {
     typedef Composition<
@@ -45,7 +43,7 @@ namespace manifolds {
   template <class Arg1, class Arg2, class ... Args>
   struct Simplification<
     Multiplication<Composition<Arg1, Args...>,
-		   Composition<Arg2, Args...>>,
+		   Composition<Arg2, Args...>>, 0,
     typename std::enable_if<
       and_<is_stateless<Args>...>::value &&
       (!std::is_same<Arg1,Arg2>::value ||
@@ -82,7 +80,7 @@ namespace manifolds {
   template <class CType, int order, class T>
   struct Simplification<
     Addition<Composition<
-	       Polynomial<CType, int_<order>>, T>, T>,
+	       Polynomial<CType, int_<order>>, T>, T>, 0,
     typename std::enable_if<is_stateless<T>::value>::type>
   {
     static const int new_order = 2 > order ? 2 : order;
@@ -108,7 +106,7 @@ namespace manifolds {
   template <class CType, int order, class T>
   struct Simplification<
     Multiplication<Composition<
-		     Polynomial<CType, int_<order>>, T>, T>,
+		     Polynomial<CType, int_<order>>, T>, T>, 0,
     typename std::enable_if<is_stateless<T>::value>::type>
   {
     static const int new_order = 1 + order;
@@ -141,8 +139,8 @@ namespace manifolds {
 	    class CType, int order, class T>
   struct Simplification<
     Variadic<T, Composition<
-	       Polynomial<CType, int_<order>>, T>>,
-    typename std::enable_if<is_stateless<T>::value>::type>
+      Polynomial<CType, int_<order>>, T>>, 1,
+      typename std::enable_if<is_stateless<T>::value>::type>
   {
     typedef Simplification<
       Variadic<Composition<
@@ -170,7 +168,7 @@ namespace manifolds {
   template <class CoeffType,
 	    class ... Functions>
   struct Simplification<
-    Composition<Polynomial<CoeffType,int_<1>>,Functions...>>
+    Composition<Polynomial<CoeffType,int_<1>>,Functions...>,0>
   {
     typedef Polynomial<CoeffType,int_<1>> type;
 
@@ -183,6 +181,19 @@ namespace manifolds {
 #endif
       return std::get<0>(p.GetFunctions());
     }
+  };
+
+  template <class T, class C>
+  struct Simplification<Addition<T, Polynomial<C, int_<1>>>>
+  {
+    typedef Addition<T, Polynomial<C, int_<1>>> in_type;
+    static auto Combine(in_type a)
+    {
+      auto t = a.GetFunctions();
+      return GetPolynomial(std::get<1>(t).GetCoeffs()[0], (C)1)
+	(std::get<0>(t));
+    }
+    typedef decltype(Combine(std::declval<in_type>())) type;
   };
 }
 

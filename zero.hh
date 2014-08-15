@@ -32,7 +32,7 @@ namespace manifolds {
 
 namespace manifolds {
   template <class T>
-  struct Simplification<Addition<T,Zero>>
+  struct Simplification<Addition<T,Zero>,0>
   {
     typedef T type;
 
@@ -47,7 +47,7 @@ namespace manifolds {
 
   template <class T>
   struct Simplification<
-    Addition<Zero,T>,
+    Addition<Zero,T>,0,
     typename std::enable_if<
       !std::is_same<Zero,T>::value>::type>
   {
@@ -63,7 +63,7 @@ namespace manifolds {
   };
 
   template <class T>
-  struct Simplification<Multiplication<T,Zero>>
+  struct Simplification<Multiplication<T,Zero>,0>
   {
     typedef Zero type;
     static type Combine(Multiplication<T,Zero>)
@@ -76,7 +76,7 @@ namespace manifolds {
   };
 
   template <class T>
-  struct Simplification<Multiplication<Zero,T>,
+  struct Simplification<Multiplication<Zero,T>, 0,
 		  typename std::enable_if<
 		    !std::is_same<T,Zero>::value>::type>
   {
@@ -92,7 +92,7 @@ namespace manifolds {
   };
 
   template <class T>
-  struct Simplification<Composition<Zero, T>>
+  struct Simplification<Composition<Zero, T>,0>
   {
     typedef Zero type;
     static type Combine(Composition<Zero, T>)

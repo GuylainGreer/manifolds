@@ -30,7 +30,7 @@ template <std::size_t rows1, std::size_t cols1,
 	  class CoeffType2>
 struct Simplification<
   Addition<Matrix<rows1,cols1,CoeffType1>,
-	   Matrix<rows2,cols2,CoeffType2>>>
+	   Matrix<rows2,cols2,CoeffType2>>,0>
 {
   static_assert(rows1 == rows2 && cols1 == cols2,
 		"Matrix addition requires the two "
@@ -52,6 +52,29 @@ struct Simplification<
   }
 };
 
+  template <class T>
+    auto MassageMultiplicationOutput(T t,
+				     int_<1>,
+				     int_<1>)
+  {
+    return t.Coeff(0,0);
+  }
+
+  template <class T, int i, int j>
+  auto MassageMultiplicationOutput(T t,
+				   int_<i>,
+				   int_<j>)
+  {
+    return t;
+  }
+
+  template <class T>
+  auto MassageMultiplicationOutput(T t)
+  {
+    return MassageMultiplicationOutput
+      (t, int_<T::num_rows>(), int_<T::num_cols>());
+  }
+
 template <std::size_t rows1, std::size_t cols1,
 	  std::size_t cols2,
 	  class CoeffType1, class CoeffType2>
@@ -65,15 +88,34 @@ auto operator*(Matrix<rows1,cols1,CoeffType1> a,
     for(std::size_t j = 0; j < cols1; j++)
       for(std::size_t k = 0; k  < cols2; k++)
 	r.Coeff(i,k) += a.Coeff(i,j) * b.Coeff(j,k);
-  return r;
-}  
+  return MassageMultiplicationOutput(r);
+}
+
+  template <std::size_t rows, std::size_t cols,
+	    class CoeffType1, class CoeffType2>
+  auto operator*(CoeffType2 value,
+		 Matrix<rows,cols,CoeffType1> m)
+  {
+    for(unsigned i = 0; i < rows; i++)
+      for(unsigned j = 0; j < cols; j++)
+	m.Coeff(i,j) *= value;
+    return m;
+  }
+
+  template <std::size_t rows, std::size_t cols,
+	    class CoeffType1, class CoeffType2>
+  auto operator*(Matrix<rows,cols,CoeffType1> m,
+		 CoeffType2 value)
+  {
+    return value * m;
+  }
 
 template <std::size_t rows1, std::size_t cols1,
 	  std::size_t rows2, std::size_t cols2,
 	  class CoeffType1, class CoeffType2>
 struct Simplification<
   Multiplication<Matrix<rows1,cols1,CoeffType1>,
-		 Matrix<rows2,cols2,CoeffType2>>>
+		 Matrix<rows2,cols2,CoeffType2>>,0>
 {
   static_assert(rows2 == cols1,
 		"Number of columns of left matrix "
@@ -95,25 +137,19 @@ struct Simplification<
   }
 };
 
-  template <class ... Functions, class ... OtherFunctions>
-  struct Simplification<
-    Composition<Group<Functions...>, OtherFunctions...>>
+  template <class ... Functions>
+  struct Simplification<Group<Functions...>,0>
   {
     typedef FunctionMatrix<
       int_<sizeof...(Functions)>,
       int_<1>, Functions...> MType;
-    typedef Composition<MType, OtherFunctions...> type;
-    static type Combine(Composition<Group<Functions...>,
-			OtherFunctions...> c)
+    typedef MType type;
+    static type Combine(Group<Functions...> c)
     {
 #ifdef PRINT_SIMPLIFIES
       std::cout << "Simplifying group->vector\n";
 #endif
-      auto ofs = c.GetFunctions();
-      MType m(std::get<0>(ofs).GetFunctions());
-      auto new_tuple =
-	std::tuple_cat(m, remove_element<0>(ofs));
-      return type(new_tuple);
+      return {c.GetFunctions()};
     }
   };
 }

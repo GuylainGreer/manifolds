@@ -6,12 +6,15 @@
 #include <iostream>
 
 namespace manifolds {
-  //Default, don't do anything
-  template <class A, class ForEnableIf = void>
+
+  static const int num_simplification_levels = 3;
+
+  template <class A,
+	    int level = 0,
+	    class ForEnableIf = void>
   struct Simplification
   {
     typedef A type;
-
     static type Combine(A a)
     {
 #ifdef PRINT_SIMPLIFIES
@@ -21,6 +24,13 @@ namespace manifolds {
     }
   };
 
+  template <class>
+  struct SimplificationLevel;
+
+  template <class A, int level, class B>
+  struct SimplificationLevel<Simplification<A,level,B>>:
+    int_<level>{};
+
   template <template<class...>class Variadic, class...>
   struct IsVariadic : std::false_type{};
 
@@ -28,65 +38,46 @@ namespace manifolds {
 	    class ... Fs2>
   struct IsVariadic<V, V<Fs...>,Fs2...> : std::true_type{};
 
-  template <template <class...> class Variadic,
-	    class ... Args1, class ... Args2>
-  struct Simplification<
-    Variadic<Variadic<Args1...>, Args2...>,
-    typename std::enable_if<
-      !IsVariadic<Variadic,Args2...>::value>::type>
+  template <int iter>
+  struct SimplificationWrapper
   {
-    typedef Variadic<Args1..., Args2...> type;
-
-    static type Combine(Variadic<Variadic<Args1...>, Args2...> v)
+    template <class F, int level>
+    static auto Simplify(F f, F, int_<level>)
     {
 #ifdef PRINT_SIMPLIFIES
-      std::cout << "Flattening variadics\n";
+      std::cout << "Done level " << level << ", "
+		<< "moving to level " << level+1 << '\n';
 #endif
-      auto t =
-	std::tuple_cat(std::get<0>(v.GetFunctions()).GetFunctions(),
-		       remove_element<0>(v.GetFunctions()));
-      return {t};
+      return SimplificationWrapper<iter+1>::
+	Simplify(f, int_<level+1>());
     }
-  };
 
-  template <template <class...> class Variadic,
-	    class ... Args1, class ... Args2>
-  struct Simplification<Variadic<Variadic<Args1...>,
-			   Variadic<Args2...>>>
-  {
-    typedef Variadic<Args1..., Args2...> type;
+    template <class F, class G, int level>
+    static auto Simplify(F f, G, int_<level>)
+    {
+      return SimplificationWrapper<iter+1>::
+	Simplify(f, int_<0>());
+    }
 
-    static type Combine(Variadic<Variadic<Args1...>,
-			Variadic<Args2...>> input)
+    template <class F, int level>
+    static auto Simplify(F f, int_<level>)
     {
 #ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying more variadics\n";
+      std::cout << "Simplifying: " << f << std::endl;
 #endif
-      auto t1 =
-	std::get<0>(input.GetFunctions()).GetFunctions();
-      auto t2 =
-	std::get<1>(input.GetFunctions()).GetFunctions();
-      return type(std::tuple_cat(t1, t2));
+      return Simplify(Simplification<F,level>::Combine(f), f,
+		      int_<level>());
+    }
+
+    template <class F>
+    static auto Simplify(F f, int_<num_simplification_levels>)
+    {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Done: " << f << "\n\n";
+#endif
+      return f;
     }
   };
-
-  template <class F>
-  auto Simplify(F f, F)
-  {
-#ifdef PRINT_SIMPLIFIES
-    std::cout << "Done: " << f << std::endl;
-#endif
-    return f;
-  }
-
-  template <class F, class G>
-  auto Simplify(F f, G)
-  {
-#ifdef PRINT_SIMPLIFIES
-    std::cout << "Simplifying: " << f << std::endl;
-#endif
-    return Simplify(Simplification<F>::Combine(f), f);
-  }
 
   template <class F>
   auto Simplify(F f)
@@ -94,8 +85,13 @@ namespace manifolds {
 #ifdef PRINT_SIMPLIFIES
     std::cout << "Simplifying: " << f << std::endl;
 #endif
-    return Simplify(Simplification<F>::Combine(f), f);
+    return SimplificationWrapper<0>::
+      Simplify(f, int_<0>());
   }
+
+  template <class T>
+  using SimplifiedType =
+    decltype(Simplify(std::declval<T>()));
 }
 
 #endif

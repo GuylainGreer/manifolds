@@ -25,6 +25,14 @@ namespace manifolds
     PolynomialImpl(std::array<Type, N> t):
       coeffs(t){}
 
+    template <class Type, class N>
+    PolynomialImpl(const PolynomialImpl<Type, N> & t)
+      {
+	std::copy(t.GetCoeffs().begin(),
+		  t.GetCoeffs().end(),
+		  coeffs.begin());
+      }
+
     template <class T, class ... Ts>
     auto operator()(T t, Ts ...) const
     {
@@ -90,13 +98,12 @@ namespace manifolds
   auto GetPolynomial(InputTypes ... coeffs)
   {
     typedef typename std::common_type<
-      double,InputTypes...>::type coeff_type;
+      InputTypes...>::type coeff_type;
     std::array<coeff_type, sizeof...(InputTypes)>
       coeff_arr{{coeff_type(coeffs)...}};
     return Polynomial<
       coeff_type,
-      int_<
-	     sizeof...(InputTypes)>>(coeff_arr);
+      int_<sizeof...(InputTypes)>>(coeff_arr);
   }
 
 }
@@ -112,7 +119,7 @@ namespace manifolds {
 	    class CoeffType1, class CoeffType2>
   struct Simplification<Addition<
     Polynomial<CoeffType1, int_<order1>>,
-    Polynomial<CoeffType2, int_<order2>>>>
+    Polynomial<CoeffType2, int_<order2>>>,0>
   {
     static const int new_order =
       order1 > order2 ? order1 : order2;
@@ -122,18 +129,31 @@ namespace manifolds {
       coeff_type,
       int_< new_order>> type;
 
-    template <class T1, class T2>
-      static auto Init(const T1 & t1, const T2&,
-		std::true_type)
+    template <class T1, class T2, bool b>
+      static auto Init(const T1 & t1, const T2 & t2,
+		       std::true_type)
     {
-      return t1.GetCoeffs();
+      typedef typename std::common_type<
+	decltype(t1[0]), decltype(t2[0])>::type type;
+      std::array<type, array_size<
+	decltype(t1.GetCoeffs())>::value> result;
+      std::copy(t1.GetCoeffs().begin(),
+		t1.GetCoeffs().end(), result.begin());
+      return result;
     }
 
     template <class T1, class T2>
-      static auto Init(const T1& , const T2& t2,
-		std::false_type)
+      static auto Init(const T1 & t1, const T2& t2,
+		       std::false_type)
     {
-      return t2.GetCoeffs();
+      typedef typename std::common_type<
+	decltype(t1.GetCoeffs()[0]),
+	decltype(t2.GetCoeffs()[0])>::type type;
+      std::array<type, array_size<
+	decltype(t2.GetCoeffs())>::value> result;
+      std::copy(t2.GetCoeffs().begin(),
+		t2.GetCoeffs().end(), result.begin());
+      return result;
     }
 
     static type Combine(Addition<Polynomial<
@@ -175,7 +195,7 @@ namespace manifolds {
     Polynomial<CoeffType1,
 	       int_<order1>>,
     Polynomial<CoeffType2,
-	       int_<order2>>>>
+	       int_<order2>>>,0>
   {
     static const int new_order = order1 + order2 - 1;
     typedef typename std::common_type<
@@ -211,7 +231,7 @@ namespace manifolds {
   struct Simplification<
     Composition<
     Polynomial<CoeffType1,int_<order1>>,
-    Polynomial<CoeffType2,int_<order2>>>>
+      Polynomial<CoeffType2,int_<order2>>>,0>
   {
     static const int new_order = (order1-1) * (order2-1) + 1;
     typedef typename std::common_type<
@@ -223,15 +243,13 @@ namespace manifolds {
     template <class T, class U>
       static auto Multiply(const T & t, const U & u)
     {
-      return Simplification<Multiplication<T,U>>::
-	Combine(Multiplication<T,U>(t,u));
+      return Simplify(Multiplication<T,U>(t,u));
     }
 
     template <class T, class U>
       static auto Add(const T & t, const U & u)
     {
-      return Simplification<Addition<T,U>>::
-	Combine(Addition<T,U>(t,u));
+      return Simplify(Addition<T,U>(t,u));
     }
 
     template <class T, class U>
@@ -275,7 +293,7 @@ namespace manifolds {
 
   template <class Order, class CoeffType>
   struct Simplification<
-    UnaryMinus<Polynomial<CoeffType, Order>>>
+    UnaryMinus<Polynomial<CoeffType, Order>>,0>
   {
     typedef typename std::conditional<
       std::is_signed<CoeffType>::value,
@@ -303,7 +321,7 @@ namespace manifolds {
   struct Simplification<
     Multiplication<Composition<Polynomial<CoeffType1, Order>,
 			       Funcs...>,
-		   Polynomial<CoeffType2, int_<1>>>>
+		   Polynomial<CoeffType2, int_<1>>>,0>
   {
     typedef typename std::common_type<
       CoeffType1, CoeffType2>::type CoeffType;

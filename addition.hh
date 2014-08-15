@@ -26,23 +26,24 @@ struct AdditionImpl : Function<
     functions(f){}
 
   template <class ... Args>
-  auto operator()(Args && ... args) const
+  auto operator()(Args ... args) const
   {
-    return eval<0>(std::forward<Args>(args)...);
+    return eval(int_<0>(), args...);
+  }
+
+  template <class ... Args>
+  auto eval(int_<sizeof...(Functions)-1>,
+	    Args ... args) const
+  {
+    return std::get<sizeof...(Functions)-1>
+      (functions)(args...);
   }
 
   template <int N, class ... Args>
-  auto eval(Args && ... args) const
+  auto eval(int_<N>, Args ... args) const
   {
-    typedef decltype(std::get<N>(functions)(args...)) result;
-    static const int next_N =
-      N == sizeof...(Functions)-1?
-      sizeof...(Functions)-1 : N+1;
-    if(N == sizeof...(Functions) - 1)
-      return std::forward<result>(std::get<N>(functions)(args...));
-    else
-      return std::forward<result>(std::get<N>(functions)(args...)) +
-	eval<next_N>(std::forward<Args>(args)...);
+      return std::get<N>(functions)(args...) +
+	eval(int_<N+1>(), args...);
   }
 
   auto GetFunctions() const
@@ -78,8 +79,7 @@ private:
 
   template <class ... Functions>
   struct Simplification<
-    Addition<Functions...>,
-    typename std::enable_if<(sizeof...(Functions)>2)>::type>
+    Addition<Functions...>, 2>
   {
     typedef decltype(SimplifyV<Addition>
 		     (std::declval<std::tuple<Functions...>>(),
@@ -93,6 +93,22 @@ private:
       return SimplifyV<Addition>(a.GetFunctions(),
 				 std::true_type{});
     }
+  };
+
+  template <class ... AFuncs, class C>
+  struct Simplification<Composition<Addition<AFuncs...>,C>>
+  {
+    typedef Composition<Addition<AFuncs...>,C> in_type;
+    static auto Combine(in_type c)
+    {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Distributing Composition "
+	"into addition\n";
+#endif
+      return DistributeComposition<Addition>(c);
+    }
+
+    typedef decltype(Combine(std::declval<in_type>())) type;
   };
 }
 

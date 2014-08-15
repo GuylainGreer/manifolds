@@ -41,12 +41,13 @@ namespace manifolds
   STD_FUNCTION(ATanh, atanh)
   STD_FUNCTION(Exp, exp)
   STD_FUNCTION(Sqrt, sqrt)
+#undef STD_FUNCTION
 
   struct PowImpl : Function<2,1>
   {
     static const bool stateless = true;
     template <class T, class U>
-    auto operator()(T && t, U && u) const
+    auto operator()(T t, U u) const
     {
       return std::pow(t, u);
     }
@@ -59,7 +60,5 @@ namespace manifolds
     return s << "pow";
   }
 }
-
-#undef STD_FUNCTION
 
 #endif

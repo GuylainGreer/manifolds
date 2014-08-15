@@ -84,9 +84,7 @@ private:
 
   template <class ... Functions>
   struct Simplification<
-    Multiplication<Functions...>,
-    typename std::enable_if<
-      (sizeof...(Functions) > 2)>::type>
+    Multiplication<Functions...>,1>
   {
     typedef bool_<
       has_abelian_arithmetic<
@@ -106,24 +104,20 @@ private:
     }
   };
 
-  template <class F, class ... Functions>
-  struct Simplification<
-    Multiplication<F, Multiplication<Functions...>>,
-    typename std::enable_if<
-      !IsVariadic<Multiplication, F>::value>::type>
+  template <class ... MFuncs, class C>
+  struct Simplification<Composition<Multiplication<MFuncs...>,C>>
   {
-    typedef Multiplication<F, Functions...> type;
-
-    static type Combine(Multiplication<F, 
-			Multiplication<Functions...>> t)
+    typedef Composition<Multiplication<MFuncs...>,C> in_type;
+    static auto Combine(in_type c)
     {
 #ifdef PRINT_SIMPLIFIES
-      std::cout << "Flattening multiplication\n";
+      std::cout << "Distributing Composition "
+	"into multiplication\n";
 #endif
-      auto tu = t.GetFunctions();
-      return {std::tuple_cat(remove_element<1>(tu),
-			     std::get<1>(tu).GetFunctions())};
+      return DistributeComposition<Multiplication>(c);
     }
+
+    typedef decltype(Combine(std::declval<in_type>())) type;
   };
 }
 

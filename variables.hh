@@ -58,6 +58,19 @@ namespace manifolds {
   VARIABLE(2,false,Z)
   VARIABLE(3,false,T)
 
+template <bool a, class F>
+  struct Simplification<
+    Composition<Variable<0,a>, F>, 1,
+    typename std::enable_if<
+      F::output_dim == 1>::type>
+  {
+    typedef F type;
+
+    static type Combine(Composition<Variable<0,a>, F> c)
+    {
+      return std::get<1>(c.GetFunctions());
+    }
+  };
 }
 
 #endif
