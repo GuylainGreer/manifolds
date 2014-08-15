@@ -9,45 +9,9 @@
 #include <type_traits>
 #include <boost/preprocessor/cat.hpp>
 #include "simplify.hh"
+#include "group.hh"
 
 namespace manifolds {
-
-  template <class...Funcs>
-  struct Group :
-    Function<max<Funcs::input_dim...>::value,
-	     max<Funcs::output_dim...>::value>
-  {
-    std::tuple<Funcs...> functions;
-
-    Group(Funcs...fs):functions{fs...}{}
-
-    template <std::size_t...is, class...Args>
-    auto eval(std::integer_sequence<std::size_t,is...>,
-	      Args...args) const
-    {
-      return std::make_tuple(std::get<is>(functions)(args...)...);
-    }
-
-    template <class ... Args>
-    auto operator()(Args...args) const
-    {
-      return eval(std::index_sequence_for<Funcs...>(),
-		  args...);
-    }
-
-    auto GetFunctions() const
-    {
-      return functions;
-    }
-  };
-
-  template <class F, class ... Funcs>
-  std::ostream & operator<<(std::ostream & s,
-			    Group<F, Funcs...> g)
-  {
-    StreamVariadic("Group", g, s);
-    return s;
-  }
 
 template <class FunctionImpl>
 struct FunctionCommon
@@ -76,11 +40,9 @@ struct FunctionCommon
 	      >::type>
   auto operator()(InnerFunc ... f) const
   {
-    Group<InnerFunc...> g{f...};
-    return Simplify(Composition<
-		    FunctionImpl, decltype(g)>
-		    (*static_cast<const FunctionImpl*>(this), g));
+    return (*this)(GetGroup(f...));
   }
+
   template <class T, std::size_t ... Indices>
   auto helper(const T & t, std::integer_sequence<
 	      std::size_t, Indices...>) const
