@@ -3,6 +3,7 @@
 #include "variables.hh"
 #include "full_function_defs.hh"
 #include "trig.hh"
+#include "polynomial.hh"
 
 BOOST_AUTO_TEST_CASE(addition_test)
 {
@@ -13,4 +14,5 @@ BOOST_AUTO_TEST_CASE(addition_test)
   BOOST_CHECK_EQUAL(a(1,2,4,8,16), 5);
   auto l = Log()(x);
   static_assert(is_function<decltype(l)>::value, "");
+  static_assert(!IsVariadic<Composition, Cos>::value, "");
 }

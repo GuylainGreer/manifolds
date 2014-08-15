@@ -22,4 +22,15 @@ BOOST_AUTO_TEST_CASE(derivative_test)
     GetFunctionMatrix(GetRow(d, Cos()(x*x)));
   BOOST_CHECK_EQUAL(fd(5,6), fd_check(5,6));
   BOOST_CHECK_EQUAL(fd(7,7), fd_check(7,7));
+  auto fd_check_d = Derivative(fd);
+  auto fd_check_check =
+    GetFunctionMatrix(GetRow(-2_c * Sin()(x*x)*y +
+			     -4_c * x * x * Cos()(x*x)*y,
+			     -2_c * x * Sin()(x * x)));
+  BOOST_CHECK_EQUAL(fd_check_d(2,2), fd_check_check(2,2));
+  BOOST_CHECK_EQUAL(fd_check_d(3,4), fd_check_check(3,4));
+  auto p = Pow()(x, x);
+  auto pd = Derivative(p);
+  auto pd_check = (Log()(x)+1_c)*Pow()(x,x);
+  BOOST_CHECK_EQUAL(pd(3), pd_check(3));
 }

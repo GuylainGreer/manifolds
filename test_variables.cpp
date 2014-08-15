@@ -27,8 +27,6 @@ BOOST_AUTO_TEST_CASE(test_variables)
 
   using namespace manifolds;
 
-  //This test ensures that accessing the nth coordinate
-  //returns the exact same object that was passed in
   BOOST_CHECK_EQUAL(x(a,b,c,d,e,f), a);
   BOOST_CHECK_EQUAL(y(a,b,c,d,e,f), b);
   BOOST_CHECK_EQUAL(z(a,b,c,d,e,f), c);
