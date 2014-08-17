@@ -223,6 +223,69 @@ namespace manifolds {
 
     typedef decltype(Combine(std::declval<in_type>())) type;
   };
+
+  template <class r1, class c1, class r2, class c2,
+	    class ... F1s, class ... F2s>
+  struct Simplification<
+    Multiplication<FunctionMatrix<r1,c1,F1s...>,
+		   FunctionMatrix<r2,c2,F2s...>>>
+  {
+    typedef Multiplication<
+      FunctionMatrix<r1,c1,F1s...>,
+      FunctionMatrix<r2,c2,F2s...>> in_type;
+    template <std::size_t row>
+      struct Inner1
+    {
+      template <std::size_t col>
+      struct Inner2
+      {
+	template <std::size_t ... is>
+	static auto apply(in_type m, std::integer_sequence<
+			  std::size_t, is...>)
+	{
+	  auto l = std::get<0>(m.GetFunctions()).GetFunctions();
+	  auto r = std::get<1>(m.GetFunctions()).GetFunctions();
+	  return Add((std::get<row*c1::value+is>(l) *
+		      std::get<is*c2::value+col>(r))...);
+	}
+      };
+      template <std::size_t ... is>
+      static auto apply(in_type m, std::integer_sequence<
+			std::size_t, is...>)
+      {
+	std::make_index_sequence<r2::value> s;
+	return std::make_tuple(Inner2<is>::apply(m, s)...);
+      }
+    };
+
+    template <std::size_t ... is>
+      static auto apply(in_type m, std::integer_sequence<
+			std::size_t, is...>)
+    {
+      std::make_index_sequence<c2::value> s;
+      return std::tuple_cat(Inner1<is>::apply(m, s)...);
+    }
+
+    static auto Combine(in_type m)
+    {
+      std::make_index_sequence<r1::value> s;
+      return
+	GetFunctionMatrix<r1::value,c2::value>(apply(m,s));
+    }
+
+    typedef decltype(Combine(std::declval<in_type>())) type;
+  };
+
+  template <class F>
+  struct Simplification<
+    FunctionMatrix<int_<1>,int_<1>,F>>
+  {
+    typedef F type;
+    static type Combine(FunctionMatrix<int_<1>,int_<1>,F> f)
+    {
+      return std::get<0>(f.GetFunctions());
+    }
+  };
 }
 
 #endif
