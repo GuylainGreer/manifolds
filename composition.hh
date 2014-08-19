@@ -189,7 +189,7 @@ private:
   }
 
   template <class ... Functions>
-  struct Simplification<Composition<Functions...>,3>
+  struct Simplification<Composition<Functions...>,4>
   {
     typedef decltype(SimplifyV<Composition>
 		     (std::declval<std::tuple<Functions...>>(),
