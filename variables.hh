@@ -4,8 +4,38 @@
 #include "function.hh"
 #include "full_function_defs.hh"
 #include <tuple>
+#include <string>
 
 namespace manifolds {
+
+    template <int N, bool abelian>
+    std::string VariableDefaultName()
+    {
+        switch(2 * N + abelian)
+        {
+          case 0:
+              return "X";
+          case 1:
+              return "x";
+          case 2:
+              return "Y";
+          case 3:
+              return "y";
+          case 4:
+              return "Z";
+          case 5:
+              return "z";
+          case 6:
+              return "T";
+          case 7:
+              return "t";
+          default:
+              if(abelian)
+                  return std::string("Variable<") + (char)('0' + N) + ">";
+              else
+                  return std::string("VARIABLE<") + (char)('0' + N) + ">";
+        }
+    }
 
   template <int N, bool abelian>
   struct VariableImpl : Function<N+1,1>
@@ -38,12 +68,15 @@ namespace manifolds {
     using VariableImpl<N, abelian>::operator();
   };
 
+    template <int i, bool abelian>
+    std::ostream & operator<<(std::ostream&s, Variable<i,abelian> v)
+    {
+        return s << VariableDefaultName<i,abelian>();
+    }
+
 #define VARIABLE(i, abelian, name)				\
   static const Variable<i,abelian> name =			\
   Variable<i,abelian>();					\
-  inline std::ostream & operator<<(std::ostream&s,		\
-				   Variable<i,abelian>)		\
-  {return s << #name;}
 
   VARIABLE(0,true,x)
   VARIABLE(1,true,y)
