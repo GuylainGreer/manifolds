@@ -79,6 +79,12 @@ namespace manifolds
   template <class C, class O>
   struct is_polynomial<Polynomial<C, O>> : std::true_type{};
 
+    template <class>
+    struct PolynomialOrder : int_<-1>{};
+
+    template <class C, class O>
+    struct PolynomialOrder<Polynomial<C, O>> : O {};
+
   template <class CType, int N>
   std::ostream & operator<<(std::ostream & s,
 			    Polynomial<CType,int_<N>> p)
