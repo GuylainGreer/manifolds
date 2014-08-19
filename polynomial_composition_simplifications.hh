@@ -195,6 +195,33 @@ namespace manifolds {
     }
     typedef decltype(Combine(std::declval<in_type>())) type;
   };
+
+  template <template<class...>class Variadic,
+	    class C1, class O1,
+	    class C2, class O2,
+	    class ... F1s>
+  struct Simplification<
+    Variadic<Composition<Polynomial<C1,O1>,F1s...>,
+	     Composition<Polynomial<C2,O2>,F1s...>>, 1,
+    typename std::enable_if<
+      is_stateless<Composition<F1s...>>::value>::type>
+  {
+    typedef Variadic<Polynomial<C1,O2>,
+		     Polynomial<C2,O2>> inter_type;
+    typedef Composition<
+      SimplifiedType<inter_type>,
+      F1s...> type;
+    static type Combine(Variadic<Composition<
+			Polynomial<C1,O1>,F1s...>,
+			Composition<
+			Polynomial<C2,O2>,F1s...>> v)
+    {
+      auto t = v.GetFunctions();
+      inter_type i(std::get<0>(std::get<0>(t).GetFunctions()),
+		   std::get<0>(std::get<1>(t).GetFunctions()));
+      return std::make_tuple(Simplify(i), F1s()...);
+    }
+  };
 }
 
 #endif

@@ -5,6 +5,8 @@
 #include "typename.hh"
 #include <tuple>
 #include <iostream>
+#include <boost/mpl/range_c.hpp>
+#include <boost/mpl/bool.hpp>
 
 namespace manifolds
 {
@@ -131,7 +133,11 @@ namespace manifolds
       typename std::tuple_element<
 	i+1, Tuple>::type
       > VType;
-    typedef typename Simplification<VType>::type SType;
+#ifdef PRINT_SIMPLIFIES
+    VType test(std::get<i>(t),std::get<i+1>(t));
+    std::cout << "Checking if " << test << " simplifies: ";
+#endif
+    typedef SimplifiedType<VType> SType;
     typedef typename std::is_same<
       VType, SType>::type Simplified;
     auto next =
@@ -200,6 +206,24 @@ namespace manifolds
 			   indices...>)
   {
     return std::make_tuple(Simplify(std::get<indices>(t))...);
+  }
+
+  template <class ... indices>
+  struct FunctionReOrgComparator
+  {
+    struct apply
+    {
+      
+    };
+  };
+
+  template <class Tuple, std::size_t ... tis>
+  auto SortElements(Tuple t, std::integer_sequence<
+		    std::size_t, tis...>)
+  {
+    typedef boost::mpl::range_c<
+      std::size_t, 0, std::tuple_size<Tuple>::value> indices;
+    
   }
 
   template <template<class...>class V, class Tuple,

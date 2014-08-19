@@ -19,7 +19,7 @@ namespace manifolds
   };
 
   template <class ... ReductionPairs>
-  struct Reduction : Function<1,1>
+  struct Reduction : Function<int_<26>, 1,1>
   {
     template <class Arg, class Array, class ... Indices,
 	      class = typename std::enable_if<

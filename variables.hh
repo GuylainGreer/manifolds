@@ -37,8 +37,9 @@ namespace manifolds {
         }
     }
 
+  //Offset of 10000 should be enough to avoid conflicts
   template <int N, bool abelian>
-  struct VariableImpl : Function<N+1,1>
+  struct VariableImpl : Function<int_<10000+N>, N+1,1>
   {
   private:
     template<class>
@@ -93,7 +94,7 @@ namespace manifolds {
 
 template <bool a, class F>
   struct Simplification<
-    Composition<Variable<0,a>, F>, 1,
+    Composition<Variable<0,a>, F>, 2,
     typename std::enable_if<
       F::output_dim == 1>::type>
   {
@@ -101,6 +102,10 @@ template <bool a, class F>
 
     static type Combine(Composition<Variable<0,a>, F> c)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying composition of x and single "
+	"dimensional function\n";
+#endif
       return std::get<1>(c.GetFunctions());
     }
   };

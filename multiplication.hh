@@ -11,8 +11,10 @@ namespace manifolds {
 
 template <class ... Functions>
 struct MultiplicationImpl :
-    Function<max<Functions::input_dim...>::value,
-	     max<Functions::output_dim...>::value>
+    Function<
+  list<int_<5>, typename Functions::indices...>,
+  max<Functions::input_dim...>::value,
+  max<Functions::output_dim...>::value>
 {
   static const bool stateless =
     and_<is_stateless<Functions>...>::value;
@@ -84,7 +86,7 @@ private:
 
   template <class ... Functions>
   struct Simplification<
-    Multiplication<Functions...>,1>
+    Multiplication<Functions...>,2>
   {
     typedef bool_<
       has_abelian_arithmetic<
@@ -118,6 +120,45 @@ private:
     }
 
     typedef decltype(Combine(std::declval<in_type>())) type;
+  };
+}
+
+#include "unary_minus.hh"
+
+namespace manifolds
+{
+  template <class F1, class F2>
+  struct Simplification<
+    Multiplication<
+    F1, UnaryMinus<F2>>>
+  {
+    typedef UnaryMinus<Multiplication<F1,F2>> type;
+    static type Combine(Multiplication<
+			F1, UnaryMinus<F2>> m)
+    {
+      auto t = m.GetFunctions();
+      Multiplication<F1,F2> r =
+	Multiplication<F1,F2>
+	(std::get<0>(t), std::get<1>(t).GetFunction());
+      return UnaryMinus<decltype(r)>(r);
+    }
+  };
+
+  template <class F1, class F2>
+  struct Simplification<
+    Multiplication<
+      UnaryMinus<F1>, F2>, 1>
+  {
+    typedef UnaryMinus<Multiplication<F1,F2>> type;
+    static type Combine(Multiplication<
+			UnaryMinus<F1>, F2> m)
+    {
+      auto l = std::get<0>(m.GetFunctions()).GetFunction();
+      auto r = std::get<1>(m.GetFunctions());
+      auto mr = Multiplication<
+	decltype(l), decltype(r)>(l,r);
+      return UnaryMinus<decltype(mr)>(mr);
+    }
   };
 }
 

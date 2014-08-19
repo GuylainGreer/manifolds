@@ -6,12 +6,12 @@
 #include <ostream>
 #include "full_function_defs.hh"
 
-#define STD_FUNCTION(classname , funcname)			\
-  struct classname##Impl : Function<1,1>			\
+#define STD_FUNCTION(classname , funcname, index)		\
+  struct classname##Impl : Function<int_<index>, 1,1>		\
   {								\
     static const bool stateless = true;				\
     template <class T>						\
-      auto operator()(T && t) const				\
+      auto operator()(T t) const				\
     {								\
       return std::funcname(t);					\
     }								\
@@ -26,24 +26,24 @@
 
 namespace manifolds
 {
-  STD_FUNCTION(Sin, sin)
-  STD_FUNCTION(Cos, cos)
-  STD_FUNCTION(Tan, tan)
-  STD_FUNCTION(Log, log)
-  STD_FUNCTION(Sinh, sinh)
-  STD_FUNCTION(Cosh, cosh)
-  STD_FUNCTION(Tanh, tanh)
-  STD_FUNCTION(ASin, asin)
-  STD_FUNCTION(ACos, acos)
-  STD_FUNCTION(ATan, atan)
-  STD_FUNCTION(ASinh, asinh)
-  STD_FUNCTION(ACosh, acosh)
-  STD_FUNCTION(ATanh, atanh)
-  STD_FUNCTION(Exp, exp)
-  STD_FUNCTION(Sqrt, sqrt)
+  STD_FUNCTION(Sin, sin, 8)
+  STD_FUNCTION(Cos, cos, 9)
+  STD_FUNCTION(Tan, tan, 10)
+  STD_FUNCTION(Log, log, 11)
+  STD_FUNCTION(Sinh, sinh, 12)
+  STD_FUNCTION(Cosh, cosh, 13)
+  STD_FUNCTION(Tanh, tanh, 14)
+  STD_FUNCTION(ASin, asin, 15)
+  STD_FUNCTION(ACos, acos, 16)
+  STD_FUNCTION(ATan, atan, 17)
+  STD_FUNCTION(ASinh, asinh, 18)
+  STD_FUNCTION(ACosh, acosh, 19)
+  STD_FUNCTION(ATanh, atanh, 20)
+  STD_FUNCTION(Exp, exp, 21)
+  STD_FUNCTION(Sqrt, sqrt, 22)
 #undef STD_FUNCTION
 
-  struct PowImpl : Function<2,1>
+  struct PowImpl : Function<int_<23>, 2,1>
   {
     static const bool stateless = true;
     template <class T, class U>

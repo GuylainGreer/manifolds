@@ -11,6 +11,7 @@ namespace manifolds {
 
 template <class ... Functions>
 struct AdditionImpl : Function<
+  list<int_<0>, typename Functions::indices...>,
   max<Functions::input_dim...>::value,
   max<Functions::output_dim...>::value>
 {
@@ -109,6 +110,37 @@ private:
     }
 
     typedef decltype(Combine(std::declval<in_type>())) type;
+  };
+}
+
+#include "unary_minus.hh"
+#include "zero.hh"
+
+namespace manifolds {
+
+  template <class F>
+  struct Simplification<
+    Addition<F, UnaryMinus<F>>,0,
+    typename std::enable_if<
+      is_stateless<F>::value>::type>
+  {
+    typedef Zero type;
+    static type Combine(Addition<F, UnaryMinus<F>>)
+    {
+      return zero;
+    }
+  };
+
+  template <class F>
+  struct Simplification<
+    Addition<UnaryMinus<F>,F>,0,
+    typename std::enable_if<is_stateless<F>::value>::type>
+  {
+    typedef Zero type;
+    static type Combine(Addition<UnaryMinus<F>,F>)
+    {
+      return zero;
+    }
   };
 }
 

@@ -9,10 +9,14 @@ namespace manifolds {
 template <class Numerator,
 	  class Denominator>
 struct DivisionImpl :
-    Function<max<Numerator::input_dim,
-		 Denominator::input_dim>::value,
-	     max<Numerator::output_dim,
-		 Denominator::output_dim>::value>
+    Function<
+  list<int_<2>,
+       typename Numerator::indices,
+       typename Denominator::indices>,
+  max<Numerator::input_dim,
+      Denominator::input_dim>::value,
+  max<Numerator::output_dim,
+      Denominator::output_dim>::value>
 {
   static const bool stateless =
     and_<is_stateless<Numerator>,

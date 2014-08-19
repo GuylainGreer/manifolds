@@ -5,7 +5,7 @@
 #include <ostream>
 
 namespace manifolds {
-  struct ZeroImpl : Function<1,1>
+  struct ZeroImpl : Function<int_<25>, 1,1>
 {
   static const bool stateless = true;
 

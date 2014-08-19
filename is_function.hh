@@ -9,7 +9,8 @@
 namespace manifolds {
   //For now just test whether first function is a function
   template <class F>
-  std::true_type is_function_helper(int,int_<F::input_dim> =
+  std::true_type is_function_helper(int,
+				    int_<F::input_dim> =
 				    int_<F::input_dim>(),
 				    int_<F::output_dim> =
 				    int_<F::output_dim>(),
