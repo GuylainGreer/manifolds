@@ -6,6 +6,7 @@
 #include "polynomial.hh"
 #include "operators.hh"
 #include <iostream>
+#include "streaming2.hh"
 
 BOOST_AUTO_TEST_CASE(addition_test)
 {
@@ -30,10 +31,18 @@ BOOST_AUTO_TEST_CASE(addition_test)
   auto c33 = b1 + m1 * t;
   auto c22 = b2 + m2 * t;
   auto c11 = b3 + m3 * t;
-  auto f =
-      4_c * c22 * c22 * c11 * c33 -
-      8_c * c22 * (c11 + c33) * c11 * c33 +
-      (c11 + c33) * (c11 + c33) * c11 * c33 -
-      (c12r * c12r + c12i * c12i) * (c11 + c33) * (c11 * c33);
-  std::cout << "\n\n" << f << "\n\n";
+  auto part1 = 4_c * c22 * c22 * c11 * c33;
+  Stream2(std::cout, part1);
+  auto part2 = 8_c * c22 * (c11 + c33) * c11 * c33;
+  std::cout << "\n\n";
+  Stream2(std::cout, part2);
+  std::cout << "\n\n";
+//  auto part3 = (c11 + c33) * (c11 + c33) * c11 * c33;
+//  Stream2(std::cout, part3);
+  std::cout << "\n\n";
+  auto part4 = (c12r * c12r + c12i * c12i) * (c11 + c33) * (c11 * c33);
+  Stream2(std::cout, part4);
+  std::cout << "\n\n";
+/*  auto f = part1 - part2 + part3 - part4;
+      Stream2(std::cout, f);*/
 }
