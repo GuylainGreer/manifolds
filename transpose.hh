@@ -7,7 +7,7 @@
 
 namespace manifolds
 {
-  struct TransposeImpl : Function<1,1>
+  struct TransposeImpl : Function<int_<7>, 1,1>
   {
     static const bool stateless = true;
 
@@ -34,4 +34,56 @@ namespace manifolds
 
 }
 
+#include "function_matrix.hh"
+
+namespace manifolds
+{
+
+  template <class r, class c, class ... Funcs>
+  struct Simplification<
+    Composition<Transpose,
+		FunctionMatrix<
+		  r, c, Funcs...>>>
+  {
+    typedef Composition<Transpose,
+			FunctionMatrix<
+			  r, c, Funcs...>> in_type;
+    typedef std::tuple<Funcs...> f_type;
+
+    template <std::size_t col>
+      struct Inner1
+    {
+      template <std::size_t row>
+      struct Inner2
+      {
+	static auto apply(f_type m)
+	{
+	  return std::get<row * c::value + col>(m);
+	}
+      };
+      template <std::size_t ... is>
+      static auto apply(f_type m, std::integer_sequence<
+			std::size_t, is...>)
+      {
+	return std::make_tuple(Inner2<is>::apply(m)...);
+      }
+    };
+    template <std::size_t ... is>
+      static auto apply(f_type m, std::integer_sequence<
+			std::size_t,is...>)
+    {
+      std::make_index_sequence<c::value> s;
+      return std::tuple_cat(Inner1<is>::apply(m,s)...);
+    }
+
+    static auto Combine(in_type co)
+    {
+      std::make_index_sequence<r::value> s;
+      return GetFunctionMatrix<c::value,r::value>
+	(apply(std::get<1>(co.GetFunctions()).
+	       GetFunctions(), s));
+    }
+  };
+
+}
 #endif

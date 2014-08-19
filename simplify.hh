@@ -7,7 +7,7 @@
 
 namespace manifolds {
 
-  static const int num_simplification_levels = 3;
+  static const int num_simplification_levels = 4;
 
   template <class A,
 	    int level = 0,
@@ -92,6 +92,10 @@ namespace manifolds {
   template <class T>
   using SimplifiedType =
     decltype(Simplify(std::declval<T>()));
+
+  template <class T>
+  using Simplifies = bool_<
+    !std::is_same<SimplifiedType<T>, T>::value>;
 }
 
 #endif

@@ -9,6 +9,7 @@
 BOOST_AUTO_TEST_CASE(streaming_test)
 {
   using namespace manifolds;
-  auto p = Log()(Sin()(x)) + Exp()(ASin()(y));
+  auto p1 = x * x;
+  auto p = p1(x - 1_c) + x * x * x;
   Stream2(std::cout, p) << "\n\n";
 }

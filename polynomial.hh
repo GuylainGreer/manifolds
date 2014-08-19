@@ -17,7 +17,7 @@ namespace manifolds
   //order here refers to the number of coefficients
   template <class CoeffType, class Order>
   struct PolynomialImpl :
-    Function<1, 1>
+    Function<int_<6>, 1, 1>
   {
     static const int num_coeffs = Order::value;
     static const bool stateless = false;
@@ -72,6 +72,13 @@ namespace manifolds
   };
 
   DEF_FF_TEMPLATE(Polynomial)
+
+  template <class>
+  struct is_polynomial : std::false_type{};
+
+  template <class C, class O>
+  struct is_polynomial<Polynomial<C, O>> : std::true_type{};
+
   template <class CType, int N>
   std::ostream & operator<<(std::ostream & s,
 			    Polynomial<CType,int_<N>> p)

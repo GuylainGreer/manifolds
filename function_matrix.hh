@@ -26,8 +26,10 @@ namespace manifolds {
   template <class rows, class cols,
 	    class ... Functions>
   struct FunctionMatrixImpl :
-    Function<max<Functions::input_dim...>::value,
-	     max<Functions::output_dim...>::value>
+    Function<
+    list<int_<4>, typename Functions::indices...>,
+    max<Functions::input_dim...>::value,
+    max<Functions::output_dim...>::value>
   {
     static const int num_rows = rows::value;
     static const int num_cols = cols::value;
@@ -109,6 +111,7 @@ namespace manifolds {
 #include "variables.hh"
 #include "trig.hh"
 #include "polynomial.hh"
+#include "transpose.hh"
 
 namespace manifolds {
 

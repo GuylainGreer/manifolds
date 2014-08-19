@@ -37,6 +37,7 @@ BOOST_AUTO_TEST_CASE(matrix_test)
 				    std::cos(3))));
 
   auto mf2 = transpose(mf) * mf;
+  std::cout << mf2 << "\n\n";
   BOOST_CHECK_EQUAL(mf2(4).Coeff(0,0), 1.0);
   BOOST_CHECK_EQUAL(mf2(4).Coeff(0,1), 0.0);
   BOOST_CHECK_EQUAL(mf2(4).Coeff(1,0), 0.0);

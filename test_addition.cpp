@@ -9,7 +9,7 @@ BOOST_AUTO_TEST_CASE(addition_test)
 {
   using namespace manifolds;
   Addition<decltype(x), decltype(z)> a(x,z);
-
+  static_assert(is_function<Variable<0>>::value, "");
   BOOST_CHECK_EQUAL(a(1,2,3,4), 4);
   BOOST_CHECK_EQUAL(a(1,2,4,8,16), 5);
   auto l = Log()(x);

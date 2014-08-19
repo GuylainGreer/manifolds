@@ -4,8 +4,10 @@
 namespace manifolds {
   template <class...Funcs>
   struct Group :
-    Function<max<Funcs::input_dim...>::value,
-	     sizeof...(Funcs)>
+    Function<
+    list<int_<5>, typename Funcs::indices...>,
+    max<Funcs::input_dim...>::value,
+    sizeof...(Funcs)>
   {
     std::tuple<Funcs...> functions;
 
