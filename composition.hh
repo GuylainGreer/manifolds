@@ -58,8 +58,10 @@ struct ToTuple
 
 template <class ... Functions>
 struct Composition :
-    Function<last<Functions...>::type::input_dim,
-	     first<Functions...>::type::output_dim>
+    Function<
+  list<int_<1>, typename Functions::indices...>,
+  last<Functions...>::type::input_dim,
+  first<Functions...>::type::output_dim>
 {
   static const bool stateless =
     and_<is_stateless<Functions>...>::value;
@@ -187,7 +189,7 @@ private:
   }
 
   template <class ... Functions>
-  struct Simplification<Composition<Functions...>,2>
+  struct Simplification<Composition<Functions...>,3>
   {
     typedef decltype(SimplifyV<Composition>
 		     (std::declval<std::tuple<Functions...>>(),
