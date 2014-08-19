@@ -1,3 +1,4 @@
+
 #ifndef MANIFOLDS_FUNCTIONS_UNARY_MINUS_HH
 #define MANIFOLDS_FUNCTIONS_UNARY_MINUS_HH
 
@@ -8,15 +9,17 @@ namespace manifolds {
 
 template <class Func>
 struct UnaryMinusImpl :
-    Function<Func::input_dim,
-	     Func::output_dim>
+    Function<
+  list<int_<24>, typename Func::indices>,
+  Func::input_dim,
+  Func::output_dim>
 {
 
   UnaryMinusImpl(){}
   UnaryMinusImpl(const Func & f):f(f){}
 
   template <class ... Args>
-  auto operator()(Args && ... args) const
+  auto operator()(Args ... args) const
   {
     return -f(args...);
   }
@@ -55,5 +58,27 @@ private:
   {
     return u1.f == u2.f;
   }
+
+  template <class F>
+  struct Simplification<
+    UnaryMinus<UnaryMinus<F>>>
+  {
+    typedef F type;
+    static type Combine(UnaryMinus<UnaryMinus<F>> u)
+    {
+      return u.GetFunction().GetFunction();
+    }
+  };
+
+  template <class F>
+  struct Simplification<
+    UnaryMinus<F>, 2>
+  {
+    static auto Combine(UnaryMinus<F> u)
+    {
+      auto f = Simplify(u.GetFunction());
+      return UnaryMinus<decltype(f)>(f);
+    }
+  };
 }
 #endif
