@@ -61,6 +61,16 @@ namespace manifolds
       s << ')';
     }
 
+      template <class T>
+      static void Stream2(std::ostream & s,
+                          UnaryMinus<T> u)
+      {
+          s << "-(";
+          Stream2Wrapper<iter+1>::Stream2
+              (s, u.GetFunction());
+          s << ")";
+      }
+
     template <class CoeffType, class Order>
     static void Stream2(std::ostream & s,
 			Polynomial<CoeffType, Order> p,
@@ -140,7 +150,8 @@ namespace manifolds
       static const bool b =
 	IsVariadic<
 	  Addition, T
-	>::value;
+	>::value ||
+          (is_polynomial<T>::value && PolynomialOrder<T>::value != 1);
       if(b) s << '(';
       Stream2Wrapper<iter+1>::Stream2(s, t);
       if(b) s << ')';
@@ -153,7 +164,9 @@ namespace manifolds
       PrintMultElem(s, std::get<0>(m.GetFunctions()));
     }
 
-    template <class F, class ... Funcs>
+      template <class F, class ... Funcs,
+                class = typename std::enable_if<
+                    (sizeof...(Funcs)>0)>::type>
     static void Stream2(std::ostream & s,
 			Multiplication<F,Funcs...> m)
     {
