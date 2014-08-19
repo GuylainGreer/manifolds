@@ -86,7 +86,7 @@ private:
 
   template <class ... Functions>
   struct Simplification<
-    Multiplication<Functions...>,2>
+    Multiplication<Functions...>,3>
   {
     typedef bool_<
       has_abelian_arithmetic<
@@ -124,6 +124,7 @@ private:
 }
 
 #include "unary_minus.hh"
+#include "addition.hh"
 
 namespace manifolds
 {
@@ -160,6 +161,38 @@ namespace manifolds
       return UnaryMinus<decltype(mr)>(mr);
     }
   };
+
+    template <class ... F1s, class ... F2s>
+    struct Simplification<
+        Multiplication<
+            Addition<F1s...>, Addition<F2s...> >, 0>
+    {
+        template <class T1, class T2, std::size_t ... indices>
+        static auto Second(T1 t1, T2 t2, std::integer_sequence<
+                               std::size_t, indices...>)
+        {
+            return Add(Multiply(t1, std::get<indices>(t2))...);
+        }
+
+        template <class T1, class T2, std::size_t ... indices>
+        static auto First(T1 t1, T2 t2, std::integer_sequence<std::size_t, indices...>)
+        {
+            return Add(Second(std::get<indices>(t1), t2, std::make_index_sequence<
+                                  std::tuple_size<T2>::value>())...);
+        }
+
+        typedef Multiplication<
+            Addition<F1s...>, Addition<F2s...> > in_type;
+
+        static auto Combine(in_type m)
+        {
+            auto t1 = std::get<0>(m.GetFunctions()).GetFunctions();
+            return First(t1, std::get<1>(m.GetFunctions()).GetFunctions(),
+                         std::make_index_sequence<std::tuple_size<decltype(t1)>::value>());
+        }
+
+        typedef decltype(Combine(std::declval<in_type>())) type;
+    };
 }
 
 #endif
