@@ -24,7 +24,7 @@ namespace manifolds {
 
   template <class A>
   struct Simplification<
-    Multiplication<A,A>, 0,
+    Multiplication<A,A>, 2,
     typename std::enable_if<is_stateless<A>::value>::type>
   {
     typedef Composition<
@@ -222,6 +222,47 @@ namespace manifolds {
       return std::make_tuple(Simplify(i), F1s()...);
     }
   };
+
+    template <class C, class O, class ... Fs>
+    struct Simplification<
+        Composition<
+            Polynomial<C,O>, Addition<Fs...> >, 3>
+    {
+        typedef Composition<
+            Polynomial<C,O>, Addition<Fs...> > in_type;
+
+        static auto P(C c){return GetPolynomial(c);}
+
+        template <class T, std::size_t>
+        struct Dummy
+        {
+            typedef T type;
+        };
+
+        template <std::size_t ... count>
+        static auto Mult(C c, Addition<Fs...> a,
+                         std::integer_sequence<std::size_t, count...>)
+        {
+            auto p = P(c);
+            Multiplication<
+                decltype(p),
+                typename Dummy<Addition<Fs...>, count>::type...> r(P(c), ((void)count, a)...);
+            return r;
+        }
+
+        template <std::size_t ... orders>
+        static auto Addem(in_type c, std::integer_sequence<std::size_t, orders...>)
+        {
+            auto a = std::get<1>(c.GetFunctions());
+            auto coeffs = std::get<0>(c.GetFunctions()).GetCoeffs();
+            return Add(Mult(coeffs[orders], a, std::make_index_sequence<orders>())...);
+        }
+
+        static auto Combine(in_type c)
+        {
+            return Addem(c, std::make_index_sequence<O::value>());
+        }
+    };
 }
 
 #endif
