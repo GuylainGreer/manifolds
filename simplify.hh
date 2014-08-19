@@ -7,7 +7,7 @@
 
 namespace manifolds {
 
-  static const int num_simplification_levels = 4;
+  static const int num_simplification_levels = 5;
 
   template <class A,
 	    int level = 0,
