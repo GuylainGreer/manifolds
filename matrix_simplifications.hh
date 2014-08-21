@@ -4,7 +4,6 @@
 #include "simplify.hh"
 #include "addition.hh"
 #include "multiplication.hh"
-#include "function_matrix.hh"
 
 namespace manifolds {
 
@@ -48,7 +47,7 @@ struct Simplification<
     std::cout << "Simplifying matrix addition\n";
 #endif
     auto ms = a.GetFunctions();
-    return std::get<0>(a) + std::get<1>(a);
+    return get<0>(a) + get<1>(a);
   }
 };
 
@@ -133,25 +132,9 @@ struct Simplification<
     std::cout << "Simplifying matrix multiplication\n";
 #endif
     auto ms = m.GetFunctions();
-    return std::get<0>(ms) * std::get<1>(ms);
+    return get<0>(ms) * get<1>(ms);
   }
 };
-
-  template <class ... Functions>
-  struct Simplification<Group<Functions...>,0>
-  {
-    typedef FunctionMatrix<
-      int_<sizeof...(Functions)>,
-      int_<1>, Functions...> MType;
-    typedef MType type;
-    static type Combine(Group<Functions...> c)
-    {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying group->vector\n";
-#endif
-      return {c.GetFunctions()};
-    }
-  };
 }
 
 #endif

@@ -1,8 +1,6 @@
 #ifndef MANIFOLDS_FUNCTIONS_TEMPLATE_METAPROGRAMMING_UTILITIES_HH
 #define MANIFOLDS_FUNCTIONS_TEMPLATE_METAPROGRAMMING_UTILITIES_HH
 
-#include <tuple>
-
 namespace manifolds
 {
   template <class T>
@@ -58,11 +56,43 @@ namespace manifolds
     typedef int_<value> type;
   };
 
-  template <int n, class ... Ts>
-  struct nth
+  template <int...>
+  struct sum;
+
+  template <int i, int ... is>
+  struct sum<i,is...> : int_<i + sum<is...>::value>{};
+
+  template <>
+  struct sum<> : int_<0>{};
+
+  template <int, int...>
+  struct sum_n;
+
+  template <int n, int i, int ... is>
+  struct sum_n<n,i,is...>
   {
-    typedef typename std::tuple_element<
-      n, std::tuple<Ts...>>::type type;
+    static const int next =
+      n ? n - 1: 0;
+    static const int adding =
+      n ? i : 0;
+    static const int value = adding +
+      sum_n<next,is...>::value;
+    typedef int_<value> type;
+  };
+
+  template <>
+  struct sum_n<0>:int_<0>{};
+
+  template <int n, class ... Ts>
+  struct nth;
+
+  template <int n, class T, class...Ts>
+  struct nth<n,T,Ts...> : nth<n-1,Ts...>{};
+
+  template <class T, class ... Ts>
+  struct nth<0, T, Ts...>
+  {
+    typedef T type;
   };
 
   template <class T, class ... Ts>
@@ -102,8 +132,6 @@ namespace manifolds
 			  Coeff(std::declval<int>(),
 				std::declval<int>())))
 
-  FUNC_CHECK_DEF(is_gettable,
-		 decltype(std::get<0>(std::declval<T>())))
 }
 
 #endif

@@ -1,7 +1,6 @@
 #ifndef MANIFOLDS_FUNCTIONS_VECTOR_FIELDS_HH
 #define MANIFOLDS_FUNCTIONS_VECTOR_FIELDS_HH
 
-#include <tuple>
 #include "operators.hh"
 #include "derivatives.hh"
 
@@ -10,18 +9,18 @@ namespace manifolds
   template <class ... Functions>
   struct VectorField
   {
-    std::tuple<Functions...> functions;
+    tuple<Functions...> functions;
 
     VectorField(Functions ... functions):
       functions(functions...){}
-    VectorField(std::tuple<Functions...> functions):
+    VectorField(tuple<Functions...> functions):
       functions(functions){}
 
     template <class F, std::size_t ... indices>
     auto eval(F f, std::integer_sequence<
 	      std::size_t, indices...>) const
     {
-      return Add((std::get<indices>(functions)*
+      return Add((get<indices>(functions)*
 		  Derivative(f, Variable<indices>()))...);
     }
 

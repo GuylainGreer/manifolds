@@ -31,7 +31,7 @@ struct UnaryMinusImpl :
 
   auto GetFunctions() const
   {
-    return std::make_tuple(f);
+    return make_my_tuple(f);
   }
 
 private:

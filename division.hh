@@ -44,7 +44,7 @@ struct DivisionImpl :
 
   auto GetFunctions() const
   {
-    return std::make_tuple(n,d);
+    return make_my_tuple(n,d);
   }
 
 private:
@@ -84,12 +84,12 @@ namespace manifolds {
 	"by division\n";
 #endif
       Multiplication<N1,N2>
-	mn(std::get<0>(a.GetFunctions()).GetNumerator(),
-	   std::get<1>(a.GetFunctions()).GetNumerator());
+	mn(get<0>(a.GetFunctions()).GetNumerator(),
+	   get<1>(a.GetFunctions()).GetNumerator());
 
       Multiplication<D1,D2>
-	md(std::get<0>(a.GetFunctions()).GetDenominator(),
-	   std::get<1>(a.GetFunctions()).GetDenominator());
+	md(get<0>(a.GetFunctions()).GetDenominator(),
+	   get<1>(a.GetFunctions()).GetDenominator());
 
       return {mn, md};
     }
@@ -109,9 +109,9 @@ namespace manifolds {
 	"by function\n";
 #endif
       Multiplication<N,F>
-	m(std::get<0>(a.GetFunctions()).GetNumerator(),
-	  std::get<1>(a.GetFunctions()));
-      return {m, std::get<0>(a.GetFunctions()).GetDenominator()};
+	m(get<0>(a.GetFunctions()).GetNumerator(),
+	  get<1>(a.GetFunctions()));
+      return {m, get<0>(a.GetFunctions()).GetDenominator()};
     }
   };
 

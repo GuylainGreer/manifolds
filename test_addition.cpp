@@ -11,38 +11,23 @@
 BOOST_AUTO_TEST_CASE(addition_test)
 {
   using namespace manifolds;
-  Addition<decltype(x), decltype(z)> a(x,z);
-  static_assert(is_function<Variable<0>>::value, "");
-  BOOST_CHECK_EQUAL(a(1,2,3,4), 4);
-  BOOST_CHECK_EQUAL(a(1,2,4,8,16), 5);
-  auto l = Log()(x);
-  static_assert(is_function<decltype(l)>::value, "");
-  static_assert(!IsVariadic<Composition, Cos>::value, "");
-  Variable<0> b0;
   Variable<1> b1;
   Variable<2> b2;
   Variable<4> b3;
-  Variable<5> m0;
   Variable<6> m1;
   Variable<7> m2;
   Variable<8> m3;
-  auto c12i = t;
-  auto c12r = b0 + m0 * t;
   auto c33 = b1 + m1 * t;
   auto c22 = b2 + m2 * t;
   auto c11 = b3 + m3 * t;
   auto part1 = 4_c * c22 * c22 * c11 * c33;
-  Stream2(std::cout, part1);
-  auto part2 = 8_c * c22 * (c11 + c33) * c11 * c33;
-  std::cout << "\n\n";
-  Stream2(std::cout, part2);
-  std::cout << "\n\n";
-//  auto part3 = (c11 + c33) * (c11 + c33) * c11 * c33;
-//  Stream2(std::cout, part3);
-  std::cout << "\n\n";
-  auto part4 = (c12r * c12r + c12i * c12i) * (c11 + c33) * (c11 * c33);
-  Stream2(std::cout, part4);
-  std::cout << "\n\n";
-/*  auto f = part1 - part2 + part3 - part4;
-      Stream2(std::cout, f);*/
+  CustomVariableNamer vnamer{
+      std::make_pair(1, "b1"),
+      std::make_pair(2, "b2"),
+      std::make_pair(4, "b3"),
+      std::make_pair(6, "m1"),
+      std::make_pair(7, "m2"),
+      std::make_pair(8, "m3"),
+    };
+  Stream2(std::cout, part1, vnamer);
 }

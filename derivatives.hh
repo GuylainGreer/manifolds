@@ -8,7 +8,7 @@
 #include "polynomial.hh"
 #include "trig.hh"
 #include "operators.hh"
-#include "matrix.hh"
+#include "function_matrix.hh"
 
 #ifdef PRINT_SIMPLIFIES
 #  define PRINT_DERIV(object, variable, name)			\
@@ -31,7 +31,7 @@ namespace manifolds {
     {
       return 
 	Add(DerivativeWrapper<iter+1>::
-	    Derivative(std::get<indices>(a.GetFunctions())..., v));
+	    Derivative(get<indices>(a.GetFunctions())..., v));
     }
 
     template <class ... Funcs, int i>
@@ -57,7 +57,7 @@ namespace manifolds {
     {
       PRINT_DERIV(c, v, "last composition");
       return DerivativeWrapper<iter+1>::
-	Derivative(std::get<0>(c.GetFunctions()),v);
+	Derivative(get<0>(c.GetFunctions()),v);
     }
 
     template <class Func, class ... Funcs, int i,
@@ -68,9 +68,9 @@ namespace manifolds {
     {
       PRINT_DERIV(c, v, "composition");
       auto funcs = remove_element<0>(c.GetFunctions());
-      auto d = FullDeriv(std::get<0>(c.GetFunctions()));
+      auto d = FullDeriv(get<0>(c.GetFunctions()));
       auto next =
-	std::tuple_cat(std::make_tuple(d), funcs);
+	tuple_cat(make_my_tuple(d), funcs);
       return Composition<decltype(d), Funcs...>(next) *
 	DerivativeWrapper<iter+1>::
 	Derivative(Composition<Funcs...>(funcs), v);
@@ -98,10 +98,10 @@ namespace manifolds {
 			  std::size_t, rights...>)
     {
       auto t = a.GetFunctions();
-      return Multiply(std::get<lefts>(t)...,
+      return Multiply(get<lefts>(t)...,
 		      DerivativeWrapper<iter+1>::
-		      Derivative(std::get<i>(t),v),
-		      std::get<rights+i+1>(t)...);
+		      Derivative(get<i>(t),v),
+		      get<rights+i+1>(t)...);
     }
 
     template <int i, class ... Funcs, int d_i>
@@ -232,8 +232,8 @@ namespace manifolds {
       typedef FunctionMatrix<Functions...> M;
       return GetFunctionMatrix<
 	M::num_rows,M::num_cols>
-	(std::make_tuple(Derivative
-			 (std::get<indices>(m.GetFunctions()),
+	(make_my_tuple(Derivative
+			 (get<indices>(m.GetFunctions()),
 			  v)...));
     }
 
@@ -243,7 +243,7 @@ namespace manifolds {
     {
       PRINT_DERIV(m, v, "function matrix");
       static const int size =
-	std::tuple_size<decltype(m.GetFunctions())>::type::value;
+	tuple_size<decltype(m.GetFunctions())>::type::value;
       return Derivative
 	(m, v, std::make_index_sequence<size>());
     }
@@ -252,13 +252,13 @@ namespace manifolds {
     static auto FullDerivHelper(T t, int_<T::output_dim>,
 		   std::integer_sequence<std::size_t, ins...>)
     {
-      return std::tuple<>();
+      return tuple<>();
     }
 
     template <class T>
     static auto GetOutputs(T t, int_<1>)
     {
-      return std::make_tuple(t);
+      return make_my_tuple(t);
     }
 
     template <class T, int i>
@@ -280,21 +280,21 @@ namespace manifolds {
 		   std::integer_sequence<std::size_t, ins...> b)
     {
       auto r =
-	std::make_tuple(Derivative(std::get<col>(GetOutputs(t)),
+	make_my_tuple(Derivative(get<col>(GetOutputs(t)),
 				   Variable<ins>())...);
       return tuple_cat(r, DerivativeWrapper<iter+1>::
 		       FullDerivHelper(t, int_<col+1>(), b));
     }
 
     template <class T>
-    static auto FullDerivOutput(std::tuple<T> t,
+    static auto FullDerivOutput(tuple<T> t,
 				int_<1>, int_<1>)
     {
-      return std::get<0>(t);
+      return get<0>(t);
     }
 
     template <class ... Ts, int rows, int cols>
-    static auto FullDerivOutput(std::tuple<Ts...> t,
+    static auto FullDerivOutput(tuple<Ts...> t,
 				int_<rows>, int_<cols>)
     {
       return GetFunctionMatrix<rows,cols>(t);

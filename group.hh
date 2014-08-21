@@ -9,7 +9,7 @@ namespace manifolds {
     max<Funcs::input_dim...>::value,
     sizeof...(Funcs)>
   {
-    std::tuple<Funcs...> functions;
+    tuple<Funcs...> functions;
 
     Group(Funcs...fs):functions{fs...}{}
 
@@ -17,7 +17,7 @@ namespace manifolds {
     auto eval(std::integer_sequence<std::size_t,is...>,
 	      Args...args) const
     {
-      return std::make_tuple(std::get<is>(functions)(args...)...);
+      return make_my_tuple(get<is>(functions)(args...)...);
     }
 
     template <class ... Args>

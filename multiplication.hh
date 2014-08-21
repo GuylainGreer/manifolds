@@ -22,7 +22,7 @@ struct MultiplicationImpl :
   MultiplicationImpl(){}
   MultiplicationImpl(const Functions & ... functions):
     functions(functions...){}
-  MultiplicationImpl(const std::tuple<Functions...> & f):
+  MultiplicationImpl(const tuple<Functions...> & f):
     functions(f){}
 
   template <class ... Args>
@@ -34,16 +34,16 @@ struct MultiplicationImpl :
   template <class ... Args>
   auto eval(int_<sizeof...(Functions)-1>, Args ... args) const
   {
-    return std::get<sizeof...(Functions)-1>
+    return get<sizeof...(Functions)-1>
       (functions)(args...);
   }
 
   template <int N, class ... Args>
   auto eval(int_<N>, Args ... args) const
   {
-    typedef decltype(std::get<N>(functions)(args...)) result;
+    typedef decltype(get<N>(functions)(args...)) result;
     static const int next_N = N + 1;
-    return std::forward<result>(std::get<N>(functions)(args...)) *
+    return std::forward<result>(get<N>(functions)(args...)) *
       eval(int_<next_N>(), std::forward<Args>(args)...);
   }
 
@@ -59,7 +59,7 @@ struct MultiplicationImpl :
   }
 
 private:
-  std::tuple<Functions...> functions;
+  tuple<Functions...> functions;
 };
 
   DEF_FF_TEMPLATE(Multiplication)
@@ -93,7 +93,7 @@ private:
 	Multiplication<
 	  Functions...>>::value> Abelian;
     typedef decltype(SimplifyV<Multiplication>
-		     (std::declval<std::tuple<Functions...>>(),
+		     (std::declval<tuple<Functions...>>(),
 		      Abelian{})) type;
 
     static type Combine(Multiplication<Functions...> a)
@@ -140,7 +140,7 @@ namespace manifolds
       auto t = m.GetFunctions();
       Multiplication<F1,F2> r =
 	Multiplication<F1,F2>
-	(std::get<0>(t), std::get<1>(t).GetFunction());
+	(get<0>(t), get<1>(t).GetFunction());
       return UnaryMinus<decltype(r)>(r);
     }
   };
@@ -154,8 +154,8 @@ namespace manifolds
     static type Combine(Multiplication<
 			UnaryMinus<F1>, F2> m)
     {
-      auto l = std::get<0>(m.GetFunctions()).GetFunction();
-      auto r = std::get<1>(m.GetFunctions());
+      auto l = get<0>(m.GetFunctions()).GetFunction();
+      auto r = get<1>(m.GetFunctions());
       auto mr = Multiplication<
 	decltype(l), decltype(r)>(l,r);
       return UnaryMinus<decltype(mr)>(mr);
@@ -171,14 +171,17 @@ namespace manifolds
         static auto Second(T1 t1, T2 t2, std::integer_sequence<
                                std::size_t, indices...>)
         {
-            return Add(Multiply(t1, std::get<indices>(t2))...);
+            return AddRaw(Multiply(t1, get<indices>(t2))...);
         }
 
         template <class T1, class T2, std::size_t ... indices>
-        static auto First(T1 t1, T2 t2, std::integer_sequence<std::size_t, indices...>)
+        static auto First(T1 t1, T2 t2,
+			  std::integer_sequence<
+			  std::size_t, indices...>)
         {
-            return Add(Second(std::get<indices>(t1), t2, std::make_index_sequence<
-                                  std::tuple_size<T2>::value>())...);
+            return AddRaw(Second(get<indices>(t1), t2,
+				 std::make_index_sequence<
+				 tuple_size<T2>::value>())...);
         }
 
         typedef Multiplication<
@@ -186,9 +189,12 @@ namespace manifolds
 
         static auto Combine(in_type m)
         {
-            auto t1 = std::get<0>(m.GetFunctions()).GetFunctions();
-            return First(t1, std::get<1>(m.GetFunctions()).GetFunctions(),
-                         std::make_index_sequence<std::tuple_size<decltype(t1)>::value>());
+            auto t1 =
+	      get<0>(m.GetFunctions()).GetFunctions();
+            return First(t1, get<1>(m.GetFunctions()).
+			 GetFunctions(),
+                         std::make_index_sequence<
+			 tuple_size<decltype(t1)>::value>());
         }
 
         typedef decltype(Combine(std::declval<in_type>())) type;

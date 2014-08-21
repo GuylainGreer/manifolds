@@ -4,7 +4,6 @@
 #include "function.hh"
 #include <type_traits>
 #include <utility>
-#include <tuple>
 
 namespace manifolds {
   //For now just test whether first function is a function
@@ -29,7 +28,7 @@ namespace manifolds {
   struct is_tuple: std::false_type{};
 
   template <class ... Args>
-  struct is_tuple<std::tuple<Args...>>:
+  struct is_tuple<tuple<Args...>>:
     std::true_type{};
 }
 

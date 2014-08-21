@@ -41,7 +41,7 @@ namespace manifolds {
 #ifdef PRINT_SIMPLIFIES
       std::cout << "Simplifying adding zero\n";
 #endif
-      return std::get<0>(t.GetFunctions());
+      return get<0>(t.GetFunctions());
     }
   };
 
@@ -58,7 +58,7 @@ namespace manifolds {
 #ifdef PRINT_SIMPLFIES
       std::cout << "Simplifying adding zero inverse\n";
 #endif
-      return std::get<1>(t.GetFunctions());
+      return get<1>(t.GetFunctions());
     }
   };
 

@@ -5,7 +5,6 @@
 #include "composition.hh"
 #include "is_function.hh"
 #include <utility>
-#include <tuple>
 #include <type_traits>
 #include <boost/preprocessor/cat.hpp>
 #include "simplify.hh"
@@ -48,10 +47,10 @@ struct FunctionCommon
 	      std::size_t, Indices...>) const
   {
     return (*static_cast<const FunctionImpl*>(this))
-      (std::get<Indices>(t)...);
+      (get<Indices>(t)...);
   }
   template <class ... Args>
-  auto operator()(std::tuple<Args...> t) const
+  auto operator()(tuple<Args...> t) const
   {
     return helper(t, std::index_sequence_for<Args...>());
   }

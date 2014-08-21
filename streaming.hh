@@ -1,9 +1,11 @@
 #ifndef MANIFOLDS_FUNCTION_STREAM_VARIADIC_HH
 #define MANIFOLDS_FUNCTION_STREAM_VARIADIC_HH
 
+#include "tuple_util.hh"
 #include <ostream>
 #include <utility>
 
+namespace manifolds {
 template <class T>
 void StreamVariadicHelper(std::ostream & s, T t)
 {
@@ -22,7 +24,7 @@ void StreamVariadicHelper(std::ostream & s, Tuple ts,
 			  std::integer_sequence<
 			  std::size_t,indices...>)
 {
-  StreamVariadicHelper(s, std::get<indices>(ts)...);
+  StreamVariadicHelper(s, get<indices>(ts)...);
 }
 
 
@@ -36,8 +38,8 @@ void StreamVariadic(String var_name,
   auto t = v.GetFunctions();
   StreamVariadicHelper(s, t,
 		       std::make_index_sequence<
-		       std::tuple_size<decltype(t)>::value>());
+		       tuple_size<decltype(t)>::value>());
   s << "}";
 }
-
+};
 #endif

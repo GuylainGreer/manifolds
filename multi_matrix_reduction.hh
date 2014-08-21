@@ -53,7 +53,7 @@ namespace manifolds
 
     template <class MMatrix,
 	      class Skips,
-	      class IndicesTuple = std::tuple<>,
+	      class IndicesTuple = tuple<>,
 	      int index = 0,
 	      bool = MMatrix::dimensions == index>
     struct output_type
@@ -78,7 +78,7 @@ namespace manifolds
     template <class MMatrix, class Skips,
 	      int index, int ... dimensions>
     struct output_type<
-      MMatrix, Skips, std::tuple<int_<dimensions>...>,
+      MMatrix, Skips, tuple<int_<dimensions>...>,
       index, true>
     {
       typedef MultiMatrix<

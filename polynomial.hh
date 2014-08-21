@@ -3,7 +3,6 @@
 
 #include "full_function_defs.hh"
 #include "function.hh"
-#include <ratio>
 #include <array>
 #include <type_traits>
 #include <ostream>
@@ -179,8 +178,8 @@ namespace manifolds {
 #ifdef PRINT_SIMPLIFIES
       std::cout << "Simplifying addition of two polynomials\n";
 #endif
-      auto p1 = std::get<0>(p.GetFunctions());
-      auto p2 = std::get<1>(p.GetFunctions());
+      auto p1 = get<0>(p.GetFunctions());
+      auto p2 = get<1>(p.GetFunctions());
       typedef std::integral_constant<
 	bool, (order1>order2)> yes_no;
       if(order1 > order2)
@@ -228,8 +227,8 @@ namespace manifolds {
       std::cout << "Simplifying multiplication "
 	"of two polynomials\n";
 #endif
-      auto p1 = std::get<0>(p.GetFunctions());
-      auto p2 = std::get<1>(p.GetFunctions());
+      auto p1 = get<0>(p.GetFunctions());
+      auto p2 = get<1>(p.GetFunctions());
       std::array<coeff_type,new_order> r;
       std::fill(r.begin(), r.end(), 0);
       for(unsigned j = 0; j < order1; j++)
@@ -280,7 +279,7 @@ namespace manifolds {
       static const int last_coeff =
 	std::tuple_size<decltype(t_coeffs)>::value-1;
       auto m1 =
-	GetPolynomial(std::get<last_coeff-index>(t_coeffs));
+	GetPolynomial(get<last_coeff-index>(t_coeffs));
       auto m2 = u;
       auto m3 = Accumulate(t, u, int_<index-1>());
       auto m4 = Multiply(m2,m3);
@@ -297,8 +296,8 @@ namespace manifolds {
 #ifdef PRINT_SIMPLIFIES
       std::cout << "Simplifying composition of two polynomials\n";
 #endif
-      auto p1 = std::get<0>(p.GetFunctions());
-      auto p2 = std::get<1>(p.GetFunctions());
+      auto p1 = get<0>(p.GetFunctions());
+      auto p2 = get<1>(p.GetFunctions());
       return
 	Accumulate(p1, p2, int_<order1-1>());
     }
@@ -352,16 +351,16 @@ namespace manifolds {
 #endif
       std::array<CoeffType, Order::value> cs;
       auto p =
-	std::get<0>(std::get<0>(m.GetFunctions()).
+	get<0>(get<0>(m.GetFunctions()).
 		    GetFunctions()).GetCoeffs();
       CoeffType2 c =
-	std::get<1>(m.GetFunctions()).GetCoeffs()[0];
+	get<1>(m.GetFunctions()).GetCoeffs()[0];
       std::transform(p.begin(), p.end(), cs.begin(),
 		     [&c](auto x){return x * c;});
       return 
 	{insert_element<0>
 	(remove_element<0>
-	 (std::get<0>(m.GetFunctions()).GetFunctions()),
+	 (get<0>(m.GetFunctions()).GetFunctions()),
 	 Polynomial<CoeffType, Order>(cs))};
     }
   };

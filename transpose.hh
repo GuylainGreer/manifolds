@@ -48,7 +48,7 @@ namespace manifolds
     typedef Composition<Transpose,
 			FunctionMatrix<
 			  r, c, Funcs...>> in_type;
-    typedef std::tuple<Funcs...> f_type;
+    typedef tuple<Funcs...> f_type;
 
     template <std::size_t col>
       struct Inner1
@@ -58,14 +58,14 @@ namespace manifolds
       {
 	static auto apply(f_type m)
 	{
-	  return std::get<row * c::value + col>(m);
+	  return get<row * c::value + col>(m);
 	}
       };
       template <std::size_t ... is>
       static auto apply(f_type m, std::integer_sequence<
 			std::size_t, is...>)
       {
-	return std::make_tuple(Inner2<is>::apply(m)...);
+	return make_my_tuple(Inner2<is>::apply(m)...);
       }
     };
     template <std::size_t ... is>
@@ -73,14 +73,14 @@ namespace manifolds
 			std::size_t,is...>)
     {
       std::make_index_sequence<c::value> s;
-      return std::tuple_cat(Inner1<is>::apply(m,s)...);
+      return tuple_cat(Inner1<is>::apply(m,s)...);
     }
 
     static auto Combine(in_type co)
     {
       std::make_index_sequence<r::value> s;
       return GetFunctionMatrix<c::value,r::value>
-	(apply(std::get<1>(co.GetFunctions()).
+	(apply(get<1>(co.GetFunctions()).
 	       GetFunctions(), s));
     }
   };

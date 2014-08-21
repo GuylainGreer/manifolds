@@ -22,20 +22,6 @@ namespace manifolds {
     typedef int_<value> type;
   };
 
-  template <int n, int ... ns>
-  struct sum
-  {
-    static const int value = n + sum<ns...>::value;
-    typedef int_<value> type;
-  };
-
-  template <int n>
-  struct sum<n>
-  {
-    static const int value = n;
-    typedef int_<value> type;
-  };
-
   template <class CoeffType, int ... sizes>
   struct MultiMatrix
   {
@@ -48,8 +34,8 @@ namespace manifolds {
     template <int N>
     struct dimension
     {
-      typedef typename std::tuple_element<
-	N, std::tuple<int_<sizes>...>>::type type;
+      typedef typename tuple_element<
+	N, tuple<int_<sizes>...>>::type type;
       static const int value = type::value;
     };
 
@@ -129,7 +115,7 @@ namespace manifolds {
   template <class ... MMatrices>
   struct MultiMatrixGroup
   {
-    std::tuple<MMatrices...> matrices;
+    tuple<MMatrices...> matrices;
     static const int dimensions =
       sum<MMatrices::dimensions...>::value;
     typedef typename std::common_type<
@@ -138,15 +124,15 @@ namespace manifolds {
 
     template <int N>
     using dim_helper =
-      typename std::tuple_element<
-      N, std::tuple<MMatrices...>
+      typename tuple_element<
+      N, tuple<MMatrices...>
       >::type;
 
     template <int N, int index = 0,
 	      bool = (N < dim_helper<index>::dimensions)>
     struct dimension :
-      std::tuple_element<
-      index, std::tuple<MMatrices...>>::type::
+      tuple_element<
+      index, tuple<MMatrices...>>::type::
       template dimension<N>::type
     {
     };
@@ -172,7 +158,7 @@ namespace manifolds {
     }
 
     MultiMatrixGroup(MMatrices ... mms):matrices(mms...){}
-    MultiMatrixGroup(std::tuple<MMatrices...> t):matrices(t){}
+    MultiMatrixGroup(tuple<MMatrices...> t):matrices(t){}
 
     template <class T, class U, class V>
     auto GetCoeff(V, T, U, int_<sizeof...(MMatrices)>) const
@@ -189,13 +175,13 @@ namespace manifolds {
 		  int_<offset>, int_<index>) const
     {
       static const int dims = 
-	std::tuple_element<
+	tuple_element<
 	index, 
-	std::tuple<MMatrices...>>::type::dimensions;
+	tuple<MMatrices...>>::type::dimensions;
       return GetCoeff(a, std::make_integer_sequence<
 		      int, dims>(), int_<offset+dims>(),
 		      int_<index+1>()) *
-	std::get<index>(matrices).Coeff
+	get<index>(matrices).Coeff
 	(a[individual_indices+offset]...);
 		      
     }
@@ -209,8 +195,8 @@ namespace manifolds {
       std::copy(std::begin(indices), std::end(indices),
 		a.begin());
       return GetCoeff(a, std::make_integer_sequence<
-		      int, std::tuple_element<
-		      0, std::tuple<MMatrices...>
+		      int, tuple_element<
+		      0, tuple<MMatrices...>
 		      >::type::dimensions>(),
 		      int_<0>(), int_<0>());
     }
@@ -220,8 +206,8 @@ namespace manifolds {
     {
       std::array<int, sizeof...(Indices)> a{{int(indices)...}};
       return GetCoeff(a, std::make_integer_sequence<
-		      int, std::tuple_element<
-		      0, std::tuple<MMatrices...>
+		      int, tuple_element<
+		      0, tuple<MMatrices...>
 		      >::type::dimensions>(),
 		      int_<0>(), int_<0>());
 		      
@@ -272,7 +258,7 @@ namespace manifolds {
     typedef MultiMatrixGroup<
       MMatrices1..., MMatrices2...> type;
 
-    return type{std::tuple_cat(a.GetFunctions(),
+    return type{tuple_cat(a.GetFunctions(),
 			       b.GetFunctions())};
   }
 

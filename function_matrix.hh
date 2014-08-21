@@ -10,7 +10,7 @@ namespace manifolds {
   struct RowHolder
   {
     RowHolder(Functions...fs):functions(fs...){}
-    std::tuple<Functions...> functions;
+    tuple<Functions...> functions;
     auto GetFunctions() const
     {
       return functions;
@@ -33,13 +33,13 @@ namespace manifolds {
   {
     static const int num_rows = rows::value;
     static const int num_cols = cols::value;
-    std::tuple<Functions...> functions;
+    tuple<Functions...> functions;
 
     template <class ... Rows>
     FunctionMatrixImpl(Rows...rs):
-      functions(std::tuple_cat(rs.GetFunctions()...)){}
+      functions(tuple_cat(rs.GetFunctions()...)){}
 
-    FunctionMatrixImpl(std::tuple<Functions...> f):
+    FunctionMatrixImpl(tuple<Functions...> f):
       functions(f){}
 
     template <class ... Args, std::size_t ... indices>
@@ -47,7 +47,7 @@ namespace manifolds {
 	      Args...args) const
     {
       return GetMatrix<rows::value,cols::value>
-	(std::get<indices>(functions)(args...)...);
+	(get<indices>(functions)(args...)...);
     }
 
     template <class ... Args>
@@ -71,7 +71,7 @@ namespace manifolds {
 
   template <std::size_t rows, std::size_t cols,
 	    class ... Functions>
-  auto GetFunctionMatrix(std::tuple<Functions...> functions)
+  auto GetFunctionMatrix(tuple<Functions...> functions)
   {
     return FunctionMatrix<
       int_<rows>,int_<cols>,Functions...>(functions);
@@ -82,11 +82,11 @@ namespace manifolds {
   {
     return GetFunctionMatrix<
       sizeof...(Rows),
-      std::tuple_size<
+      tuple_size<
 	decltype(std::declval<
 		 typename first<Rows...>::type>().
 		 GetFunctions())>::value>
-      (std::tuple_cat(rows.GetFunctions()...));
+      (tuple_cat(rows.GetFunctions()...));
   }
 
   template <class rows, class cols, class ... Functions>
@@ -142,8 +142,8 @@ namespace manifolds {
 			      std::integer_sequence<
 			      std::size_t, iins...>)
     {
-      return std::make_tuple(std::get<iouts>(t1)
-			     (std::get<iins>(t2)...)...);
+      return make_my_tuple(get<iouts>(t1)
+			     (get<iins>(t2)...)...);
     }
 
     typedef Composition<FunctionMatrix<r1,c1,F1s...>,
@@ -156,8 +156,8 @@ namespace manifolds {
 #endif
       auto t = c.GetFunctions();
       return GetFunctionMatrix<r1::value, c1::value>
-	(CombineHelper(std::get<0>(t).GetFunctions(),
-		       std::get<1>(t).GetFunctions(),
+	(CombineHelper(get<0>(t).GetFunctions(),
+		       get<1>(t).GetFunctions(),
 		       std::index_sequence_for<F1s...>(),
 		       std::index_sequence_for<F2s...>()));
     }
@@ -179,7 +179,7 @@ namespace manifolds {
       std::cout << "Simplifying composition of "
 	"variable and function matrix\n";
 #endif
-      return std::get<i>(std::get<1>(c.GetFunctions()).
+      return get<i>(get<1>(c.GetFunctions()).
 			 GetFunctions());
     }
   };
@@ -199,7 +199,7 @@ namespace manifolds {
       return GetFunctionMatrix<r::value, c::value>
 	(SimplifyIndividuals(t,
 			     std::make_index_sequence<
-			     std::tuple_size<
+			     tuple_size<
 			     decltype(t)>::value>()));
     }
 
@@ -218,10 +218,10 @@ namespace manifolds {
 		     FunctionMatrix<r,c,F,P>>> in_type;
     static auto Combine(in_type f)
     {
-      auto p = std::get<1>(std::get<1>
-			   (std::get<1>(f.GetFunctions()).
+      auto p = get<1>(get<1>
+			   (get<1>(f.GetFunctions()).
 			    GetFunctions()).GetFunctions());
-      return Pow()(F(), Add(p, 1_c));
+      return Pow()(F(), AddRaw(p, 1_c));
     }
 
     typedef decltype(Combine(std::declval<in_type>())) type;
@@ -246,10 +246,10 @@ namespace manifolds {
 	static auto apply(in_type m, std::integer_sequence<
 			  std::size_t, is...>)
 	{
-	  auto l = std::get<0>(m.GetFunctions()).GetFunctions();
-	  auto r = std::get<1>(m.GetFunctions()).GetFunctions();
-	  return Add((std::get<row*c1::value+is>(l) *
-		      std::get<is*c2::value+col>(r))...);
+	  auto l = get<0>(m.GetFunctions()).GetFunctions();
+	  auto r = get<1>(m.GetFunctions()).GetFunctions();
+	  return Add((get<row*c1::value+is>(l) *
+		      get<is*c2::value+col>(r))...);
 	}
       };
       template <std::size_t ... is>
@@ -257,7 +257,7 @@ namespace manifolds {
 			std::size_t, is...>)
       {
 	std::make_index_sequence<r2::value> s;
-	return std::make_tuple(Inner2<is>::apply(m, s)...);
+	return make_my_tuple(Inner2<is>::apply(m, s)...);
       }
     };
 
@@ -266,7 +266,7 @@ namespace manifolds {
 			std::size_t, is...>)
     {
       std::make_index_sequence<c2::value> s;
-      return std::tuple_cat(Inner1<is>::apply(m, s)...);
+      return tuple_cat(Inner1<is>::apply(m, s)...);
     }
 
     static auto Combine(in_type m)
@@ -286,7 +286,23 @@ namespace manifolds {
     typedef F type;
     static type Combine(FunctionMatrix<int_<1>,int_<1>,F> f)
     {
-      return std::get<0>(f.GetFunctions());
+      return get<0>(f.GetFunctions());
+    }
+  };
+
+  template <class ... Functions>
+  struct Simplification<Group<Functions...>,0>
+  {
+    typedef FunctionMatrix<
+      int_<sizeof...(Functions)>,
+      int_<1>, Functions...> MType;
+    typedef MType type;
+    static type Combine(Group<Functions...> c)
+    {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying group->vector\n";
+#endif
+      return {c.GetFunctions()};
     }
   };
 }

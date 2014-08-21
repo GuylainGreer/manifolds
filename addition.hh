@@ -5,7 +5,6 @@
 #include "full_function_defs.hh"
 #include "simplify_variadic.hh"
 #include <utility>
-#include <tuple>
 
 namespace manifolds {
 
@@ -23,7 +22,7 @@ struct AdditionImpl : Function<
   AdditionImpl(Functions ... fs):
     functions(fs...){}
 
-  AdditionImpl(std::tuple<Functions...> f):
+  AdditionImpl(tuple<Functions...> f):
     functions(f){}
 
   template <class ... Args>
@@ -36,14 +35,14 @@ struct AdditionImpl : Function<
   auto eval(int_<sizeof...(Functions)-1>,
 	    Args ... args) const
   {
-    return std::get<sizeof...(Functions)-1>
+    return get<sizeof...(Functions)-1>
       (functions)(args...);
   }
 
   template <int N, class ... Args>
   auto eval(int_<N>, Args ... args) const
   {
-      return std::get<N>(functions)(args...) +
+      return get<N>(functions)(args...) +
 	eval(int_<N+1>(), args...);
   }
 
@@ -53,7 +52,7 @@ struct AdditionImpl : Function<
   }
 
 private:
-  std::tuple<Functions...> functions;
+  tuple<Functions...> functions;
 };
 
   DEF_FF_TEMPLATE(Addition)
@@ -66,16 +65,16 @@ private:
     return s;
   }
 
-  template <class F>
-  auto Add(F f)
+  template <class ... Funcs>
+  auto Add(Funcs ... fs)
   {
-    return f;
+    return Simplify(AddRaw(fs...));
   }
 
-  template <class F, class ... Funcs>
-  auto Add(F f, Funcs ... fs)
+  template <class ... Fs>
+  auto AddRaw(Fs ... fs)
   {
-    return f + Add(fs...);
+    return Addition<Fs...>(fs...);
   }
 
   template <class ... Functions>
@@ -83,7 +82,7 @@ private:
     Addition<Functions...>, 2>
   {
     typedef decltype(SimplifyV<Addition>
-		     (std::declval<std::tuple<Functions...>>(),
+		     (std::declval<tuple<Functions...>>(),
 		      std::true_type{})) type;
 
     static type Combine(Addition<Functions...> a)

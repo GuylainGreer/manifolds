@@ -31,7 +31,7 @@ struct ToTuple
     static_assert(iter_rows == 1 ||
 		  iter_cols == 1,
 		  "I'm not sure what's going on here");
-    return std::make_tuple(x.Coeff(indices * iter_rows,
+    return make_my_tuple(x.Coeff(indices * iter_rows,
 				   indices * iter_cols)...);
   }
 
@@ -40,7 +40,7 @@ struct ToTuple
 	    std::size_t, indices...>,
 	    int_<4>) const
   {
-    return std::make_tuple(std::get<indices>(x)...);
+    return make_my_tuple(get<indices>(x)...);
   }
 
   template <class X>
@@ -71,7 +71,7 @@ struct Composition :
   Composition(){}
   Composition(const Functions & ... functions):
     functions(functions...){}
-  Composition(const std::tuple<Functions...> & f):
+  Composition(const tuple<Functions...> & f):
     functions(f){}
 
   template <class Arg, class ... Args,
@@ -84,7 +84,7 @@ struct Composition :
     static const int next_ins =
       nth<last-1, Functions...>::type::input_dim;
     ToTuple<next_ins> t;
-    return eval(t(std::get<last>(functions)(arg, args...)),
+    return eval(t(get<last>(functions)(arg, args...)),
 		int_<last-1>());
   }
 
@@ -94,14 +94,14 @@ struct Composition :
     static const int next_ins =
       nth<last-1, Functions...>::type::input_dim;
     ToTuple<next_ins> t;
-    return eval(t(std::get<last>(functions)()),
+    return eval(t(get<last>(functions)()),
 		int_<last-1>());
   }
 
   template <class Arg>
   auto eval(Arg arg, int_<0>) const
   {
-    return std::get<0>(functions)(arg);
+    return get<0>(functions)(arg);
   }
 
   template <int N, class Arg>
@@ -110,7 +110,7 @@ struct Composition :
     static const int next_ins =
       nth<N-1, Functions...>::type::input_dim;
     ToTuple<next_ins> t;
-    return eval(t(std::get<N>(functions)(arg)),
+    return eval(t(get<N>(functions)(arg)),
 		int_<N-1>());
   }
 
@@ -154,7 +154,7 @@ struct Composition :
   template <int N>
   void stream(std::ostream & s, int_<N>)
   {
-    std::get<N>(functions).Print(s);
+    get<N>(functions).Print(s);
     s << "(";
     stream(s, int_<N+1>());
     s << ")";
@@ -171,7 +171,7 @@ struct Composition :
     stream(s, int_<0>());
   }
 private:
-  std::tuple<Functions...> functions;
+  tuple<Functions...> functions;
 };
 
   template <class> struct is_composition : std::false_type{};
@@ -192,7 +192,7 @@ private:
   struct Simplification<Composition<Functions...>,4>
   {
     typedef decltype(SimplifyV<Composition>
-		     (std::declval<std::tuple<Functions...>>(),
+		     (std::declval<tuple<Functions...>>(),
 		      std::false_type{})) type;
 
     static type Combine(Composition<Functions...> a)

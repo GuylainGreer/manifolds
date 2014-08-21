@@ -3,49 +3,15 @@
 
 #include "function.hh"
 #include "full_function_defs.hh"
-#include <tuple>
+#include "tuple_util.hh"
 #include <string>
 
 namespace manifolds {
-
-    template <int N, bool abelian>
-    std::string VariableDefaultName()
-    {
-        switch(2 * N + abelian)
-        {
-          case 0:
-              return "X";
-          case 1:
-              return "x";
-          case 2:
-              return "Y";
-          case 3:
-              return "y";
-          case 4:
-              return "Z";
-          case 5:
-              return "z";
-          case 6:
-              return "T";
-          case 7:
-              return "t";
-          default:
-              if(abelian)
-                  return std::string("Variable<") + (char)('0' + N) + ">";
-              else
-                  return std::string("VARIABLE<") + (char)('0' + N) + ">";
-        }
-    }
 
   //Offset of 10000 should be enough to avoid conflicts
   template <int N, bool abelian>
   struct VariableImpl : Function<int_<10000+N>, N+1,1>
   {
-  private:
-    template<class>
-    struct not_tuple: std::true_type{};
-    template <class...As>
-    struct not_tuple<std::tuple<As...>>:std::false_type{};
   public:
     static const bool stateless = true;
     static const bool abelian_arithmetic = abelian;
@@ -56,8 +22,7 @@ namespace manifolds {
     {
       static_assert(N < sizeof...(Args)+1,
 		    "Not enough arguments to extract Nth");
-      typedef decltype(std::tie(arg,args...)) tuple_type;
-      return std::get<N>(tuple_type(arg,args...));
+      return get<N>(make_my_tuple(arg,args...));
     }
   };
 
@@ -69,11 +34,45 @@ namespace manifolds {
     using VariableImpl<N, abelian>::operator();
   };
 
-    template <int i, bool abelian>
-    std::ostream & operator<<(std::ostream&s, Variable<i,abelian> v)
+  struct DefaultVariableNamer
+  {
+    template <int N, bool abelian>
+    std::string operator()(Variable<N,abelian>) const
     {
-        return s << VariableDefaultName<i,abelian>();
+      switch(2 * N + abelian)
+        {
+	case 0:
+	  return "X";
+	case 1:
+	  return "x";
+	case 2:
+	  return "Y";
+	case 3:
+	  return "y";
+	case 4:
+	  return "Z";
+	case 5:
+	  return "z";
+	case 6:
+	  return "T";
+	case 7:
+	  return "t";
+	default:
+	  if(abelian)
+	    return std::string("Variable<") +
+	      std::to_string(N) + ">";
+	  else
+	    return std::string("VARIABLE<") +
+	      std::to_string(N) + ">";
+        }
     }
+  };
+
+  template <int i, bool abelian>
+  std::ostream & operator<<(std::ostream&s, Variable<i,abelian> v)
+  {
+    return s << DefaultVariableNamer()(v);
+  }
 
 #define VARIABLE(i, abelian, name)				\
   static const Variable<i,abelian> name =			\
@@ -106,7 +105,7 @@ template <bool a, class F>
       std::cout << "Simplifying composition of x and single "
 	"dimensional function\n";
 #endif
-      return std::get<1>(c.GetFunctions());
+      return get<1>(c.GetFunctions());
     }
   };
 }

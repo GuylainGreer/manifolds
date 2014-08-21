@@ -8,7 +8,7 @@ struct ReturnTwo : manifolds::Function<
 {
   auto operator()() const
   {
-    return std::make_tuple(1,2);
+    return manifolds::make_my_tuple(1,2);
   }
 };
 

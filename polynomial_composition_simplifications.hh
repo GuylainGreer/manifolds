@@ -66,9 +66,9 @@ namespace manifolds {
       std::cout << "Simplifying multipication of composition of "
 	"simplifiable functions\n";
 #endif
-      auto first = std::get<0>(std::get<0>(a.GetFunctions()).
+      auto first = get<0>(get<0>(a.GetFunctions()).
 			       GetFunctions());
-      auto second = std::get<0>(std::get<1>(a.GetFunctions()).
+      auto second = get<0>(get<1>(a.GetFunctions()).
 				GetFunctions());
       Multiplication<decltype(first),decltype(second)>
 	m(first,second);
@@ -97,7 +97,7 @@ namespace manifolds {
       std::cout << "Simplifying addition of composed polynomial "
 	"by inner function\n";
 #endif
-      auto p = std::get<0>(std::get<0>(a.GetFunctions()).
+      auto p = get<0>(get<0>(a.GetFunctions()).
 			   GetFunctions());
       return Simplify(Add(GetPolynomial(0,1), p))(T());
     }
@@ -127,7 +127,7 @@ namespace manifolds {
 #endif
       auto m =
 	Mult(GetPolynomial(0,1),
-	     std::get<0>(std::get<0>
+	     get<0>(get<0>
 			 (a.GetFunctions()).
 			 GetFunctions()));
       T t;
@@ -157,10 +157,10 @@ namespace manifolds {
 #endif
       auto t = a.GetFunctions();
       typedef typename std::remove_reference<
-	decltype(std::get<1>(t))>::type T1;
+	decltype(get<1>(t))>::type T1;
       typedef typename std::remove_reference<
-	decltype(std::get<0>(t))>::type T2;
-      Variadic<T1, T2> v(std::get<1>(t), std::get<0>(t));
+	decltype(get<0>(t))>::type T2;
+      Variadic<T1, T2> v(get<1>(t), get<0>(t));
       return ref_type::Combine(v);
     }
   };
@@ -179,7 +179,7 @@ namespace manifolds {
       std::cout << "Simplifying composition of "
 	"constant polynomial\n";
 #endif
-      return std::get<0>(p.GetFunctions());
+      return get<0>(p.GetFunctions());
     }
   };
 
@@ -190,8 +190,8 @@ namespace manifolds {
     static auto Combine(in_type a)
     {
       auto t = a.GetFunctions();
-      return GetPolynomial(std::get<1>(t).GetCoeffs()[0], (C)1)
-	(std::get<0>(t));
+      return GetPolynomial(get<1>(t).GetCoeffs()[0], (C)1)
+	(get<0>(t));
     }
     typedef decltype(Combine(std::declval<in_type>())) type;
   };
@@ -217,9 +217,9 @@ namespace manifolds {
 			Polynomial<C2,O2>,F1s...>> v)
     {
       auto t = v.GetFunctions();
-      inter_type i(std::get<0>(std::get<0>(t).GetFunctions()),
-		   std::get<0>(std::get<1>(t).GetFunctions()));
-      return std::make_tuple(Simplify(i), F1s()...);
+      inter_type i(get<0>(get<0>(t).GetFunctions()),
+		   get<0>(get<1>(t).GetFunctions()));
+      return make_my_tuple(Simplify(i), F1s()...);
     }
   };
 
@@ -253,8 +253,8 @@ namespace manifolds {
         template <std::size_t ... orders>
         static auto Addem(in_type c, std::integer_sequence<std::size_t, orders...>)
         {
-            auto a = std::get<1>(c.GetFunctions());
-            auto coeffs = std::get<0>(c.GetFunctions()).GetCoeffs();
+            auto a = get<1>(c.GetFunctions());
+            auto coeffs = get<0>(c.GetFunctions()).GetCoeffs();
             return Add(Mult(coeffs[orders], a, std::make_index_sequence<orders>())...);
         }
 
