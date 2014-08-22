@@ -4,6 +4,7 @@
 #include "trig.hh"
 #include "operators.hh"
 #include "transpose.hh"
+#include "streaming2.hh"
 
 BOOST_AUTO_TEST_CASE(matrix_test)
 {
@@ -37,7 +38,10 @@ BOOST_AUTO_TEST_CASE(matrix_test)
 				    std::cos(3))));
 
   auto mf2 = transpose(mf) * mf;
-  std::cout << mf2 << "\n\n";
+  Stream2(std::cout, mf) << "\n\n";
+  Stream2(std::cout, transpose(mf)) << "\n\n";
+  Stream2(std::cout, mf2) << "\n\n";
+
   BOOST_CHECK_EQUAL(mf2(4).Coeff(0,0), 1.0);
   BOOST_CHECK_EQUAL(mf2(4).Coeff(0,1), 0.0);
   BOOST_CHECK_EQUAL(mf2(4).Coeff(1,0), 0.0);
