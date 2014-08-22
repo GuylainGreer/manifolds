@@ -29,5 +29,5 @@ BOOST_AUTO_TEST_CASE(addition_test)
       std::make_pair(7, "m2"),
       std::make_pair(8, "m3"),
     };
-  Stream2(std::cout, part1, vnamer);
+  Stream2(std::cout, part1, vnamer) << "\n\n";
 }
