@@ -8,6 +8,10 @@
 #include <boost/mpl/sort.hpp>
 #include <boost/mpl/at.hpp>
 #include <boost/mpl/pop_front.hpp>
+#include <boost/mpl/range_c.hpp>
+#include <boost/mpl/copy.hpp>
+#include <boost/mpl/back_inserter.hpp>
+#include <boost/mpl/size.hpp>
 #include <array>
 
 namespace manifolds {
@@ -171,14 +175,24 @@ namespace manifolds {
       remove_element<0>(a) == remove_element<0>(b);
   }
 
-  template <class Tuple, class Vector>
-  auto remove_elements(const Tuple & t, Vector)
-  {
-    return remove_element<
-      boost::mpl::at_c<Vector, 0>::type::value>
-      (remove_elements(t, typename boost::mpl::pop_front<
-		       Vector>::type()));
-  }
+    template <class Tuple, class Vector,
+              class = typename std::enable_if<
+                  boost::mpl::size<Vector>::value == 0>::type>
+        auto remove_elements(const Tuple & t, Vector, long)
+    {
+        return t;
+    }
+
+    template <class Tuple, class Vector,
+              class = typename std::enable_if<
+                  boost::mpl::size<Vector>::value != 0>::type>
+    auto remove_elements(const Tuple & t, Vector, int)
+    {
+        return remove_element<
+            boost::mpl::at_c<Vector, 0>::type::value>
+            (remove_elements(t, typename boost::mpl::pop_front<
+                                 Vector>::type(), 0));
+    }
 
   template <int ... indices, class Tuple>
   auto remove_elements(const Tuple & t)
@@ -186,7 +200,7 @@ namespace manifolds {
     typedef typename boost::mpl::sort<
       boost::mpl::vector_c<int,indices...>
       >::type sorted_list;
-    return remove_elements(t, sorted_list());
+    return remove_elements(t, sorted_list(), 0);
   }
 
   template <int index, class Tuple, class E,
@@ -254,6 +268,18 @@ namespace manifolds {
   template <int start, int size, class Tuple>
   auto subset(const Tuple & t)
   {
+      typedef boost::mpl::range_c<int, 0, start> first_r;
+      typedef typename boost::mpl::copy<
+          first_r, boost::mpl::back_inserter<
+              boost::mpl::vector<>>>::type first_v;
+      typedef boost::mpl::range_c<
+          int, start + size,
+          tuple_size<Tuple>::value> second_r;
+      typedef typename boost::mpl::copy<
+          second_r, boost::mpl::back_inserter<
+          boost::mpl::vector<>>>::type second_v;
+    return remove_elements
+        (remove_elements(t, second_v(), 0), first_v(), 0);
   }
 }
 
