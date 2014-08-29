@@ -189,6 +189,10 @@ namespace manifolds {
     typedef Addition<T, Polynomial<C, int_<1>>> in_type;
     static auto Combine(in_type a)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying adddition of constant "
+	"and another function\n";
+#endif
       auto t = a.GetFunctions();
       return GetPolynomial(get<1>(t).GetCoeffs()[0], (C)1)
 	(get<0>(t));
@@ -196,7 +200,7 @@ namespace manifolds {
     typedef decltype(Combine(std::declval<in_type>())) type;
   };
 
-  template <template<class...>class Variadic,
+  /*  template <template<class...>class Variadic,
 	    class C1, class O1,
 	    class C2, class O2,
 	    class ... F1s>
@@ -206,63 +210,75 @@ namespace manifolds {
     typename std::enable_if<
       is_stateless<Composition<F1s...>>::value>::type>
   {
-    typedef Variadic<Polynomial<C1,O2>,
+    typedef Variadic<Polynomial<C1,O1>,
 		     Polynomial<C2,O2>> inter_type;
     typedef Composition<
-      SimplifiedType<inter_type>,
+      inter_type,
       F1s...> type;
     static type Combine(Variadic<Composition<
 			Polynomial<C1,O1>,F1s...>,
 			Composition<
 			Polynomial<C2,O2>,F1s...>> v)
     {
+#ifdef PRINT_SIMPLIFIES
+      std::cout << "Simplifying operation on "
+	"polynomials composed by same functions\n";
+#endif
       auto t = v.GetFunctions();
       inter_type i(get<0>(get<0>(t).GetFunctions()),
 		   get<0>(get<1>(t).GetFunctions()));
-      return make_my_tuple(Simplify(i), F1s()...);
+      return make_my_tuple(i, F1s()...);
+    }
+    };*/
+
+  template <class C, class O, class ... Fs>
+  struct Simplification<
+    Composition<
+      Polynomial<C,O>, Addition<Fs...> >, 3>
+  {
+    typedef Composition<
+      Polynomial<C,O>, Addition<Fs...> > in_type;
+
+    static auto P(C c){return GetPolynomial(c);}
+
+    template <class T, std::size_t>
+    struct Dummy
+    {
+      typedef T type;
+    };
+
+    template <std::size_t ... count>
+    static auto Mult(C c, Addition<Fs...> a,
+		     std::integer_sequence<std::size_t, count...>)
+    {
+      auto p = P(c);
+      Multiplication<
+	decltype(p),
+	typename Dummy<Addition<Fs...>,
+		       count>::type...>
+	r(P(c), ((void)count, a)...);
+      return r;
+    }
+
+    template <std::size_t ... orders>
+    static auto Addem(in_type c, std::integer_sequence<
+		      std::size_t, orders...>)
+    {
+      auto a = get<1>(c.GetFunctions());
+      auto coeffs = get<0>(c.GetFunctions()).GetCoeffs();
+      return Add(Mult(coeffs[orders], a,
+		      std::make_index_sequence<orders>())...);
+    }
+
+    static auto Combine(in_type c)
+    {
+#ifndef PRINT_SIMPLIFIES
+      std::cout << "Simplifying polynomial of addition of "
+	"functions\n";
+#endif
+      return Addem(c, std::make_index_sequence<O::value>());
     }
   };
-
-    template <class C, class O, class ... Fs>
-    struct Simplification<
-        Composition<
-            Polynomial<C,O>, Addition<Fs...> >, 3>
-    {
-        typedef Composition<
-            Polynomial<C,O>, Addition<Fs...> > in_type;
-
-        static auto P(C c){return GetPolynomial(c);}
-
-        template <class T, std::size_t>
-        struct Dummy
-        {
-            typedef T type;
-        };
-
-        template <std::size_t ... count>
-        static auto Mult(C c, Addition<Fs...> a,
-                         std::integer_sequence<std::size_t, count...>)
-        {
-            auto p = P(c);
-            Multiplication<
-                decltype(p),
-                typename Dummy<Addition<Fs...>, count>::type...> r(P(c), ((void)count, a)...);
-            return r;
-        }
-
-        template <std::size_t ... orders>
-        static auto Addem(in_type c, std::integer_sequence<std::size_t, orders...>)
-        {
-            auto a = get<1>(c.GetFunctions());
-            auto coeffs = get<0>(c.GetFunctions()).GetCoeffs();
-            return Add(Mult(coeffs[orders], a, std::make_index_sequence<orders>())...);
-        }
-
-        static auto Combine(in_type c)
-        {
-            return Addem(c, std::make_index_sequence<O::value>());
-        }
-    };
 }
 
 #endif
