@@ -41,5 +41,5 @@ void StreamVariadic(String var_name,
 		       tuple_size<decltype(t)>::value>());
   s << "}";
 }
-};
+}
 #endif
