@@ -42,9 +42,8 @@ struct MultiplicationImpl :
   auto eval(int_<N>, Args ... args) const
   {
     typedef decltype(get<N>(functions)(args...)) result;
-    static const int next_N = N + 1;
     return std::forward<result>(get<N>(functions)(args...)) *
-      eval(int_<next_N>(), std::forward<Args>(args)...);
+      eval(int_<N + 1>(), std::forward<Args>(args)...);
   }
 
   auto GetFunctions() const
@@ -72,16 +71,16 @@ private:
     return s;
   }
 
-  template <class F>
-  auto Multiply(F f)
+  template <class ... Fs>
+  Multiplication<Fs...> MultiplyRaw(Fs ... fs)
   {
-    return f;
+    return {fs...};
   }
 
-  template <class F, class ... Fs>
-  auto Multiply(F f, Fs...fs)
+  template <class ... Fs>
+  auto Multiply(Fs...fs)
   {
-    return f * Multiply(fs...);
+    return Simplify(MultiplyRaw(fs...));
   }
 
   template <class ... Functions>
