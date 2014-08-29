@@ -65,16 +65,16 @@ private:
     return s;
   }
 
-  template <class ... Funcs>
-  auto Add(Funcs ... fs)
-  {
-    return Simplify(AddRaw(fs...));
-  }
-
   template <class ... Fs>
   auto AddRaw(Fs ... fs)
   {
     return Addition<Fs...>(fs...);
+  }
+
+  template <class ... Funcs>
+  auto Add(Funcs ... fs)
+  {
+    return Simplify(AddRaw(fs...));
   }
 
   template <class ... Functions>
