@@ -333,9 +333,14 @@ namespace manifolds {
     return DerivativeWrapper<0>::FullDeriv(t);
   }
 
-  template <int order, int i = 0>
-  struct D
+  template <int order, int i = 0, bool ABELIAN = true>
+  struct D : Function<int_<26>, 1, 1>
   {
+    typedef std::tuple<FTag<FunctionType::Function>> input_types;
+    typedef std::tuple<FTag<FunctionType::Function>> output_types;
+    static const bool stateless = true;
+    static const bool abelian = ABELIAN;
+
     template <class F>
     auto operator()(F f) const
     {
