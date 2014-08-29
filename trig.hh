@@ -13,7 +13,8 @@
     template <class T>						\
       auto operator()(T t) const				\
     {								\
-      return std::funcname(t);					\
+      using std::funcname;					\
+      return funcname(t);					\
     }								\
     void Print(std::ostream & s)const{s << #funcname;}		\
   };								\
