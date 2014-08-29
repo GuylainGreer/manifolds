@@ -1,6 +1,16 @@
-
-
-env = Environment(CXX = 'clang++')
-cpp_flags = '-std=c++1y -Wall -Wpedantic -ftemplate-depth=10000 -ftemplate-backtrace-limit=0 ' + \
-    '-msse4 -march=native -mtune=native'# -DPRINT_SIMPLIFIES '
+compiler = 'clang++'
+error_limit = '-fmax-errors=1' \
+              if compiler == 'g++' else \
+                 '-ferror-limit=1'
+env = Environment(CXX = compiler)
+cpp_flags = ' '.join(['-std=c++1y',
+                     '-Wall',
+                      '-Wpedantic',
+                      '-ftemplate-depth=116',
+                      '-ftemplate-backtrace-limit=0',
+                      '-msse4 -march=native',
+                      '-mtune=native',
+                      error_limit,
+                      #'-DPRINT_SIMPLIFIES',
+                  ])
 env.Program('test', Glob('*.cpp'),CPPFLAGS=cpp_flags)
