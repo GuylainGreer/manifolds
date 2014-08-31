@@ -164,7 +164,7 @@ namespace manifolds
     template <class ... F1s, class ... F2s>
     struct Simplification<
         Multiplication<
-            Addition<F1s...>, Addition<F2s...> >, 0>
+            Addition<F1s...>, Addition<F2s...>>, 0>
     {
         template <class T1, class T2, std::size_t ... indices>
         static auto Second(T1 t1, T2 t2, std::integer_sequence<
