@@ -200,7 +200,7 @@ namespace manifolds {
     typedef decltype(Combine(std::declval<in_type>())) type;
   };
 
-  /*  template <template<class...>class Variadic,
+  /*template <template<class...>class Variadic,
 	    class C1, class O1,
 	    class C2, class O2,
 	    class ... F1s>
@@ -234,7 +234,7 @@ namespace manifolds {
   template <class C, class O, class ... Fs>
   struct Simplification<
     Composition<
-      Polynomial<C,O>, Addition<Fs...> >, 3>
+      Polynomial<C,O>, Addition<Fs...>>, 3>
   {
     typedef Composition<
       Polynomial<C,O>, Addition<Fs...> > in_type;
