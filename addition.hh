@@ -132,7 +132,7 @@ namespace manifolds {
 
   template <class F>
   struct Simplification<
-    Addition<UnaryMinus<F>,F>,0,
+    Addition<UnaryMinus<F>, F>,0,
     typename std::enable_if<is_stateless<F>::value>::type>
   {
     typedef Zero type;
