@@ -6,7 +6,7 @@ env = Environment(CXX = compiler)
 cpp_flags = ' '.join(['-std=c++1y',
                      '-Wall',
                       '-Wpedantic',
-                      '-ftemplate-depth=116',
+                      '-ftemplate-depth=1024',
                       '-ftemplate-backtrace-limit=0',
                       '-msse4 -march=native',
                       '-mtune=native',
