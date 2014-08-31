@@ -2,6 +2,10 @@
 #include "multiplication.hh"
 #include "full_function_defs.hh"
 #include "variables.hh"
+#include "polynomial.hh"
+#include "addition.hh"
+#include "operators.hh"
+#include "streaming2.hh"
 
 BOOST_AUTO_TEST_CASE(multiplication_test)
 {
