@@ -33,4 +33,6 @@ BOOST_AUTO_TEST_CASE(derivative_test)
   auto pd = Derivative(p);
   auto pd_check = (Log()(x)+1_c)*Pow()(x,x);
   BOOST_CHECK_EQUAL(pd(3), pd_check(3));
+
+  //auto m = D<3>()(Log()(x));
 }
