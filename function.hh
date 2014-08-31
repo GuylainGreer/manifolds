@@ -12,23 +12,16 @@ namespace manifolds {
     typedef list type;
   };
 
-  enum class FunctionType
-  {
-    Data,
-    Function,
-      TangentVector,
-      CotangentVector
-  };
-
-  template <FunctionType e>
-  using FTag =
-    std::integral_constant<FunctionType, e>;
+  struct DataTag{};
+  struct FunctionTag{};
+  struct VectorTag{};
+  struct TangentVectorTag{};
 
   template <class INDICES, int INPUT_DIM, int OUTPUT_DIM>
   struct Function
   {
-    typedef std::tuple<FTag<FunctionType::Data>> input_types;
-    typedef std::tuple<FTag<FunctionType::Data>> output_types;
+    typedef std::tuple<DataTag> input_types;
+    typedef std::tuple<DataTag> output_types;
     typedef INDICES indices;
     static const bool stateless = false;
     static const int input_dim = INPUT_DIM;

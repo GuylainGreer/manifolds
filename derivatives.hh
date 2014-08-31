@@ -336,8 +336,8 @@ namespace manifolds {
   template <int order, int i = 0, bool ABELIAN = true>
   struct D : Function<int_<26>, 1, 1>
   {
-    typedef std::tuple<FTag<FunctionType::Function>> input_types;
-    typedef std::tuple<FTag<FunctionType::Function>> output_types;
+    typedef std::tuple<FunctionTag> input_types;
+    typedef std::tuple<FunctionTag> output_types;
     static const bool stateless = true;
     static const bool abelian = ABELIAN;
 
