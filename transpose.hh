@@ -43,7 +43,8 @@ namespace manifolds
   struct Simplification<
     Composition<Transpose,
 		FunctionMatrix<
-		  r, c, Funcs...>>>
+		  r, c, Funcs...>>,
+    /*com_t_fm*/0>
   {
     typedef Composition<Transpose,
 			FunctionMatrix<
@@ -78,6 +79,7 @@ namespace manifolds
 
     static auto Combine(in_type co)
     {
+      SIMPLIFY_INFO("Simplifying transpose of function matrix\n");
       std::make_index_sequence<r::value> s;
       return GetFunctionMatrix<c::value,r::value>
 	(apply(get<1>(co.GetFunctions()).

@@ -79,7 +79,7 @@ private:
 
   template <class ... Functions>
   struct Simplification<
-    Addition<Functions...>, 2>
+    Addition<Functions...>, /*var_add*/4>
   {
     typedef decltype(SimplifyV<Addition>
 		     (std::declval<tuple<Functions...>>(),
@@ -87,24 +87,21 @@ private:
 
     static type Combine(Addition<Functions...> a)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying Addition\n";
-#endif
+      SIMPLIFY_INFO("Simplifying Addition\n");
       return SimplifyV<Addition>(a.GetFunctions(),
 				 std::true_type{});
     }
   };
 
   template <class ... AFuncs, class C>
-  struct Simplification<Composition<Addition<AFuncs...>,C>>
+  struct Simplification<Composition<Addition<AFuncs...>,C>,
+			/*com_add*/0>
   {
     typedef Composition<Addition<AFuncs...>,C> in_type;
     static auto Combine(in_type c)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Distributing Composition "
-	"into addition\n";
-#endif
+      SIMPLIFY_INFO("Distributing Composition "
+		    "into addition\n");
       return DistributeComposition<Addition>(c);
     }
 
@@ -119,7 +116,7 @@ namespace manifolds {
 
   template <class F>
   struct Simplification<
-    Addition<F, UnaryMinus<F>>,0,
+    Addition<F, UnaryMinus<F>>, /*add_nadd*/2,
     typename std::enable_if<
       is_stateless<F>::value>::type>
   {
@@ -132,7 +129,7 @@ namespace manifolds {
 
   template <class F>
   struct Simplification<
-    Addition<UnaryMinus<F>, F>,0,
+    Addition<UnaryMinus<F>, F>, /*nadd_add*/1,
     typename std::enable_if<is_stateless<F>::value>::type>
   {
     typedef Zero type;

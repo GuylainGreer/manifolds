@@ -5,7 +5,7 @@ namespace manifolds {
 
   template <class A>
   struct Simplification<
-    Addition<A,A>, 0,
+    Addition<A,A>, /*add_f_f*/3,
     typename std::enable_if<
       is_stateless<A>::value>::type>
   {
@@ -14,9 +14,7 @@ namespace manifolds {
       A> type;
     static type Combine(Addition<A,A> a)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying addition of function by itself\n";
-#endif
+      SIMPLIFY_INFO("Simplifying addition of function by itself\n");
       type b = {GetPolynomial(0.0,2.0), A()};
       return b;
     }
@@ -24,7 +22,7 @@ namespace manifolds {
 
   template <class A>
   struct Simplification<
-    Multiplication<A,A>, 2,
+    Multiplication<A,A>, /*mult_f_f*/3,
     typename std::enable_if<is_stateless<A>::value>::type>
   {
     typedef Composition<
@@ -32,45 +30,42 @@ namespace manifolds {
 
     static type Combine(Multiplication<A,A>)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying multiplication of function "
-	"by itself\n";
-#endif
+      SIMPLIFY_INFO("Simplifying multiplication of function "
+		    "by itself\n");
       return {GetPolynomial(0,0,1), A()};
     }
   };
 
-  template <class Arg1, class Arg2, class ... Args>
+  template <template <class...>class Variadic,
+	    class Arg1, class Arg2, class ... Args>
   struct Simplification<
-    Multiplication<Composition<Arg1, Args...>,
-		   Composition<Arg2, Args...>>, 0,
+    Variadic<Composition<Arg1, Args...>,
+	     Composition<Arg2, Args...>>,
+    /*mult_f_fvar_com_f1_fs_com_f2_fs*/1,
     typename std::enable_if<
       and_<is_stateless<Args>...>::value &&
       (!std::is_same<Arg1,Arg2>::value ||
        !is_stateless<Arg1>::value ||
        !is_stateless<Arg2>::value) &&
-      !std::is_same<
-	typename Simplification<Multiplication<Arg1,Arg2>>::type,
-	Multiplication<Arg1,Arg2>
-	>::value>::type>
+    Simplifies<Variadic<Arg1,Arg2>
+	       >::value>::type>
   {
     typedef Composition<
-      typename Simplification<
-	Multiplication<Arg1, Arg2>>::type,
+      SimplifiedType<
+	Variadic<Arg1, Arg2>>,
       Args...> type;
 
-    static type Combine(Multiplication<Composition<Arg1, Args...>,
+    static type Combine(Variadic<Composition<Arg1, Args...>,
 			Composition<Arg2, Args...>> a)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying multipication of composition of "
-	"simplifiable functions\n";
-#endif
+      SIMPLIFY_INFO("Simplifying variadic operation of "
+		    "composition of "
+		    "simplifiable functions\n");
       auto first = get<0>(get<0>(a.GetFunctions()).
 			       GetFunctions());
       auto second = get<0>(get<1>(a.GetFunctions()).
 				GetFunctions());
-      Multiplication<decltype(first),decltype(second)>
+      Variadic<decltype(first),decltype(second)>
 	m(first,second);
       auto s = Simplify(m);
       return {s, Args()...};
@@ -80,7 +75,8 @@ namespace manifolds {
   template <class CType, int order, class T>
   struct Simplification<
     Addition<Composition<
-	       Polynomial<CType, int_<order>>, T>, T>, 0,
+	       Polynomial<CType, int_<order>>, T>, T>,
+    /*add_com_p_f_f*/2,
     typename std::enable_if<is_stateless<T>::value>::type>
   {
     static const int new_order = 2 > order ? 2 : order;
@@ -93,10 +89,8 @@ namespace manifolds {
     static type Combine(Addition<Composition<
 			Polynomial<CType, int_<order>>, T>, T> a)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying addition of composed polynomial "
-	"by inner function\n";
-#endif
+      SIMPLIFY_INFO("Simplifying addition of composed polynomial "
+		    "by inner function\n");
       auto p = get<0>(get<0>(a.GetFunctions()).
 			   GetFunctions());
       return Simplify(Add(GetPolynomial(0,1), p))(T());
@@ -106,7 +100,8 @@ namespace manifolds {
   template <class CType, int order, class T>
   struct Simplification<
     Multiplication<Composition<
-		     Polynomial<CType, int_<order>>, T>, T>, 0,
+		     Polynomial<CType, int_<order>>, T>, T>,
+    /*mult_com_p_f_f*/2,
     typename std::enable_if<is_stateless<T>::value>::type>
   {
     static const int new_order = 1 + order;
@@ -121,10 +116,8 @@ namespace manifolds {
     static type Combine(Multiplication<Composition<
 			Polynomial<CType, int_<order>>, T>, T> a)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying multiplication of composed "
-	"polynomial by inner function\n";
-#endif
+      SIMPLIFY_INFO("Simplifying multiplication of composed "
+		    "polynomial by inner function\n");
       auto m =
 	Mult(GetPolynomial(0,1),
 	     get<0>(get<0>
@@ -139,60 +132,56 @@ namespace manifolds {
 	    class CType, int order, class T>
   struct Simplification<
     Variadic<T, Composition<
-      Polynomial<CType, int_<order>>, T>>, 1,
-      typename std::enable_if<is_stateless<T>::value>::type>
+      Polynomial<CType, int_<order>>, T>>,
+    /*var_f_com_p_f*/1,
+    typename std::enable_if<is_stateless<T>::value>::type>
   {
-    typedef Simplification<
+    typedef SimplifiedType<
       Variadic<Composition<
 		 Polynomial<CType, int_<order>>,
-		 T>, T>> ref_type;
-    typedef typename ref_type::type type;
+		 T>, T>> type;
 
     static type Combine(Variadic<T, Composition<
 			Polynomial<CType, int_<order>>, T>> a)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying inverted composed "
-	"polynomial operation\n";
-#endif
+      SIMPLIFY_INFO("Simplifying inverted composed "
+		    "polynomial operation\n");
       auto t = a.GetFunctions();
       typedef typename std::remove_reference<
 	decltype(get<1>(t))>::type T1;
       typedef typename std::remove_reference<
 	decltype(get<0>(t))>::type T2;
       Variadic<T1, T2> v(get<1>(t), get<0>(t));
-      return ref_type::Combine(v);
+      return Simplify(v);
     }
   };
 
   template <class CoeffType,
 	    class ... Functions>
   struct Simplification<
-    Composition<Polynomial<CoeffType,int_<1>>,Functions...>,0>
+    Composition<Polynomial<CoeffType,int_<1>>,Functions...>,
+    /*com_p_1_fs*/2>
   {
     typedef Polynomial<CoeffType,int_<1>> type;
 
     static type Combine(Composition<Polynomial<
 			CoeffType,int_<1>>,Functions...> p)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying composition of "
-	"constant polynomial\n";
-#endif
+      SIMPLIFY_INFO("Simplifying composition of "
+		    "constant polynomial\n");
       return get<0>(p.GetFunctions());
     }
   };
 
   template <class T, class C>
-  struct Simplification<Addition<T, Polynomial<C, int_<1>>>>
+  struct Simplification<Addition<T, Polynomial<C, int_<1>>>,
+			/*add_f_p_1*/2>
   {
     typedef Addition<T, Polynomial<C, int_<1>>> in_type;
     static auto Combine(in_type a)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying adddition of constant "
-	"and another function\n";
-#endif
+      SIMPLIFY_INFO("Simplifying adddition of constant "
+		    "and another function\n");
       auto t = a.GetFunctions();
       return GetPolynomial(get<1>(t).GetCoeffs()[0], (C)1)
 	(get<0>(t));
@@ -220,10 +209,8 @@ namespace manifolds {
 			Composition<
 			Polynomial<C2,O2>,F1s...>> v)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying operation on "
-	"polynomials composed by same functions\n";
-#endif
+    SIMPLIFY_INFO("Simplifying operation on "
+	"polynomials composed by same functions\n");
       auto t = v.GetFunctions();
       inter_type i(get<0>(get<0>(t).GetFunctions()),
 		   get<0>(get<1>(t).GetFunctions()));
@@ -234,7 +221,8 @@ namespace manifolds {
   template <class C, class O, class ... Fs>
   struct Simplification<
     Composition<
-      Polynomial<C,O>, Addition<Fs...>>, 3>
+      Polynomial<C,O>, Addition<Fs...>>,
+    /*com_p_add_fs*/3>
   {
     typedef Composition<
       Polynomial<C,O>, Addition<Fs...> > in_type;
@@ -272,13 +260,60 @@ namespace manifolds {
 
     static auto Combine(in_type c)
     {
-#ifndef PRINT_SIMPLIFIES
-      std::cout << "Simplifying polynomial of addition of "
-	"functions\n";
-#endif
+      SIMPLIFY_INFO("Simplifying polynomial of addition of "
+		    "functions\n");
       return Addem(c, std::make_index_sequence<O::value>());
     }
   };
+
+  template <class T, class ... Fs>
+  struct Simplification<
+    UnaryMinus<Composition<T,Fs...>>,
+    /*um_com_f_fs*/0,
+    typename std::enable_if<
+      Simplifies<UnaryMinus<T>>::value>::type>
+  {
+    typedef Composition<
+      SimplifiedType<UnaryMinus<T>>, Fs...> type;
+
+    static type Combine(UnaryMinus<Composition<T,Fs...>> f)
+    {
+      SIMPLIFY_INFO("Simplifying unary minus of composition\n");
+      auto t = f.GetFunction().GetFunctions();
+      auto ut =
+	make_my_tuple(Simplify(UnaryMinus<T>(get<0>(t))));
+      return tuple_cat(ut, remove_element<0>(t));
+    }
+  };
+
+  template <class F>
+  struct Simplification<Composition<F,Zero>, /*com_f_z*/1>
+  {
+    typedef Polynomial<
+      decltype(std::declval<F>()(0)), int_<1>> type;
+
+    static type Combine(Composition<F,Zero> c)
+    {
+      return GetPolynomial(get<0>(c.GetFunctions())(0));
+    }
+  };
+
+  template <class C, class F>
+  struct Simplification<
+    Composition<F, Polynomial<C,int_<1>>>,
+    /*com_f_p_1*/1>
+  {
+    typedef Polynomial<
+      decltype(std::declval<F>()(std::declval<C>())),
+      int_<1>>type;
+
+    static type Combine(Composition<F, Polynomial<C,int_<1>>> c)
+    {
+      auto t = c.GetFunctions();
+      return GetPolynomial(get<0>(t)(get<1>(t).GetCoeffs()[0]));
+    }
+  };
+
 }
 
 #endif

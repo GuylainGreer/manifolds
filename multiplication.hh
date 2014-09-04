@@ -85,7 +85,7 @@ private:
 
   template <class ... Functions>
   struct Simplification<
-    Multiplication<Functions...>,3>
+    Multiplication<Functions...>, /*var_mult*/4>
   {
     typedef bool_<
       has_abelian_arithmetic<
@@ -97,24 +97,22 @@ private:
 
     static type Combine(Multiplication<Functions...> a)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying multiplication\n";
-#endif
+      SIMPLIFY_INFO("Simplifying multiplication\n");
       return SimplifyV<Multiplication>(a.GetFunctions(),
 				       Abelian{});
     }
   };
 
   template <class ... MFuncs, class C>
-  struct Simplification<Composition<Multiplication<MFuncs...>,C>>
+  struct Simplification<
+    Composition<Multiplication<MFuncs...>,C>,
+    /*com_mult_f*/2>
   {
     typedef Composition<Multiplication<MFuncs...>,C> in_type;
     static auto Combine(in_type c)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Distributing Composition "
-	"into multiplication\n";
-#endif
+      SIMPLIFY_INFO("Distributing Composition "
+		    "into multiplication\n");
       return DistributeComposition<Multiplication>(c);
     }
 
@@ -130,7 +128,8 @@ namespace manifolds
   template <class F1, class F2>
   struct Simplification<
     Multiplication<
-    F1, UnaryMinus<F2>>>
+    F1, UnaryMinus<F2>>,
+    /*mult_f1_um_f2*/2>
   {
     typedef UnaryMinus<Multiplication<F1,F2>> type;
     static type Combine(Multiplication<
@@ -147,7 +146,7 @@ namespace manifolds
   template <class F1, class F2>
   struct Simplification<
     Multiplication<
-      UnaryMinus<F1>, F2>, 1>
+      UnaryMinus<F1>, F2>, /*mult_um_f1_f2*/1>
   {
     typedef UnaryMinus<Multiplication<F1,F2>> type;
     static type Combine(Multiplication<
@@ -164,7 +163,8 @@ namespace manifolds
     template <class ... F1s, class ... F2s>
     struct Simplification<
         Multiplication<
-            Addition<F1s...>, Addition<F2s...>>, 0>
+            Addition<F1s...>, Addition<F2s...>>,
+      /*mult_add_add*/0>
     {
         template <class T1, class T2, std::size_t ... indices>
         static auto Second(T1 t1, T2 t2, std::integer_sequence<

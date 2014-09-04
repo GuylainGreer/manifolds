@@ -29,7 +29,7 @@ namespace manifolds {
     Function<
     list<int_<4>, typename Functions::indices...>,
     max<Functions::input_dim...>::value,
-    max<Functions::output_dim...>::value>
+    rows::value * cols::value>
   {
     static const int num_rows = rows::value;
     static const int num_cols = cols::value;
@@ -119,7 +119,8 @@ namespace manifolds {
 	    class ... F1s, class ... F2s>
   struct Simplification<
     Composition<FunctionMatrix<r1,c1,F1s...>,
-		FunctionMatrix<r2,c2,F2s...>>>
+		FunctionMatrix<r2,c2,F2s...>>,
+    /*com_fm_fm*/0>
   {
     typedef FunctionMatrix<r1,c1,F1s...> FMOut;
     typedef FunctionMatrix<r2,c2,F2s...> FMIn;
@@ -151,9 +152,8 @@ namespace manifolds {
 
     static auto Combine(in_type c)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying composition of function matrices\n";
-#endif
+      SIMPLIFY_INFO("Simplifying composition of "
+		    "function matrices\n");
       auto t = c.GetFunctions();
       return GetFunctionMatrix<r1::value, c1::value>
 	(CombineHelper(get<0>(t).GetFunctions(),
@@ -168,33 +168,30 @@ namespace manifolds {
   template <int i, bool a, class ... FMFuncs>
   struct Simplification<
     Composition<Variable<i,a>,
-		FunctionMatrix<FMFuncs...>>>
+		FunctionMatrix<FMFuncs...>>,
+    /*com_v_fm*/3>
   {
     typedef typename nth<i+2,FMFuncs...>::type type;
 
     static type Combine(Composition<Variable<i,a>,
 			FunctionMatrix<FMFuncs...>> c)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying composition of "
-	"variable and function matrix\n";
-#endif
+      SIMPLIFY_INFO("Simplifying composition of "
+		    "variable and function matrix\n");
       return get<i>(get<1>(c.GetFunctions()).
-			 GetFunctions());
+		    GetFunctions());
     }
   };
 
   template <class r, class c, class ... Fs>
   struct Simplification<
-    FunctionMatrix<r,c, Fs...>, 1>
+    FunctionMatrix<r,c, Fs...>, /*var_fm*/1>
   {
     typedef FunctionMatrix<r,c, Fs...> in_type;
     static auto Combine(in_type m)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying individual elements "
-	"of function matrix\n";
-#endif
+      SIMPLIFY_INFO("Simplifying individual elements "
+		    "of function matrix\n");
       auto t = m.GetFunctions();
       return GetFunctionMatrix<r::value, c::value>
 	(SimplifyIndividuals(t,
@@ -210,7 +207,8 @@ namespace manifolds {
   struct Simplification<
     Multiplication<
     F, Composition<Pow,
-		   FunctionMatrix<r,c,F,P>>>, 0,
+		   FunctionMatrix<r,c,F,P>>>,
+    /*mult_f1_com_pow_fm_f2_f1*/0,
     typename std::enable_if<is_stateless<F>::value>::type>
   {
     typedef Multiplication<
@@ -231,7 +229,8 @@ namespace manifolds {
 	    class ... F1s, class ... F2s>
   struct Simplification<
     Multiplication<FunctionMatrix<r1,c1,F1s...>,
-		   FunctionMatrix<r2,c2,F2s...>>>
+		   FunctionMatrix<r2,c2,F2s...>>,
+    /*mult_fm_fm*/0>
   {
     typedef Multiplication<
       FunctionMatrix<r1,c1,F1s...>,
@@ -281,7 +280,7 @@ namespace manifolds {
 
   template <class F>
   struct Simplification<
-    FunctionMatrix<int_<1>,int_<1>,F>>
+    FunctionMatrix<int_<1>,int_<1>,F>, /*fm_1_1*/0>
   {
     typedef F type;
     static type Combine(FunctionMatrix<int_<1>,int_<1>,F> f)
@@ -291,7 +290,7 @@ namespace manifolds {
   };
 
   template <class ... Functions>
-  struct Simplification<Group<Functions...>,0>
+  struct Simplification<Group<Functions...>, /*var_grp*/0>
   {
     typedef FunctionMatrix<
       int_<sizeof...(Functions)>,
@@ -299,9 +298,7 @@ namespace manifolds {
     typedef MType type;
     static type Combine(Group<Functions...> c)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying group->vector\n";
-#endif
+      SIMPLIFY_INFO("Simplifying group->vector\n");
       return {c.GetFunctions()};
     }
   };

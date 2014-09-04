@@ -9,17 +9,22 @@ namespace manifolds {
 
   static const int num_simplification_levels = 5;
 
+#ifdef PRINT_SIMPLIFIES
+#  define SIMPLIFY_INFO(msg) \
+  std::cout << __FILE__ << ":" << __LINE__ << " " << msg
+#else
+#  define SIMPLIFY_INFO(msg)
+#endif
+
   template <class A,
-	    int level = 0,
+	    int level,
 	    class ForEnableIf = void>
   struct Simplification
   {
     typedef A type;
     static type Combine(A a)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "No simplification found\n";
-#endif
+      SIMPLIFY_INFO("No simplification found\n");
       return a;
     }
   };
@@ -44,10 +49,8 @@ namespace manifolds {
     template <class F, int level>
     static auto Simplify(F f, F, int_<level>)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Done level " << level << ", "
-		<< "moving to level " << level+1 << '\n';
-#endif
+      SIMPLIFY_INFO("Done level " << level << ", "
+		    << "moving to level " << level+1 << '\n');
       return SimplificationWrapper<iter+1>::
 	Simplify(f, int_<level+1>());
     }
@@ -62,9 +65,7 @@ namespace manifolds {
     template <class F, int level>
     static auto Simplify(F f, int_<level>)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying: " << f << std::endl;
-#endif
+      SIMPLIFY_INFO("Simplifying: " << f << '\n');
       return Simplify(Simplification<F,level>::Combine(f), f,
 		      int_<level>());
     }
@@ -72,9 +73,7 @@ namespace manifolds {
     template <class F>
     static auto Simplify(F f, int_<num_simplification_levels>)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Done: " << f << "\n\n";
-#endif
+      SIMPLIFY_INFO("Done: " << f << "\n\n");
       return f;
     }
   };
@@ -82,9 +81,7 @@ namespace manifolds {
   template <class F>
   auto Simplify(F f)
   {
-#ifdef PRINT_SIMPLIFIES
-    std::cout << "Simplifying: " << f << std::endl;
-#endif
+    SIMPLIFY_INFO("Simplifying: " << f << "\n");
     return SimplificationWrapper<0>::
       Simplify(f, int_<0>());
   }

@@ -11,12 +11,24 @@
 #include "polynomial.hh"
 #include "variables.hh"
 #include "function_matrix.hh"
+#include "division.hh"
 
 namespace manifolds
 {
   template <int iter>
   struct Stream2Wrapper
   {
+    template <class N, class D, class VNamer>
+    static void Stream2(std::ostream & s, Division<N,D> d,
+			VNamer v)
+    {
+      s << '(';
+      Stream2Wrapper<iter+1>::Stream2(s, d.GetNumerator(), v);
+      s << " / ";
+      Stream2Wrapper<iter+1>::Stream2(s, d.GetDenominator(), v);
+      s << ')';
+    }
+
     template <class VNamer>
     static void Stream2(std::ostream & s, Zero, VNamer)
     {

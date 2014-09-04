@@ -56,7 +56,7 @@ namespace manifolds
 
     void Print(std::ostream & s) const
     {
-      s << "Polynomial(";
+      s << "Polynomial" << Order::value << "(";
       for(int i = 0; i < Order::value; i++)
 	{
 	  s << coeffs[i];
@@ -131,7 +131,8 @@ namespace manifolds {
 	    class CoeffType1, class CoeffType2>
   struct Simplification<Addition<
     Polynomial<CoeffType1, int_<order1>>,
-    Polynomial<CoeffType2, int_<order2>>>,0>
+    Polynomial<CoeffType2, int_<order2>>>,
+			/*add_p1_p2*/0>
   {
     static const int new_order =
       order1 > order2 ? order1 : order2;
@@ -141,12 +142,13 @@ namespace manifolds {
       coeff_type,
       int_< new_order>> type;
 
-    template <class T1, class T2, bool b>
+    template <class T1, class T2>
       static auto Init(const T1 & t1, const T2 & t2,
 		       std::true_type)
     {
       typedef typename std::common_type<
-	decltype(t1[0]), decltype(t2[0])>::type type;
+	decltype(t1.GetCoeffs()[0]),
+	decltype(t2.GetCoeffs()[0])>::type type;
       std::array<type, array_size<
 	decltype(t1.GetCoeffs())>::value> result;
       std::copy(t1.GetCoeffs().begin(),
@@ -175,9 +177,7 @@ namespace manifolds {
 			CoeffType2,
 			int_<order2>>> p)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying addition of two polynomials\n";
-#endif
+      SIMPLIFY_INFO("Simplifying addition of two polynomials\n");
       auto p1 = get<0>(p.GetFunctions());
       auto p2 = get<1>(p.GetFunctions());
       typedef std::integral_constant<
@@ -203,18 +203,20 @@ namespace manifolds {
 
   template <int order1, int order2,
 	    class CoeffType1, class CoeffType2>
-  struct Simplification<Multiplication<
+  struct Simplification<
+    Multiplication<
     Polynomial<CoeffType1,
 	       int_<order1>>,
     Polynomial<CoeffType2,
-	       int_<order2>>>,0>
+	       int_<order2>>>,
+    /*mult_p1_p2*/0>
   {
     static const int new_order = order1 + order2 - 1;
     typedef typename std::common_type<
       CoeffType1, CoeffType2>::type coeff_type;
     typedef Polynomial<
       coeff_type,
-      int_< new_order>> type;
+      int_<new_order>> type;
 
     static type Combine(Multiplication<Polynomial<
 			CoeffType1,
@@ -223,10 +225,8 @@ namespace manifolds {
 			CoeffType2,
 			int_<order2>>> p)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying multiplication "
-	"of two polynomials\n";
-#endif
+      SIMPLIFY_INFO("Simplifying multiplication "
+		    "of two polynomials\n");
       auto p1 = get<0>(p.GetFunctions());
       auto p2 = get<1>(p.GetFunctions());
       std::array<coeff_type,new_order> r;
@@ -243,7 +243,8 @@ namespace manifolds {
   struct Simplification<
     Composition<
     Polynomial<CoeffType1,int_<order1>>,
-      Polynomial<CoeffType2,int_<order2>>>,0>
+      Polynomial<CoeffType2,int_<order2>>>,
+    /*com_p1_p2*/3>
   {
     static const int new_order = (order1-1) * (order2-1) + 1;
     typedef typename std::common_type<
@@ -293,9 +294,7 @@ namespace manifolds {
 			CoeffType2,
 			int_<order2>>> p)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying composition of two polynomials\n";
-#endif
+      SIMPLIFY_INFO("Simplifying composition of two polynomials\n");
       auto p1 = get<0>(p.GetFunctions());
       auto p2 = get<1>(p.GetFunctions());
       return
@@ -305,22 +304,26 @@ namespace manifolds {
 
   template <class Order, class CoeffType>
   struct Simplification<
-    UnaryMinus<Polynomial<CoeffType, Order>>,0>
+    UnaryMinus<Polynomial<CoeffType, Order>>,
+    /*um_p*/0>
   {
+    template <class T>
+    struct Identity
+    {
+      typedef T type;
+    };
+
     typedef typename std::conditional<
-      std::is_signed<CoeffType>::value,
-      CoeffType,
-      typename std::make_signed<
-	CoeffType>::type
-      >::type CoeffType2;
+      std::is_integral<CoeffType>::value,
+      std::make_signed<CoeffType>,
+      Identity<CoeffType>
+      >::type::type CoeffType2;
     typedef Polynomial<CoeffType2, Order> type;
 
     static type Combine(UnaryMinus<Polynomial<
 			CoeffType, Order>> u)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying negative of polynomial\n";
-#endif
+      SIMPLIFY_INFO("Simplifying negative of polynomial\n");
       std::array<CoeffType2, Order::value> a;
       for(int i = 0; i < Order::value; i++)
 	a[i] = -CoeffType2(u.GetFunction().GetCoeffs()[i]);
@@ -333,7 +336,8 @@ namespace manifolds {
   struct Simplification<
     Multiplication<Composition<Polynomial<CoeffType1, Order>,
 			       Funcs...>,
-		   Polynomial<CoeffType2, int_<1>>>,0>
+		   Polynomial<CoeffType2, int_<1>>>,
+    /*mult_com_p1_fs_p2_1*/0>
   {
     typedef typename std::common_type<
       CoeffType1, CoeffType2>::type CoeffType;
@@ -345,10 +349,8 @@ namespace manifolds {
 			Funcs...>,
 			Polynomial<CoeffType2, int_<1>>> m)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying multiplication of composed "
-	"polynomial by a constant\n";
-#endif
+      SIMPLIFY_INFO("Simplifying multiplication of composed "
+		    "polynomial by a constant\n");
       std::array<CoeffType, Order::value> cs;
       auto p =
 	get<0>(get<0>(m.GetFunctions()).

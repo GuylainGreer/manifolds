@@ -188,8 +188,20 @@ private:
     return s;
   }
 
+  template <class ... Fs>
+  auto ComposeRaw(Fs ... fs)
+  {
+    return Composition<Fs...>(fs...);
+  }
+
+  template <class ... Fs>
+  auto Compose(Fs ... fs)
+  {
+    return Simplify(ComposeRaw(fs...));
+  }
+
   template <class ... Functions>
-  struct Simplification<Composition<Functions...>,4>
+  struct Simplification<Composition<Functions...>, /*var_com*/4>
   {
     typedef decltype(SimplifyV<Composition>
 		     (std::declval<tuple<Functions...>>(),
@@ -197,9 +209,7 @@ private:
 
     static type Combine(Composition<Functions...> a)
     {
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying composition\n";
-#endif
+      SIMPLIFY_INFO("Simplifying composition\n");
       return SimplifyV<Composition>(a.GetFunctions(),
 				    std::false_type{});
     }

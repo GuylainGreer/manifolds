@@ -37,18 +37,14 @@ namespace manifolds
   template <class F>
   auto WrapIf(bool_<true>, F f, int i)
   {
-#ifdef PRINT_SIMPLIFIES
-    std::cout << "(" << i << ", true) ";
-#endif
+    SIMPLIFY_INFO("(" << i << ", true) ");
     return f.GetFunctions();
   }
 
   template <class F>
   auto WrapIf(bool_<false>, F f, int i)
   {
-#ifdef PRINT_SIMPLIFIES
-    std::cout << "(" << i << ", false) ";
-#endif
+    SIMPLIFY_INFO("(" << i << ", false) ");
     return make_my_tuple(f);
   }
 
@@ -59,17 +55,12 @@ namespace manifolds
 		       std::integer_sequence<
 		       std::size_t,indices...>)
   {
-#ifdef PRINT_SIMPLIFIES
-    std::cout << "Flattening: ";
-#endif
+    SIMPLIFY_INFO("Flattening: ");
     auto f =
       tuple_cat(WrapIf(bool_<IsVariadic<
 		       Variadic,Functions>::value>(),
 		       get<indices>(v), indices)...);
-#ifdef PRINT_SIMPLIFIES
-    std::cout << '\n';
-    std::cout << "Flattened: ";PrintTuple(f,int_<0>());
-#endif
+    SIMPLIFY_INFO("\nFlattened: ";PrintTuple(f,int_<0>()));
     return f;
   }
 
@@ -137,10 +128,8 @@ namespace manifolds
     typename tuple_element<
     i+1, Tuple>::type
     > VType;
-#ifdef PRINT_SIMPLIFIES
-    VType test(get<i>(t),get<i+1>(t));
-    std::cout << "Checking if " << test << " simplifies: ";
-#endif
+    SIMPLIFY_INFO("Checking if " << VType(get<i>(t),get<i+1>(t))
+		  << " simplifies: ");
     typedef SimplifiedType<VType> SType;
     typedef typename std::is_same<
     VType, SType>::type Simplified;
@@ -165,14 +154,14 @@ namespace manifolds
       typename tuple_element<i, Tuple>::type,
       typename tuple_element<j, Tuple>::type
       > VType;
-      typedef typename Simplification<VType>::type SType;
-#ifdef PRINT_SIMPLIFIES
-      std::cout << "Simplifying:\n  " << get_cpp_name<
-      typename tuple_element<i, Tuple>::type>() << "\n  "
-      << get_cpp_name<
-      typename tuple_element<j, Tuple>::type>() << "\ninto "
-      << get_cpp_name<SType>() << "\n";
-#endif
+      typedef SimplifiedType<VType> SType;
+      SIMPLIFY_INFO("Simplifying:\n  " << (get_cpp_name<
+		    typename tuple_element<i, Tuple>::type>())
+		    << "\n  "
+		    << (get_cpp_name<
+		    typename tuple_element<j, Tuple>::type>())
+		    << "\ninto "
+		    << get_cpp_name<SType>() << "\n");
       typedef typename std::is_same<
       SType, VType>::type Simplified;
       auto next = MergeV<Variadic, i, j>(t, Simplified());
