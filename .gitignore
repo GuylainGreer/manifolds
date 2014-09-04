@@ -25,6 +25,10 @@
 
 #Created executable
 test
+test_exec
 
-#Scons build files
+#SCons build files
 .sconsign.dblite
+
+#Files used for reporting changes to the simplification levels
+simplification_comparison_*.txt
