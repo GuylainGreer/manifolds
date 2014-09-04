@@ -12,7 +12,7 @@ BOOST_AUTO_TEST_CASE(simplify_test)
   using namespace manifolds;
   typedef Addition<Sin,Cos> Type;
   static_assert(std::is_same<
-		Simplification<Type>::type,
+		SimplifiedType<Type>,
 		Type>::value, "Failed to not simplify!");
   static_assert(std::is_same<
 		SimplifiedType<Addition<
