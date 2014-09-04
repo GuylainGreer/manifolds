@@ -1,5 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include "derivatives.hh"
+#include "streaming2.hh"
 
 BOOST_AUTO_TEST_CASE(derivative_test)
 {
@@ -32,7 +33,10 @@ BOOST_AUTO_TEST_CASE(derivative_test)
   auto p = Pow()(x, x);
   auto pd = Derivative(p);
   auto pd_check = (Log()(x)+1_c)*Pow()(x,x);
+  std::cout << pd << "\n\n";
   BOOST_CHECK_EQUAL(pd(3), pd_check(3));
 
-  //auto m = D<3>()(Log()(x));
+  auto m = D<3>()(Log()(x));
+  Stream2(std::cout, m) << "\n\n";
+  std::cout << m << "\n\n";
 }
