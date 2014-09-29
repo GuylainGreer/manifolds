@@ -90,6 +90,8 @@ namespace manifolds {
     template <class F, class G, int level>
     static auto Simplify(F f, G, int_<level>)
     {
+      SIMPLIFY_INFO("Got " << f <<
+		    ", starting back at level 0\n");
       return SimplificationWrapper<iter+1>::
 	Simplify(f, int_<0>());
     }
