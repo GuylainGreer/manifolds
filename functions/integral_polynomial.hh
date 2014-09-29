@@ -62,7 +62,7 @@ struct IntegralPolynomialImpl<
   }
 };
 
-  DEF_FF_STEMPLATE(IntegralPolynomial);
+  DEF_FF_STEMPLATE(IntegralPolynomial)
 
   template <class C>
   struct is_polynomial<IntegralPolynomial<C>> :
