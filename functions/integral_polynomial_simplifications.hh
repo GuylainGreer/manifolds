@@ -337,6 +337,40 @@ namespace manifolds
       return type{};
     }
   };
+
+
+  template <class A>
+  struct Simplification<
+    Addition<A,A>, /*add_f_f*/3,
+    typename std::enable_if<
+      is_stateless<A>::value>::type>
+  {
+    typedef Composition<
+      IntegralPolynomial<iseq<0,2>>,
+      A> type;
+    static type Combine(Addition<A,A> a)
+    {
+      SIMPLIFY_INFO("Simplifying addition of function by itself\n");
+      type b = {IntegralPolynomial<iseq<0,2>>(), A()};
+      return b;
+    }
+  };
+
+  template <class A>
+  struct Simplification<
+    Multiplication<A,A>, /*mult_f_f*/3,
+    typename std::enable_if<is_stateless<A>::value>::type>
+  {
+    typedef Composition<
+      IntegralPolynomial<iseq<0,0,1>>,A> type;
+
+    static type Combine(Multiplication<A,A>)
+    {
+      SIMPLIFY_INFO("Simplifying multiplication of function "
+		    "by itself\n");
+      return {IntegralPolynomial<iseq<0,0,1>>(), A()};
+    }
+  };
 }
 
 #endif
