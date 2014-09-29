@@ -179,7 +179,10 @@ namespace manifolds
       Stream2(s, get<0>(c.GetFunctions()), vn, var);
     }
 
-    template <class Seq, class ... Funcs, class VNamer>
+    template <class Seq, class ... Funcs, class VNamer,
+	      class = typename std::enable_if<
+		(sizeof...(Funcs) > 0)
+		>::type>
     static void Stream2(std::ostream & s,
 			Composition<
 			IntegralPolynomial<Seq>,
@@ -218,7 +221,6 @@ namespace manifolds
 			UnaryMinus<T> u,
 			VNamer vn)
     {
-      std::cout << "AHA\n";
       s << "-(";
       Stream2(s, u.GetFunction(), vn);
       s << ")";
@@ -239,7 +241,7 @@ namespace manifolds
 			std::string var = "")
     {
       if(var == "")
-	var = "x";
+	var = "p";
       auto coeffs = p.GetCoeffs();
       bool is_first = coeffs[0] == CoeffType(0);
       if(!is_first)
