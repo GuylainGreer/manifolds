@@ -72,6 +72,8 @@ mult_ip_ip = Vertex('Multiplication<IPolynomial<>,IPolynomial<>>')
 ip = Vertex('IntegralPolynomial<>')
 var_p_ip = Vertex('Variadic<Polynomial<>,IPolynomial<>>')
 var_ip_p = Vertex('Variadic<IPolynomial<>,Polynomial<>>')
+mult_f_ip_1 = Vertex('Multiplication<T, IntegralPolynomial<1> >')
+add_f_ip_1 = Vertex('Addition<T, IntegralPolynomial<>>')
 
 all_simplifications = [var_add, com_add, add_nadd, nadd_add,
                        var_com, mult_div_div, mult_div_f,
@@ -87,8 +89,12 @@ all_simplifications = [var_add, com_add, add_nadd, nadd_add,
                        com_p_add_fs, com_t_fm, um_um_f, um_f,
                        com_v_0_f, add_f_z, add_z_f, mult_f_z,
                        mult_z_f, com_z_f, um_com_f_fs, com_div_fs,
-                       mult_cos_cos, com_f_z, com_f_p_1]
+                       mult_cos_cos, com_f_z, com_f_p_1,
+                       var_p_ip, mult_f_ip_1, add_f_ip_1,
+                       var_ip_p]
 
+add_edge(var_p_ip, add_f_ip_1)
+add_edge(mult_f_ip_1, var_p_ip)
 add_edge(com_z_f, com_f_p_1)
 add_edge(com_z_f, com_f_z)
 add_edge(com_f_z, com_v_0_f)
@@ -160,6 +166,7 @@ add_edge(var_com_f1_fs_com_f2_fs, mult_f_f)
 add_edge(var_com_f1_fs_com_f2_fs, add_com_p_f_f)
 add_edge(var_com_f1_fs_com_f2_fs, mult_com_p_f_f)
 add_edge(add_f_z, nadd_add)
+
 
 #This is hacky, but too bad
 def var_name(x):
