@@ -99,6 +99,11 @@ namespace manifolds {
   VARIABLE(2,false,Z)
   VARIABLE(3,false,T)
 
+  template <int i, bool a, bool c, class B>
+  bool operator==(Variable<i,a, c>, B)
+  {
+      return std::is_same<Variable<i,a, c>, B>::value;
+  }
 }
 
 #endif
