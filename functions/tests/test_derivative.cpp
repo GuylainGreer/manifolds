@@ -5,8 +5,7 @@
 BOOST_AUTO_TEST_CASE(derivative_test)
 {
   using namespace manifolds;
-  std::cout << Derivative(FullDerivative(Cos()(x*x)*y)) << "\n";
-  /*  BOOST_CHECK_EQUAL(Derivative(Sin()), Cos());
+  BOOST_CHECK_EQUAL(Derivative(Sin()), Cos());
   auto f = Cos()(x*x) * y;
   auto d = Derivative(f);
   auto check = 2_c * -x * Sin()(x * x) * y;
@@ -41,5 +40,5 @@ BOOST_AUTO_TEST_CASE(derivative_test)
   auto m = D<3>()(Log()(x));
   auto m_check =
     Derivative(Derivative(Derivative(Log()(x))));
-    BOOST_CHECK_EQUAL(m, m_check);*/
+  BOOST_CHECK_EQUAL(m, m_check);
 }
