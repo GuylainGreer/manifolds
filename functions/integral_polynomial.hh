@@ -73,6 +73,25 @@ struct IntegralPolynomialImpl<
   {
     return IntegralPolynomial<iseq<is...>>();
   }
+
+template <class T, T ... ts, class U>
+bool operator==(IntegralPolynomial<
+                std::integer_sequence<T,ts...>>,
+                IntegralPolynomial<
+                std::integer_sequence<U,(U)ts...>>)
+{
+    return true;
+}
+
+
+template <class T, T ... ts, class U>
+bool operator==(IntegralPolynomial<
+                std::integer_sequence<T,ts...>>,
+                U)
+{
+    return false;
+}
+
 }
 
 #endif
