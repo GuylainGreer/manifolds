@@ -5,68 +5,67 @@
 #include "full_function_defs.hh"
 
 namespace manifolds {
-template <class Numerator,
-	  class Denominator>
-struct DivisionImpl :
-    Function<
-      list<int_<2>,
-	   typename Numerator::indices,
-	   typename Denominator::indices>,
-      max<Numerator::input_dim,
-	  Denominator::input_dim>::value,
-      max<Numerator::output_dim,
-	  Denominator::output_dim>::value>
-{
-  static const bool stateless =
-    and_<is_stateless<Numerator>,
-	 is_stateless<Denominator>>::value;
-  static const ComplexOutputBehaviour complex_output =
-    VariadicComplexOutput<Numerator, Denominator>::value;
+    template <class Numerator,
+              class Denominator>
+    struct DivisionImpl :
+        Function<
+        list<int_<2>,
+             typename Numerator::indices,
+             typename Denominator::indices>,
+                 max<Numerator::input_dim,
+                     Denominator::input_dim>::value,
+                 max<Numerator::output_dim,
+                     Denominator::output_dim>::value>
+    {
+        static const bool stateless =
+            and_<is_stateless<Numerator>,
+                 is_stateless<Denominator>>::value;
+        static const ComplexOutputBehaviour complex_output =
+            VariadicComplexOutput<Numerator, Denominator>::value;
 
-  DivisionImpl(){}
-  DivisionImpl(Numerator n, Denominator d):
-    n(n),d(d){}
+        DivisionImpl(){}
+        DivisionImpl(Numerator n, Denominator d):
+            n(n),d(d){}
 
-  template <class ... Args>
-  auto operator()(Args ... args) const
-  {
-    return n(args...) / d(args...);
-  }
+        template <class ... Args>
+        auto operator()(Args ... args) const
+        {
+            return n(args...) / d(args...);
+        }
 
-  template <class ... Rights>
-  bool operator==(const DivisionImpl<Rights...> & d) const
-  {
-    return VariadicEqual(*this, d);
-  }
+        auto GetNumerator() const
+        {
+            return n;
+        }
 
-  template <class T>
-  bool operator==(const T &) const
-  {
-    return false;
-  }
+        auto GetDenominator() const
+        {
+            return d;
+        }
 
-  auto GetNumerator() const
-  {
-    return n;
-  }
+        auto GetFunctions() const
+        {
+            return make_my_tuple(n,d);
+        }
 
-  auto GetDenominator() const
-  {
-    return d;
-  }
+    private:
+        Numerator n;
+        Denominator d;
+    };
 
-  auto GetFunctions() const
-  {
-    return make_my_tuple(n,d);
-  }
+    DEF_FF_TEMPLATE(Division)
 
-private:
-  Numerator n;
-  Denominator d;
-};
+    template <class D, class N, class U>
+    bool operator==(Division<N, D>, U)
+    {
+        return false;
+    }
 
-  DEF_FF_TEMPLATE(Division)
-
+    template <class N, class D>
+    bool operator==(Division<N, D> d1, Division<N, D> d2)
+    {
+        return VariadicEqual(d1, d2);
+    }
 }
 
 #endif
