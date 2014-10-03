@@ -53,7 +53,7 @@ private:
   template <class T>
   bool operator==(UnaryMinus<T> u1, UnaryMinus<T> u2)
   {
-    return u1.f == u2.f;
+      return u1.GetFunction() == u2.GetFunction();
   }
 }
 #endif
