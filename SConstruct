@@ -1,8 +1,8 @@
 import os
 
-compiler = 'clang++'
+compiler = 'g++-4.9'
 error_limit = '-fmax-errors=1' \
-              if compiler == 'g++' else \
+              if 'g++' in compiler else \
                  '-ferror-limit=1'
 env = Environment(CXX = compiler)
 
@@ -14,8 +14,8 @@ cpp_flags = ' '.join(['-std=c++1y',
                       '-msse4 -march=native',
                       '-mtune=native',
                       error_limit,
-                      '-DPRINT_SIMPLIFIES',
-                      #'-g',
+                      #'-DPRINT_SIMPLIFIES',
+                      '-g',
 		      '-fvisibility=hidden',
                   ])
 
