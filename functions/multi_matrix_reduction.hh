@@ -3,7 +3,7 @@
 
 #include "multi_matrix.hh"
 #include "function.hh"
-
+#include "full_function_defs.hh"
 #include <boost/mpl/find.hpp>
 #include <boost/type_traits/is_same.hpp>
 #include <boost/mpl/end.hpp>
@@ -19,8 +19,10 @@ namespace manifolds
   };
 
   template <class ... ReductionPairs>
-  struct Reduction : Function<int_<26>, 1,1>
+  struct Reduction : Function<int_<26>, 1,1>,
+      FunctionCommon<Reduction<ReductionPairs...>>
   {
+      using FunctionCommon<Reduction>::operator();
     template <class Arg, class Array, class ... Indices,
 	      class = typename std::enable_if<
 		(sizeof...(Indices) == Arg::dimensions)
@@ -95,7 +97,7 @@ namespace manifolds
     }
 
     template <class Arg>
-    auto operator()(Arg arg) const
+    auto eval(Arg arg) const
     {
       static const bool all_good =
 	and_<bool_<

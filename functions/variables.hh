@@ -9,8 +9,9 @@
 namespace manifolds {
 
   //Offset of 10000 should be enough to avoid conflicts
-  template <int N, bool abelian, bool complex>
-  struct VariableImpl : Function<int_<10000+N>, N+1,1>
+  template <int N, bool abelian = true, bool complex = false>
+  struct Variable : Function<int_<10000+N>, N+1,1>,
+      FunctionCommon<Variable<N,abelian,complex>>
   {
   public:
     static const bool stateless = true;
@@ -21,7 +22,7 @@ namespace manifolds {
     template <class Arg, class ... Args,
 	      class = typename std::enable_if<
 		!is_function<Arg>::value>::type>
-    auto operator()(Arg arg, Args ... args) const
+    auto eval(Arg arg, Args ... args) const
     {
       static_assert(N < sizeof...(Args)+1,
 		    "Not enough arguments to extract Nth");
@@ -31,14 +32,6 @@ namespace manifolds {
 		    "given a complex number as input.");
       return get<N>(make_my_tuple(arg,args...));
     }
-  };
-
-  template <int N, bool abelian = true, bool complex = false>
-  struct Variable : VariableImpl<N,abelian,complex>,
-    FunctionCommon<Variable<N,abelian,complex>>
-  {
-    using FunctionCommon<Variable>::operator();
-    using VariableImpl<N, abelian,complex>::operator();
   };
 
   struct DefaultVariableNamer

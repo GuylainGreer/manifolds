@@ -5,7 +5,7 @@
 #include "functions/polynomial.hh"
 #include "functions/addition.hh"
 #include "functions/operators.hh"
-#include "functions/streaming2.hh"
+#include "functions/streaming.hh"
 
 BOOST_AUTO_TEST_CASE(multiplication_test)
 {

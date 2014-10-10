@@ -21,7 +21,7 @@ namespace manifolds {
     }
 
     template <class ... Args>
-    auto operator()(Args...args) const
+    auto eval(Args...args) const
     {
       return eval(std::index_sequence_for<Funcs...>(),
 		  args...);

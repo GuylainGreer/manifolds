@@ -6,8 +6,7 @@
 #include "functions/polynomial.hh"
 #include "functions/operators.hh"
 #include <iostream>
-#include "functions/streaming2.hh"
-//#include "functions/all_simplifications.hh"
+#include "functions/streaming.hh"
 
 BOOST_AUTO_TEST_CASE(addition_test)
 {

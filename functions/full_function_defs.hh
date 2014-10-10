@@ -11,100 +11,80 @@
 
 namespace manifolds {
 
-template <class FunctionImpl>
-struct FunctionCommon
-{
-  template <class InnerFunc>
-  using prepare =
-    typename std::remove_reference<
-    typename std::remove_cv<
-    typename std::remove_reference<
-      InnerFunc>::type
-      >::type>::type;
-  template <class InnerFunc,
-	    class = typename std::enable_if<
-	      is_function<InnerFunc>::value
-	      >::type>
-  auto operator()(InnerFunc f) const
-  {
-    return Composition<FunctionImpl>
-      (*static_cast<const FunctionImpl*>(this))(f);
-  }
-  template <class ... InnerFunc,
-	    class = typename std::enable_if<
-	      and_<is_function<InnerFunc>...>::value
-	      && (sizeof...(InnerFunc) > 1)
-	      >::type>
-  auto operator()(InnerFunc ... f) const
-  {
-    return (*this)(GetGroup(f...));
-  }
+    template <class FunctionImpl>
+    struct FunctionCommon
+    {
+        template <class InnerFunc>
+        using prepare =
+            typename std::remove_reference<
+            typename std::remove_cv<
+                typename std::remove_reference<
+                    InnerFunc>::type
+                >::type>::type;
 
-  template <class T, std::size_t ... Indices>
-  auto helper(const T & t, std::integer_sequence<
-	      std::size_t, Indices...>) const
-  {
-    return (*static_cast<const FunctionImpl*>(this))
-      (get<Indices>(t)...);
-  }
-  template <class ... Args>
-  auto operator()(tuple<Args...> t) const
-  {
-    return helper(t, std::index_sequence_for<Args...>());
-  }
+        template <class InnerFunc>
+        auto eval_dispatch(std::true_type, InnerFunc f) const
+        {
+            return Composition<FunctionImpl, InnerFunc>
+            {*static_cast<const FunctionImpl*>(this), f};
+        }
+        template <class Var>
+        auto eval_dispatch(std::false_type, Var x) const
+        {
+            return static_cast<const FunctionImpl*>(this)->
+                eval(x);
+        }
+        template <class T>
+        auto operator()(T t) const
+        {
+            return eval_dispatch(is_function<T>(), t);
+        }
+        template <class ... InnerFuncs,
+                  class = typename std::enable_if<
+                      (sizeof...(InnerFuncs) > 1)
+                  >::type>
+        auto eval_dispatch(std::true_type, InnerFuncs...fs) const
+        {
+            auto g = GetGroup(fs...);
+            return Composition<
+                FunctionImpl,
+                decltype(g)>
+                (*static_cast<const FunctionImpl*>(this), g);
+        }
+        template <class ... Vars,
+                  class = typename std::enable_if<
+                      (sizeof...(Vars) > 1)
+                  >::type>
+        auto eval_dispatch(std::false_type, Vars ... xs) const
+        {
+            return static_cast<const FunctionImpl*>(this)->
+                eval(xs...);
+        }
+        template <class ... InnerFunc,
+                  class = typename std::enable_if<
+                      (sizeof...(InnerFunc) > 1)
+                  >::type>
+        auto operator()(InnerFunc ... f) const
+        {
+            return eval_dispatch
+                (and_<is_function<InnerFunc>...>(),
+                 f...);
+        }
 
-};
+        template <class T, std::size_t ... Indices>
+        auto helper(const T & t, std::integer_sequence<
+                        std::size_t, Indices...>) const
+        {
+            return (*static_cast<const FunctionImpl*>(this))
+                (get<Indices>(t)...);
+        }
+        template <class ... Args>
+        auto operator()(tuple<Args...> t) const
+        {
+            return helper(t, std::index_sequence_for<Args...>());
+        }
+    };
 
 }
-
-#define DEF_FULL_FUNCTION(func)					\
-  struct func : BOOST_PP_CAT(func,Impl),			\
-		FunctionCommon<func>				\
-  {								\
-    using FunctionCommon<func>::operator();			\
-    template <class Arg, class ... Args, class =		\
-	      typename std::enable_if<				\
-                  !is_function<Arg>::value>::type>      	\
-      auto operator()(Arg arg, Args ... args) const		\
-    {								\
-      return BOOST_PP_CAT(func,Impl)::operator()(arg,args...);	\
-    }								\
-  };
-
-#define DEF_FF_STEMPLATE(func)				\
-  template <class N>					\
-  struct func : BOOST_PP_CAT(func,Impl)<N>,		\
-		FunctionCommon<func<N>>			\
-  {							\
-    using BOOST_PP_CAT(func, Impl)<N>::			\
-      BOOST_PP_CAT(func,Impl);				\
-    using FunctionCommon<func<N>>::operator();		\
-    template <class Arg, class ... Args, class =	\
-	      typename std::enable_if<			\
-                  !is_function<Arg>::value>::type>      \
-      auto operator()(Arg arg, Args ... args) const	\
-    {							\
-      return BOOST_PP_CAT(func,Impl)<N>::		\
-	operator()(arg,args...);			\
-    }							\
-  };
-
-#define DEF_FF_TEMPLATE(func)				\
-  template <class ... Coeffs>				\
-  struct func : BOOST_PP_CAT(func,Impl)<Coeffs...>,	\
-		FunctionCommon<func<Coeffs...>>		\
-  {							\
-    using BOOST_PP_CAT(func,Impl)			\
-      <Coeffs...>::BOOST_PP_CAT(func, Impl);		\
-    using FunctionCommon<func>::operator();		\
-    template <class Arg, class ... Args, class =	\
-	      typename std::enable_if<			\
-		  !is_function<Arg>::value>::type>      \
-      auto operator()(Arg arg, Args ... args) const	\
-    {							\
-      return BOOST_PP_CAT(func,Impl)<Coeffs...>::	\
-	operator()(arg,args...);			\
-    }							\
-  };
 
 #endif

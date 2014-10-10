@@ -7,25 +7,26 @@
 #include "full_function_defs.hh"
 
 #define STD_FUNCTION(classname , funcname, index)		\
-  struct classname##Impl : Function<int_<index>, 1,1>		\
-  {								\
-    static const bool stateless = true;				\
-    static const ComplexOutputBehaviour complex_output =	\
-      SameAsInput;						\
-    template <class T>						\
-      auto operator()(T t) const				\
+    struct classname : Function<int_<index>, 1,1>,              \
+                       FunctionCommon<classname>                \
     {								\
-      using std::funcname;					\
-      return funcname(t);					\
-    }								\
-    void Print(std::ostream & s)const{s << #funcname;}		\
-  };								\
-  DEF_FULL_FUNCTION(classname)					\
-  template <class T> bool operator==(classname,T)		\
-  {return std::is_same<T,classname>::value;}			\
-  static const classname funcname = classname();		\
-  inline std::ostream & operator<<(std::ostream & s, classname)	\
-  {return s << #funcname;}
+        static const bool stateless = true;                     \
+        static const ComplexOutputBehaviour complex_output =	\
+            SameAsInput;                                        \
+        template <class T>                                      \
+        auto eval(T t) const                                    \
+        {                                                       \
+            using std::funcname;                                \
+            return funcname(t);					\
+        }                                                       \
+        void Print(std::ostream & s)const{s << #funcname;}      \
+    };								\
+    template <class T> bool operator==(classname,T)		\
+    {return std::is_same<T,classname>::value;}			\
+    static const classname funcname = classname();		\
+    inline std::ostream & operator<<(std::ostream & s,          \
+                                     classname)                 \
+    {return s << #funcname;}
 
 namespace manifolds
 {
@@ -46,19 +47,18 @@ namespace manifolds
   STD_FUNCTION(Sqrt, sqrt, 22)
 #undef STD_FUNCTION
 
-  struct PowImpl : Function<int_<23>, 2,1>
+  struct Pow : Function<int_<23>, 2,1>,
+      FunctionCommon<Pow>
   {
     static const bool stateless = true;
     static const ComplexOutputBehaviour complex_output =
       SameAsInput;
     template <class T, class U>
-    auto operator()(T t, U u) const
+    auto eval(T t, U u) const
     {
       return std::pow(t, u);
     }
   };
-
-  DEF_FULL_FUNCTION(Pow)
 
   inline std::ostream & operator<<(std::ostream & s, Pow p)
   {

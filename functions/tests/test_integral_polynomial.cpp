@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include "functions/integral_polynomial.hh"
 #include "functions/integral_polynomial_simplifications.hh"
-#include "functions/streaming2.hh"
+#include "functions/streaming.hh"
 #include "functions/operators.hh"
 #include "functions/polynomial_simplifications.hh"
 

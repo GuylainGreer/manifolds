@@ -8,113 +8,115 @@
 
 namespace manifolds {
 
-  template <class ... Functions>
-  struct RowHolder
-  {
-    RowHolder(Functions...fs):functions(fs...){}
-    tuple<Functions...> functions;
-    auto GetFunctions() const
+    template <class ... Functions>
+    struct RowHolder
     {
-      return functions;
-    }
-  };
+        RowHolder(Functions...fs):functions(fs...){}
+        tuple<Functions...> functions;
+        auto GetFunctions() const
+        {
+            return functions;
+        }
+    };
 
-  template <class ... Functions>
-  auto Row(Functions...fs)
-  {
-    return RowHolder<Functions...>(fs...);
-  }
-
-  template <class rows, class cols,
-	    class ... Functions>
-  struct FunctionMatrixImpl :
-    Function<
-    list<int_<4>, typename Functions::indices...>,
-    max<Functions::input_dim...>::value,
-    rows::value * cols::value>
-  {
-    static const int num_rows = rows::value;
-    static const int num_cols = cols::value;
-    static const bool stateless =
-      and_<is_stateless<Functions>...>::value;
-    tuple<Functions...> functions;
-    static const ComplexOutputBehaviour complex_output =
-      VariadicComplexOutput<Functions...>::value;
-
-    FunctionMatrixImpl() = default;
-
-    template <class ... Rows>
-    FunctionMatrixImpl(Rows...rs):
-      functions(tuple_cat(rs.GetFunctions()...)){}
-
-    FunctionMatrixImpl(tuple<Functions...> f):
-      functions(f){}
-
-    template <class ... Args, std::size_t ... indices>
-    auto eval(std::integer_sequence<std::size_t,indices...>,
-	      Args...args) const
+    template <class ... Functions>
+    auto Row(Functions...fs)
     {
-      return GetMatrix<rows::value,cols::value>
-	(get<indices>(functions)(args...)...);
+        return RowHolder<Functions...>(fs...);
     }
 
-    template <class ... Args>
-    auto operator()(Args...args) const
-    {
-      return eval(std::index_sequence_for<Functions...>(), args...);
-    }
+    template <class rows, class cols,
+              class ... Functions>
+    struct FunctionMatrix :
+        Function<
+        list<int_<4>, typename Functions::indices...>,
+        max<Functions::input_dim...>::value,
+        rows::value * cols::value>,
+        FunctionCommon<FunctionMatrix<rows,cols,Functions...>>
+        {
+            using FunctionCommon<FunctionMatrix>::operator();
+            static const int num_rows = rows::value;
+            static const int num_cols = cols::value;
+            static const bool stateless =
+                and_<is_stateless<Functions>...>::value;
+            tuple<Functions...> functions;
+            static const ComplexOutputBehaviour complex_output =
+                VariadicComplexOutput<Functions...>::value;
 
-    auto GetFunctions() const
-    {
-      return functions;
-    }
+            FunctionMatrix() = default;
 
-    auto GetOutputs() const
-    {
-      return functions;
-    }
+            template <class ... Rows>
+                FunctionMatrix(Rows...rs):
+                functions(tuple_cat(rs.GetFunctions()...)){}
 
-    template <class ... Rights>
-    bool operator==(const FunctionMatrixImpl<
-		    rows, cols, Rights...> & f) const
-    {
-      return VariadicEqual(*this, f);
-    }
+            FunctionMatrix(tuple<Functions...> f):
+                functions(f){}
 
-    template <class T>
-    bool operator==(const T &) const
-    {
-      return false;
-    }
-  };
+            template <class ... Args, std::size_t ... indices>
+                auto eval(std::integer_sequence<
+                              std::size_t,indices...>,
+                          Args...args) const
+            {
+                return GetMatrix<rows::value,cols::value>
+                    (get<indices>(functions)(args...)...);
+            }
 
-  DEF_FF_TEMPLATE(FunctionMatrix)
+            template <class ... Args>
+                auto eval(Args...args) const
+            {
+                return eval(std::index_sequence_for<
+                                Functions...>(), args...);
+            }
 
-  template <std::size_t rows, std::size_t cols,
-	    class ... Functions>
-  auto GetFunctionMatrix(tuple<Functions...> functions)
-  {
+            auto GetFunctions() const
+            {
+                return functions;
+            }
+
+            auto GetOutputs() const
+            {
+                return functions;
+            }
+
+            template <class ... Rights>
+                bool operator==(const FunctionMatrix<
+                                rows, cols, Rights...> & f) const
+            {
+                return VariadicEqual(*this, f);
+            }
+
+            template <class T>
+                bool operator==(const T &) const
+            {
+                return false;
+            }
+        };
+
+template <std::size_t rows, std::size_t cols,
+          class ... Functions>
+auto GetFunctionMatrix(tuple<Functions...> functions)
+{
     return FunctionMatrix<
-      int_<rows>,int_<cols>,Functions...>(functions);
-  }
+        int_<rows>,int_<cols>,Functions...>(functions);
+}
 
-  template <class ... Rows>
-  auto GetFunctionMatrix(Rows...rows)
-  {
+template <class ... Rows>
+auto GetFunctionMatrix(Rows...rows)
+{
     return GetFunctionMatrix<
-      sizeof...(Rows),
-      tuple_size<
+        sizeof...(Rows),
+        tuple_size<
 	decltype(std::declval<
 		 typename first<Rows...>::type>().
 		 GetFunctions())>::value>
-      (tuple_cat(rows.GetFunctions()...));
-  }
+        (tuple_cat(rows.GetFunctions()...));
+}
 
-  template <class ... Functions>
-  auto GetRow(Functions ... functions)
-  {
+template <class ... Functions>
+auto GetRow(Functions ... functions)
+{
     return Row<Functions...>(functions...);
-  }
+}
 
 }
 

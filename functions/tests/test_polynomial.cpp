@@ -42,11 +42,7 @@ BOOST_AUTO_TEST_CASE(polynomial_test)
 
   auto p5 = p3(p4);
 
-  static_assert(std::is_same<
-		decltype(p5),
-		Polynomial<
-		double,
-		int_<7>>>::value,
+  static_assert(Simplifies<decltype(p5)>::value,
 		"Failed to simplify polynomial composition");
   auto p6 = Composition<decltype(p3), decltype(p4)>(p3,p4);
   for(int i = -3; i < 4; i++)

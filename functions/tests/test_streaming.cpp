@@ -1,5 +1,5 @@
 #include <boost/test/unit_test.hpp>
-#include "functions/streaming2.hh"
+#include "functions/streaming.hh"
 #include "functions/trig.hh"
 #include "functions/polynomial.hh"
 #include "functions/variables.hh"

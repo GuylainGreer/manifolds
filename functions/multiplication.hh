@@ -8,25 +8,27 @@
 namespace manifolds {
 
     template <class ... Functions>
-    struct MultiplicationImpl :
+    struct Multiplication :
         Function<
         list<int_<5>, typename Functions::indices...>,
         max<Functions::input_dim...>::value,
-        max<Functions::output_dim...>::value>
+        max<Functions::output_dim...>::value>,
+        FunctionCommon<Multiplication<Functions...>>
     {
+        using FunctionCommon<Multiplication>::operator();
         static const bool stateless =
             and_<is_stateless<Functions>...>::value;
         static const ComplexOutputBehaviour complex_output =
             VariadicComplexOutput<Functions...>::value;
 
-        MultiplicationImpl(){}
-        MultiplicationImpl(const Functions & ... functions):
+        Multiplication(){}
+        Multiplication(const Functions & ... functions):
             functions(functions...){}
-        MultiplicationImpl(const tuple<Functions...> & f):
+        Multiplication(const tuple<Functions...> & f):
             functions(f){}
 
         template <class ... Args>
-        auto operator()(Args ... args) const
+        auto eval(Args ... args) const
         {
             return eval(int_<0>(), args...);
         }
@@ -54,8 +56,6 @@ namespace manifolds {
     private:
         tuple<Functions...> functions;
     };
-
-DEF_FF_TEMPLATE(Multiplication)
 
 template <class ... Fs>
 Multiplication<Fs...> MultiplyRaw(Fs ... fs)

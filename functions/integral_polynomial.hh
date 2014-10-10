@@ -10,7 +10,7 @@ namespace manifolds {
   using iseq = std::integer_sequence<int, coeffs...>;
 
 template <class C>
-struct IntegralPolynomialImpl
+struct IntegralPolynomial
 {
   static_assert(!std::is_same<C,C>::value,
 		"Integral polynomial is only instantiable "
@@ -18,10 +18,12 @@ struct IntegralPolynomialImpl
 };
 
 template <class Type, Type ... coeffs>
-struct IntegralPolynomialImpl<
+struct IntegralPolynomial<
   std::integer_sequence<Type,coeffs...>>:
-  Function<int_<31>, 1, 1>
+    Function<int_<31>, 1, 1>,
+    FunctionCommon<IntegralPolynomial<std::integer_sequence<Type, coeffs...>>>
 {
+    using FunctionCommon<IntegralPolynomial>::operator();
   static const int num_coeffs = sizeof...(coeffs);
   static const bool stateless = true;
   static const ComplexOutputBehaviour complex_output =
@@ -35,7 +37,7 @@ struct IntegralPolynomialImpl<
   }
 
   template <class T, class ... Ts>
-    auto operator()(T t, Ts ...) const
+    auto eval(T t, Ts ...) const
   {
     static_assert(sizeof...(Ts) == 0 ||
 		  sizeof...(coeffs) == 1,
@@ -61,8 +63,6 @@ struct IntegralPolynomialImpl<
     return {c};
   }
 };
-
-  DEF_FF_STEMPLATE(IntegralPolynomial)
 
   template <class C>
   struct is_polynomial<IntegralPolynomial<C>> :

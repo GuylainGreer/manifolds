@@ -1,7 +1,7 @@
 #ifndef MANIFOLDS_FUNCTIONS_SIMPLIFY_HH
 #define MANIFOLDS_FUNCTIONS_SIMPLIFY_HH
 
-#include "streaming2.hh"
+#include "streaming.hh"
 #include <boost/type_traits/is_same.hpp>
 #include <iostream>
 #include <unordered_map>

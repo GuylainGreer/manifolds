@@ -7,7 +7,7 @@
 namespace manifolds {
     template <class Numerator,
               class Denominator>
-    struct DivisionImpl :
+    struct Division :
         Function<
         list<int_<2>,
              typename Numerator::indices,
@@ -15,20 +15,22 @@ namespace manifolds {
                  max<Numerator::input_dim,
                      Denominator::input_dim>::value,
                  max<Numerator::output_dim,
-                     Denominator::output_dim>::value>
+                     Denominator::output_dim>::value>,
+        FunctionCommon<Division<Numerator,Denominator>>
     {
+        using FunctionCommon<Division>::operator();
         static const bool stateless =
             and_<is_stateless<Numerator>,
                  is_stateless<Denominator>>::value;
         static const ComplexOutputBehaviour complex_output =
             VariadicComplexOutput<Numerator, Denominator>::value;
 
-        DivisionImpl(){}
-        DivisionImpl(Numerator n, Denominator d):
+        Division(){}
+        Division(Numerator n, Denominator d):
             n(n),d(d){}
 
         template <class ... Args>
-        auto operator()(Args ... args) const
+        auto eval(Args ... args) const
         {
             return n(args...) / d(args...);
         }
@@ -52,8 +54,6 @@ namespace manifolds {
         Numerator n;
         Denominator d;
     };
-
-    DEF_FF_TEMPLATE(Division)
 
     template <class D, class N, class U>
     bool operator==(Division<N, D>, U)

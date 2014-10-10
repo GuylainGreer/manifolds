@@ -5,23 +5,21 @@
 #include <ostream>
 
 namespace manifolds {
-  struct ZeroImpl : Function<int_<25>, 1,1>
-{
-  static const bool stateless = true;
-  static const ComplexOutputBehaviour complex_output =
-    NeverComplex;
+    struct Zero : Function<int_<25>, 1,1>,
+                  FunctionCommon<Zero>
+    {
+        static const bool stateless = true;
+        static const ComplexOutputBehaviour complex_output =
+            NeverComplex;
 
-  template <class ... Args>
-  auto operator()(Args...) const
-  {
-    return 0;
-  }
-};
+        template <class ... Args>
+        auto eval(Args...) const
+        {
+            return 0;
+        }
+    };
 
-  DEF_FULL_FUNCTION(Zero)
-
-  static const Zero zero = Zero();
-
+    static const Zero zero = Zero();
 }
 
 #endif

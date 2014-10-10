@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include "functions/derivatives.hh"
-#include "functions/streaming2.hh"
+#include "functions/streaming.hh"
 
 BOOST_AUTO_TEST_CASE(derivative_test)
 {

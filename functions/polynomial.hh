@@ -15,9 +15,11 @@ namespace manifolds
     //Somewhat confusingly,
     //order here refers to the number of coefficients
     template <class CoeffType, class Order>
-    struct PolynomialImpl :
-        Function<int_<6>, 1, 1>
+    struct Polynomial :
+        Function<int_<6>, 1, 1>,
+        FunctionCommon<Polynomial<CoeffType,Order>>
     {
+        using FunctionCommon<Polynomial>::operator();
         static const int num_coeffs = Order::value;
         static const bool stateless = false;
         static const ComplexOutputBehaviour complex_output =
@@ -25,11 +27,11 @@ namespace manifolds
             AlwaysComplex : SameAsInput;
 
         template <class Type, std::size_t N>
-        PolynomialImpl(std::array<Type, N> t):
+        Polynomial(std::array<Type, N> t):
             coeffs(t){}
 
         template <class Type, class N>
-        PolynomialImpl(const PolynomialImpl<Type, N> & t)
+        Polynomial(const Polynomial<Type, N> & t)
         {
             std::copy(t.GetCoeffs().begin(),
                       t.GetCoeffs().end(),
@@ -37,7 +39,7 @@ namespace manifolds
         }
 
         template <class T, class ... Ts>
-        auto operator()(T t, Ts ...) const
+        auto eval(T t, Ts ...) const
         {
             static_assert(sizeof...(Ts) == 0 ||
                           Order::value == 1,
@@ -72,8 +74,6 @@ namespace manifolds
     private:
         std::array<CoeffType,Order::value> coeffs;
     };
-
-    DEF_FF_TEMPLATE(Polynomial)
 
     template <class>
     struct is_polynomial : std::false_type{};
