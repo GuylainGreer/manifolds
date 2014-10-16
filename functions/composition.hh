@@ -235,6 +235,13 @@ private:
   {
     return Composition<Fs...>(fs...);
   }
+
+template <class ... Functions>
+template <class ... Args>
+Composition<Group<Functions...>, Args...> Group<Functions...>::compose(Args ... args) const
+{
+    return ComposeRaw(*this, args...);
+}
 }
 
 #endif
