@@ -66,6 +66,13 @@ namespace manifolds {
     {
         return VariadicEqual(d1, d2);
     }
+
+    template <class N, class D>
+    Division<N,D> DivideRaw(N n, D d)
+    {
+        return {n, d};
+    }
+
 }
 
 #endif
