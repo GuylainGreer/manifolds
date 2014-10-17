@@ -19,14 +19,20 @@ namespace manifolds
                              int, N>());
     }
 
+    static const int pointwise_default_num_points = 100;
+    static const double pointwise_default_tolerance = 0;
+    static const double pointwise_default_min = -100;
+    static const double pointwise_default_max = 100;
+
     template <class F, class FRef>
-    void PointwiseEqual(F f, FRef fr, int num_points = 100,
-                        double tolerance = 0,
-                        double min = -100,
-                        double max = 100)
+    void PointwiseEqual(F f, FRef fr,
+                        int num_points = pointwise_default_num_points,
+                        double tolerance = pointwise_default_tolerance,
+                        double min = pointwise_default_min,
+                        double max = pointwise_default_max)
     {
         std::minstd_rand e;
-        std::uniform_real_distribution<> r;
+        std::uniform_real_distribution<> r(min,max);
         for(int i = 0; i < num_points; i++)
         {
             auto x = MakeInput<F::input_dim>(r, e);
