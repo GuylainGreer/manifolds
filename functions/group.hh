@@ -24,13 +24,13 @@ namespace manifolds {
         }
 
         template <class ... Args>
-        auto dispatch(std::true_type, Args ... args) const
+        auto dispatch(std::false_type, Args ... args) const
         {
             return eval(args...);
         }
 
         template <class ... Args>
-        auto dispatch(std::false_type, Args ... args) const
+        auto dispatch(std::true_type, Args ... args) const
         {
             return compose(args...);
         }
@@ -41,8 +41,8 @@ namespace manifolds {
         template <class ... Args>
         auto operator()(Args ... args) const
         {
-            return eval(and_<is_function<Args>...>(),
-                        args...);
+            return dispatch(and_<is_function<Args>...>(),
+                            args...);
         }
 
         template <class ... Args>
