@@ -2,6 +2,7 @@
 #define MANIFOLDS_TESTS_POINTWISE_COMPARISON_HH
 
 #include <random>
+#include "functions/matrix.hh"
 
 namespace manifolds
 {
@@ -17,6 +18,47 @@ namespace manifolds
     {
         return MakeInput(r, e, std::make_integer_sequence<
                              int, N>());
+    }
+
+    template <class M>
+    void ComparePoint(M m1, M m2, double tolerance, std::true_type)
+    {
+        for(std::size_t r = 0; r < M::num_rows; r++)
+            for(std::size_t c = 0; c < M::num_cols; c++)
+                BOOST_CHECK_CLOSE(m1.Coeff(r,c),
+                                  m2.Coeff(r,c),
+                                  tolerance);
+    }
+
+    template <class X>
+    void ComparePoint(X x1, X x2, double tolerance, std::false_type)
+    {
+        BOOST_CHECK_CLOSE(x1, x2, tolerance);
+    }
+
+    template <class F>
+    void ComparePoint(F f1, F f2, double tolerance)
+    {
+        ComparePoint(f1, f2, tolerance, IsMatrix<F>());
+    }
+
+    inline void PrintTupleIter(const tuple<> & ){}
+
+    template <class Tuple>
+    void PrintTupleIter(const Tuple & t)
+    {
+        std::cout << get<0>(t);
+        if(tuple_size<Tuple>::value > 1)
+            std::cout << ", ";
+        PrintTupleIter(remove_element<0>(t));
+    }
+
+    template <class Tuple>
+    void PrintTuple(const Tuple & t)
+    {
+        std::cout << "(";
+        PrintTupleIter(t);
+        std::cout << ")\n";
     }
 
     static const int pointwise_default_num_points = 100;
@@ -36,7 +78,8 @@ namespace manifolds
         for(int i = 0; i < num_points; i++)
         {
             auto x = MakeInput<F::input_dim>(r, e);
-            BOOST_CHECK_CLOSE(f(x), fr(x), tolerance);
+            //PrintTuple(x);
+            ComparePoint(f(x), fr(x), tolerance);
         }
     }
 }

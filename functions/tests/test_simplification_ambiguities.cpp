@@ -6,11 +6,12 @@
 #include "functions/polynomial.hh"
 #include "functions/function_matrix.hh"
 #include "functions/division.hh"
+#include "functions/all_simplifications.hh"
 
 BOOST_AUTO_TEST_CASE(simplification_ambiguities_test)
 {
   using namespace manifolds;
-  /*
+  
   //commas in template parameter packs in macros are hard...
   //hence this otherwise dumb-looking define
 #define C ,
@@ -110,5 +111,4 @@ BOOST_AUTO_TEST_CASE(simplification_ambiguities_test)
   TESTCASE(Addition<UnaryMinus<Zero> C Zero>);
   //Tests com_z_z
   TESTCASE(Composition<Zero C Zero>);
-  */
 }

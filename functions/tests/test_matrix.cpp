@@ -40,13 +40,10 @@ BOOST_AUTO_TEST_CASE(matrix_test)
 
   static_assert(is_function<decltype(mf)>::value, "Huh?");
   auto mf2 = transpose(mf) * mf;
-  //static_assert(decltype(mf2)::stateless, "What the dilly?");
+  static_assert(decltype(mf2)::stateless, "What the dilly?");
 
   //std::cout << mf2 << "\n\n";
   //Stream2(std::cout, mf2) << "\n\n";
 
-/*  BOOST_CHECK_EQUAL(mf2(4).Coeff(0,0), 1.0);
-  BOOST_CHECK_EQUAL(mf2(4).Coeff(0,1), 0.0);
-  BOOST_CHECK_EQUAL(mf2(4).Coeff(1,0), 0.0);
-  BOOST_CHECK_EQUAL(mf2(4).Coeff(1,1), 1.0);*/
+  BOOST_CHECK_EQUAL(mf2(4), (GetMatrix<2,2>(1,0,0,1)));
 }

@@ -2,6 +2,7 @@
 #include "functions/zero.hh"
 #include "functions/trig.hh"
 #include "functions/operators.hh"
+#include "functions/all_simplifications.hh"
 
 BOOST_AUTO_TEST_CASE(zero_function_test)
 {
@@ -9,7 +10,7 @@ BOOST_AUTO_TEST_CASE(zero_function_test)
 
   Zero z;
   Sin s;
-  /*  static_assert(std::is_same<decltype(s+z),
+  static_assert(std::is_same<decltype(s+z),
 		Sin>::value, "Failed to simplify Sin + 0");
 
   static_assert(std::is_same<decltype(z+s),
@@ -24,7 +25,6 @@ BOOST_AUTO_TEST_CASE(zero_function_test)
   static_assert(std::is_same<decltype(z*s),Zero>::value,
 		"Failed to simplify 0 * Sin");
 
-		std::cout << "Zero: " << (z*z) << "\n\n";*/
-  /*static_assert(std::is_same<decltype(z*z),Zero>::value,
-    "Failed to simplify 0 * 0");*/
+  static_assert(std::is_same<decltype(z*z),Zero>::value,
+                "Failed to simplify 0 * 0");
 }

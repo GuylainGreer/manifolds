@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(polynomial_test)
 
   BOOST_CHECK_EQUAL(ps(2), 3 * manifolds::sin(2));
 
-  //ps = manifolds::sin + (manifolds::sin+manifolds::sin);
+  ps = manifolds::sin + (manifolds::sin+manifolds::sin);
   //The fact that the line above compiles means that
   //the reverse generic simplification worked and gave
   //the expected type.

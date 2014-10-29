@@ -22,5 +22,5 @@ BOOST_AUTO_TEST_CASE(multiplication_test)
   BOOST_CHECK_EQUAL((-2_c * x  * y)(2, 1), -4);
   BOOST_CHECK_EQUAL((Sin()(x*x))(2), std::sin(4));
   BOOST_CHECK_EQUAL((-2_c * Sin())(2), -2 * std::sin(2));
-  //BOOST_CHECK_EQUAL(f2(2,1), -4 * std::sin(4));
+  BOOST_CHECK_EQUAL(f2(2,1), -4 * std::sin(4));
 }

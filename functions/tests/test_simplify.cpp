@@ -4,12 +4,13 @@
 #include "functions/trig.hh"
 #include "functions/operators.hh"
 #include "functions/polynomial.hh"
-#include "functions/simplify_variadic.hh"
+#include "functions/all_simplifications.hh"
+
 
 BOOST_AUTO_TEST_CASE(simplify_test)
 {
   using namespace manifolds;
-  /*  typedef Addition<Sin,Cos> Type;
+  typedef Addition<Sin,Cos> Type;
   static_assert(std::is_same<
 		SimplifiedType<Type>,
 		Type>::value, "Failed to not simplify!");
@@ -49,5 +50,4 @@ BOOST_AUTO_TEST_CASE(simplify_test)
 		Sin,Sin>>::value,
 		"Failed to simplify multiplication of "
 		"composition of functions.");
-  */
 }

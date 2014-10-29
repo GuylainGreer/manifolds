@@ -15,7 +15,7 @@ namespace manifolds {
     static auto Combine(in_type)
     {
       SIMPLIFY_INFO("Simplifying cos**2\n");
-      return ComposeRaw(GetPolynomial(1,0,-1), Sin());
+      return ComposeRaw(GetIPolynomial<1,0,-1>(), Sin());
     }
 
     //typedef decltype(Combine(std::declval<in_type>())) type;
