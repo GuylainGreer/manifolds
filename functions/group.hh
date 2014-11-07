@@ -3,7 +3,7 @@
 
 namespace manifolds {
     template <class...>
-    class Composition;
+    struct Composition;
 
     template <class...Funcs>
     struct Group :
