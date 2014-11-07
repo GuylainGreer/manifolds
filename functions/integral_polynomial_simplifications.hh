@@ -151,12 +151,12 @@ namespace manifolds
       struct P2Loop
     {
       typedef typename P2Loop<
-	i, j+1, typename Add<
+	i, j-1, typename Add<
 	  i,j,OutSeq>::type>::type type;
     };
 
     template <int i, class OutSeq>
-    struct P2Loop<i, sizeof...(t2s), OutSeq>
+    struct P2Loop<i, -1, OutSeq>
     {
       typedef OutSeq type;
     };
@@ -165,19 +165,31 @@ namespace manifolds
       struct P1Loop
     {
       typedef typename P1Loop<
-	i+1, typename P2Loop<
-	  i, 0, OutSeq>::type>::type type;
+	i-1, typename P2Loop<
+          i, sizeof...(t2s)-1, OutSeq>::type>::type type;
     };
 
     template <class OutSeq>
-    struct P1Loop<sizeof...(t1s), OutSeq>
+    struct P1Loop<-1, OutSeq>
     {
       typedef OutSeq type;
     };
 
+    template <class>
+    struct InitOutput;
+
+    template <int ... indices>
+    struct InitOutput<iseq<indices...>>
+    {
+        typedef std::integer_sequence<Tr, (indices, 0)...> type;
+    };
+
     typedef IntegralPolynomial<
       typename P1Loop<
-	0, std::integer_sequence<Tr>>::type> type;
+	sizeof...(t1s)-1,
+        typename InitOutput<
+            miseq<sizeof...(t1s)+
+                  sizeof...(t2s)-1>>::type>::type> type;
 			      
 
     static type Combine(Multiplication<
