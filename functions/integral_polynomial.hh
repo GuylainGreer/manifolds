@@ -9,6 +9,9 @@ namespace manifolds {
   template <int ... coeffs>
   using iseq = std::integer_sequence<int, coeffs...>;
 
+  template <std::size_t size>
+  using miseq = std::make_integer_sequence<int,size>;
+
 template <class C>
 struct IntegralPolynomial
 {
