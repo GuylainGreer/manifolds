@@ -181,7 +181,8 @@ namespace manifolds
     template <int ... indices>
     struct InitOutput<iseq<indices...>>
     {
-        typedef std::integer_sequence<Tr, (indices, 0)...> type;
+        typedef std::integer_sequence<
+            Tr, ((void)indices, 0)...> type;
     };
 
     typedef IntegralPolynomial<
