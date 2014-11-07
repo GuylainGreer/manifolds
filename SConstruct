@@ -1,6 +1,6 @@
 import os
 
-compiler = 'g++-4.9'
+compiler = 'clang++'
 error_limit = '-fmax-errors=1' \
               if 'g++' in compiler else \
                  '-ferror-limit=1'
@@ -15,7 +15,7 @@ cpp_flags = ' '.join(['-std=c++1y',
                       '-mtune=native',
                       #error_limit,
                       #'-DPRINT_SIMPLIFIES',
-                      '-g',
+                      #'-g',
 		      '-fvisibility=hidden',
                   ])
 
