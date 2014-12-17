@@ -1,6 +1,7 @@
 #ifndef MANIFOLDS_TESTS_POINTWISE_COMPARISON_HH
 #define MANIFOLDS_TESTS_POINTWISE_COMPARISON_HH
 
+#include <boost/test/unit_test.hpp>
 #include <random>
 #include "functions/matrix.hh"
 
