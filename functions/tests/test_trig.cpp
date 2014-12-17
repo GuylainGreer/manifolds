@@ -1,6 +1,7 @@
 #include <complex>
 #include "functions/trig.hh"
 #include "functions/full_function_defs.hh"
+#include "pointwise_equal.hh"
 #include <boost/test/unit_test.hpp>
 #include <limits>
 
@@ -11,39 +12,41 @@ BOOST_AUTO_TEST_CASE(trig_tests)
   Cos c;
   Tan t;
 
-  BOOST_CHECK_EQUAL(s(0), 0);
-  BOOST_CHECK_EQUAL(c(0), 1);
-  BOOST_CHECK_EQUAL(t(0), 0);
-  BOOST_CHECK_CLOSE(s(1) / c(1), t(1), 1E-13);
-  BOOST_CHECK_CLOSE(s(2) * s(2) + c(2) * c(2),
-		    1, 0);
+  PointwiseEqual(s, [](auto x){return std::sin(get<0>(x));});
+  PointwiseEqual(c, [](auto x){return std::cos(get<0>(x));});
+  PointwiseEqual(t, [](auto x){return std::tan(get<0>(x));});
 
   Sinh sh;
   Cosh ch;
   Tanh th;
 
-  BOOST_CHECK_EQUAL(sh(0), 0);
-  BOOST_CHECK_EQUAL(ch(0), 1);
-  BOOST_CHECK_CLOSE(sh(1) / ch(1), th(1), 1E-13);
-  BOOST_CHECK_CLOSE(sh(2) * sh(2) - ch(2) * ch(2),
-		    -1, 1E-12);
+  PointwiseEqual(sh, [](auto x){return std::sinh(get<0>(x));});
+  PointwiseEqual(ch, [](auto x){return std::cosh(get<0>(x));});
+  PointwiseEqual(th, [](auto x){return std::tanh(get<0>(x));});
 
   std::complex<double> i(0,1);
-  BOOST_CHECK_EQUAL(std::abs(s(i)), -sh(-1));
+  BOOST_CHECK_EQUAL(std::abs(s(i)), sh(1));
   BOOST_CHECK_EQUAL(std::abs(sh(i)), s(1));
   ACos ac;
   ASin as;
   ATan at;
-  
-  BOOST_CHECK_CLOSE(ac(c(1)), 1, 1E-13);
-  BOOST_CHECK_CLOSE(as(s(1)), 1, 1E-13);
-  BOOST_CHECK_CLOSE(at(t(1)), 1, 1E-13);
+  double min = -0.9999;
+  double max = -min;
+  PointwiseEqual(as, [](auto x){return std::asin(get<0>(x));},
+                 100, 0, min, max);
+  PointwiseEqual(ac, [](auto x){return std::acos(get<0>(x));},
+                 100, 0, min, max);
+  PointwiseEqual(at, [](auto x){return std::atan(get<0>(x));},
+                 100, 0, min, max);
 
   ACosh ach;
   ASinh ash;
   ATanh ath;
   
-  BOOST_CHECK_CLOSE(ach(ch(1)), 1, 1E-13);
-  BOOST_CHECK_CLOSE(ash(sh(1)), 1, 1E-13);
-  BOOST_CHECK_CLOSE(ath(th(1)), 1, 1E-13);
+  PointwiseEqual(ash, [](auto x){return std::asinh(get<0>(x));},
+                 100, 0);
+  PointwiseEqual(ach, [](auto x){return std::acosh(get<0>(x));},
+                 100, 0, 1, 25);
+  PointwiseEqual(ath, [](auto x){return std::atanh(get<0>(x));},
+                 100, 0, min, max);
 }
