@@ -20,11 +20,7 @@ BOOST_AUTO_TEST_CASE(addition_test)
   auto c33 = b1 + m1 * t;
   auto c22 = b2 + m2 * t;
   auto c11 = b3 + m3 * t;
-  (void)c33;
-  (void)c22;
-  (void)c11;
-  //auto part1 = 4_c * c22 * c22 * c11 * c33;
-  //(void)part1;
+  auto part1 = 4_c * c22 * c22 * c11 * c33;
   CustomVariableNamer vnamer{
       std::make_pair(1, "b1"),
       std::make_pair(2, "b2"),
@@ -33,7 +29,5 @@ BOOST_AUTO_TEST_CASE(addition_test)
       std::make_pair(7, "m2"),
       std::make_pair(8, "m3"),
     };
-  //Stream2(std::cout, c11, vnamer) << "\n\n";
-  //Stream2(std::cout, c22, vnamer) << "\n\n";
-  //Stream2(std::cout, c33, vnamer) << "\n\n";
+  Stream2(std::cout, part1, vnamer) << "\n\n";
 }
