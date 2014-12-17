@@ -69,18 +69,9 @@ namespace manifolds {
         std::array<CoeffType, rows*cols> coeffs;
     };
 
-    enum class MatrixStorage
-    {
-        RowMajor,
-            ColumnMajor,
-            ColMajor = ColumnMajor
-            };
-
     template <std::size_t rows, std::size_t cols,
               class ... Coeffs>
-    auto GetMatrix(std::integral_constant<
-                       MatrixStorage, MatrixStorage::RowMajor>,
-                   Coeffs...args)
+    auto GetRowMatrix(Coeffs...args)
     {
         typedef typename std::common_type<
             Coeffs...>::type Type;
@@ -90,15 +81,10 @@ namespace manifolds {
 
     template <std::size_t rows, std::size_t cols,
               class ... Coeffs>
-    auto GetMatrix(std::integral_constant<
-                       MatrixStorage, MatrixStorage::ColMajor>,
-                   Coeffs...args)
+    auto GetColMatrix(Coeffs...args)
     {
         auto matrix =
-            GetMatrix<cols,rows>(std::integral_constant<
-                                     MatrixStorage,
-                                     MatrixStorage::RowMajor>(),
-                                 args...);
+            GetRowMatrix<cols,rows>(args...);
         typedef typename std::common_type<
             Coeffs...>::type Type;
         Matrix<rows,cols,Type> result;
@@ -109,20 +95,10 @@ namespace manifolds {
     }
 
     template <std::size_t rows, std::size_t cols,
-              MatrixStorage storage, class ... Args>
-    auto GetMatrix(Args...args)
-    {
-        return GetMatrix<rows, cols>(std::integral_constant<
-                                         MatrixStorage, storage>(),
-                                     args...);
-    }
-
-    template <std::size_t rows, std::size_t cols,
               class ... Args>
     auto GetMatrix(Args ... args)
     {
-        return GetMatrix<rows, cols,
-                         MatrixStorage::RowMajor>(args...);
+        return GetRowMatrix<rows, cols>(args...);
     }
 
     template <std::size_t r, std::size_t c, class T>
