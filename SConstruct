@@ -1,19 +1,19 @@
 import os
 
 compiler = 'clang++'
-error_limit = '-fmax-errors=1' \
-              if 'g++' in compiler else \
-                 '-ferror-limit=1'
+error_limit = '-ferror-limit=1' \
+              if 'clang++' in compiler else \
+                 '-fmax-errors=1'
 env = Environment(CXX = compiler)
 
 cpp_flags = ' '.join(['-std=c++1y',
-                     '-Wall',
+                      '-Wall',
                       '-Wpedantic',
                       '-ftemplate-depth=512',
                       '-ftemplate-backtrace-limit=0',
                       '-msse4 -march=native',
                       '-mtune=native',
-                      #error_limit,
+                      error_limit,
                       #'-DPRINT_SIMPLIFIES',
                       #'-g',
 		      '-fvisibility=hidden',
