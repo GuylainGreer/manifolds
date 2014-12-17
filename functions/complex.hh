@@ -92,6 +92,27 @@ namespace manifolds {
 
     using Arg = Phase;
 
+    struct Sign : Function<int_<31>, 1, 1>,
+                  FunctionCommon<Sign>
+    {
+        using FunctionCommon<Sign>::operator();
+        static const bool stateless = true;
+        //The sign of a complex number isn't even defined
+        static const ComplexOutputBehaviour complex_output = NeverComplex;
+
+        template <class T>
+        auto eval(T t) const
+        {
+            return std::copysign(t, 1);
+        }
+
+        template <class T>
+        bool operator==(T) const
+        {
+            return std::is_same<T, Sign>::value;
+        }
+    };
+
     struct Norm : Function<int_<29>, 1, 1>,
                   FunctionCommon<Norm>
     {
@@ -156,7 +177,7 @@ namespace manifolds {
 
     };
 
-    static const ImagN<std::complex<double>> i =
+    static const ImagN<std::complex<double>> I =
         ImagN<std::complex<double>>();
 
 }
