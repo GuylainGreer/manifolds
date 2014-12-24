@@ -3,7 +3,6 @@
 
 #include "variables.hh"
 #include "trig.hh"
-#include "polynomial.hh"
 #include "transpose.hh"
 
 namespace manifolds {
