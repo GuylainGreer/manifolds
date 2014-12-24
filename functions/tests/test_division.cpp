@@ -21,6 +21,6 @@ BOOST_AUTO_TEST_CASE(reciprocal_test)
   auto d12 = DivideRaw(d1, d2);
   static_assert(Simplifies<decltype(d12)>::value, "");
   auto d12s = Simplify(d12);
-   PointwiseEqual(d12s, d12, pointwise_default_num_points,
-                  1E-11, 0.001, 20);
+  PointwiseEqual(d12s, d12, pointwise_default_num_points,
+                 1E-11, 0.001, 20);
 }
