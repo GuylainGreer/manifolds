@@ -18,6 +18,7 @@
 #include "integral_polynomial.hh"
 #include "unary_minus.hh"
 #include "trig.hh"
+#include "complex.hh"
 
 namespace manifolds
 {
@@ -50,7 +51,19 @@ namespace manifolds
     STD_STREAM2(Exp, exp)
     STD_STREAM2(Sqrt, sqrt)
     STD_STREAM2(Pow, pow)
+    STD_STREAM2(Real, real)
+    STD_STREAM2(Imag, imag)
+    STD_STREAM2(Phase, phase)
+    STD_STREAM2(Sign, sign)
+    STD_STREAM2(Norm, norm)
+
 #undef STD_STREAM2
+
+    template <class V, class T>
+    static void Stream2(std::ostream & s, ImagN<T>, V)
+      {
+          s << "I";
+      }
 
     template <class ... Args, class VNamer>
     static void Stream2(std::ostream & s,
@@ -460,6 +473,21 @@ namespace manifolds
   {
     return Stream2(s, m);
   }
+
+#define EASY_STREAM(Func, name)                         \
+    inline std::ostream & operator<<(std::ostream & s,  \
+                                     Func)              \
+    {                                                   \
+        return s << #name;                              \
+    }
+
+    EASY_STREAM(Real, real)
+    EASY_STREAM(Imag, imag)
+    EASY_STREAM(Phase, phase)
+    EASY_STREAM(Sign, sign)
+    EASY_STREAM(Norm, norm)
+    template <class T>
+    EASY_STREAM(ImagN<T>, I)
 }
 
 #endif
