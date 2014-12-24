@@ -20,6 +20,12 @@ namespace manifolds {
     };
 
     static const Zero zero = Zero();
+
+    template <class T>
+    bool operator==(Zero, T)
+    {
+        return std::is_same<Zero,T>::value;
+    }
 }
 
 #endif
