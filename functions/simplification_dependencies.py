@@ -75,6 +75,14 @@ var_ip_p = Vertex('Variadic<IPolynomial<>,Polynomial<>>')
 mult_f_ip_1 = Vertex('Multiplication<T, IntegralPolynomial<1> >')
 add_f_ip_1 = Vertex('Addition<T, IntegralPolynomial<>>')
 div_div_div = Vertex('Division<Division<>,Division<>')
+com_re_i = Vertex('Composition<Real,I>')
+com_im_i = Vertex('Composition<Imag,I>')
+com_re_f = Vertex('Composition<Real,F>')
+com_im_f = Vertex('Composition<Imag,F>')
+com_ph_f = Vertex('Composition<Phase,F>')
+com_ph_i = Vertex('Composition<Phase,I>')
+com_nm_i = Vertex('Composition<Norm,I>')
+com_nm_f = Vertex('Composition<Norm,F>')
 
 all_simplifications = [var_add, com_add, add_nadd, nadd_add,
                        var_com, mult_div_div, mult_div_f,
@@ -92,8 +100,14 @@ all_simplifications = [var_add, com_add, add_nadd, nadd_add,
                        mult_z_f, com_z_f, um_com_f_fs, com_div_fs,
                        mult_cos_cos, com_f_z, com_f_p_1,
                        var_p_ip, mult_f_ip_1, add_f_ip_1,
-                       var_ip_p, div_div_div]
+                       var_ip_p, div_div_div, com_re_i, com_im_i,
+                       com_re_f, com_im_f, com_ph_f, com_ph_i,
+                       com_nm_i, com_nm_f]
 
+add_edge(com_nm_i, com_nm_f)
+add_edge(com_ph_i, com_ph_f)
+add_edge(com_im_i, com_im_f)
+add_edge(com_re_i, com_re_f)
 add_edge(div_div_div,  div_div_f)
 add_edge(div_div_div, div_f_div)
 add_edge(var_p_ip, add_f_ip_1)
@@ -169,7 +183,6 @@ add_edge(var_com_f1_fs_com_f2_fs, mult_f_f)
 add_edge(var_com_f1_fs_com_f2_fs, add_com_p_f_f)
 add_edge(var_com_f1_fs_com_f2_fs, mult_com_p_f_f)
 add_edge(add_f_z, nadd_add)
-
 
 #This is hacky, but too bad
 def var_name(x):
