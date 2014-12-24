@@ -19,6 +19,12 @@ namespace manifolds {
       SameAsInput
     };
 
+    template <class T>
+    struct ComplexOutputType :
+        std::integral_constant<
+        ComplexOutputBehaviour,
+        T::complex_output>{};
+
   template <class ... Functions>
   struct VariadicComplexOutput :
     std::integral_constant<
