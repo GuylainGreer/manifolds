@@ -9,10 +9,6 @@
 
 namespace manifolds {
 
-    using std::real;
-    using std::imag;
-    using std::arg;
-
     struct Real : Function<int_<27>, 1, 1>,
                   FunctionCommon<Real>
     {
@@ -24,18 +20,14 @@ namespace manifolds {
         template <class T>
         auto eval(T t) const
         {
+            using std::real;
             return real(t);
-        }
-
-        bool operator==(Real) const
-        {
-            return true;
         }
 
         template <class T>
         bool operator==(const T &) const
         {
-            return false;
+            return std::is_same<Real,T>::value;
         }
     };
 
@@ -50,18 +42,14 @@ namespace manifolds {
         template <class T>
         auto eval(T t) const
         {
+            using std::imag;
             return imag(t);
-        }
-
-        bool operator==(Imag) const
-        {
-            return true;
         }
 
         template <class T>
         bool operator==(const T &) const
         {
-            return false;
+            return std::is_same<Imag,T>::value;
         }
     };
 
@@ -75,43 +63,18 @@ namespace manifolds {
         template <class T>
         auto eval(T t) const
         {
+            using std::arg;
             return arg(t);
-        }
-
-        bool operator==(Phase) const
-        {
-            return true;
         }
 
         template <class T>
         bool operator==(const T &) const
         {
-            return false;
+            return std::is_same<Phase,T>::value;
         }
     };
 
     using Arg = Phase;
-
-    struct Sign : Function<int_<31>, 1, 1>,
-                  FunctionCommon<Sign>
-    {
-        using FunctionCommon<Sign>::operator();
-        static const bool stateless = true;
-        //The sign of a complex number isn't even defined
-        static const ComplexOutputBehaviour complex_output = NeverComplex;
-
-        template <class T>
-        auto eval(T t) const
-        {
-            return std::copysign(t, 1);
-        }
-
-        template <class T>
-        bool operator==(T) const
-        {
-            return std::is_same<T, Sign>::value;
-        }
-    };
 
     struct Norm : Function<int_<29>, 1, 1>,
                   FunctionCommon<Norm>
@@ -127,15 +90,10 @@ namespace manifolds {
             return norm(t);
         }
 
-        bool operator==(Norm) const
-        {
-            return true;
-        }
-
         template <class T>
         bool operator==(const T &) const
         {
-            return false;
+            return std::is_same<Norm,T>::value;
         }
 
         template <class T,
@@ -143,8 +101,7 @@ namespace manifolds {
                       !is_complex<T>::value>::type>
         auto eval(T t) const
         {
-            auto t2 = abs(t);
-            return t2 * t2;
+            return t * t;
         }
     };
 
@@ -174,7 +131,47 @@ namespace manifolds {
         {
             return false;
         }
+    };
 
+    struct Sign : Function<int_<31>, 1, 1>,
+                  FunctionCommon<Sign>
+    {
+        using FunctionCommon<Sign>::operator();
+        static const bool stateless = true;
+        //The sign of a complex number isn't even defined
+        static const ComplexOutputBehaviour complex_output = NeverComplex;
+
+        template <class T>
+        auto eval(T t) const
+        {
+            return std::copysign(t, 1);
+        }
+
+        template <class T>
+        bool operator==(T) const
+        {
+            return std::is_same<T, Sign>::value;
+        }
+    };
+
+    struct Conjugate : Function<int_<32>, 1, 1>,
+                       FunctionCommon<Conjugate>
+    {
+        using FunctionCommon<Conjugate>::operator();
+        static const bool stateless = true;
+        static const ComplexOutputBehaviour complex_output = SameAsInput;
+
+        template <class T>
+        auto eval(T t) const
+        {
+            return T(real(t), -imag(t));
+        }
+
+        template <class T>
+        bool operator==(T) const
+        {
+            return std::is_same<Conjugate, T>::value;
+        }
     };
 
     static const ImagN<std::complex<double>> I =
