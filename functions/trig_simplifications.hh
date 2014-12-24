@@ -17,8 +17,6 @@ namespace manifolds {
       SIMPLIFY_INFO("Simplifying cos**2\n");
       return ComposeRaw(GetIPolynomial<1,0,-1>(), Sin());
     }
-
-    //typedef decltype(Combine(std::declval<in_type>())) type;
   };
 }
 
