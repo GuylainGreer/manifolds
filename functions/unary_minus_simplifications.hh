@@ -1,6 +1,8 @@
 #ifndef MANIFOLDS_FUNCTIONS_UNARY_MINUS_SIMPLIFICATIONS_HH
 #define MANIFOLDS_FUNCTIONS_UNARY_MINUS_SIMPLIFICATIONS_HH
 
+#include "unary_minus.hh"
+
 namespace manifolds
 {
   template <class F>
