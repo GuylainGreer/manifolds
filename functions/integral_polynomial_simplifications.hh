@@ -6,6 +6,7 @@
 #include "addition.hh"
 #include "simplify.hh"
 #include "unary_minus.hh"
+#include "zero.hh"
 
 namespace manifolds
 {
@@ -421,6 +422,18 @@ struct Simplification<
         return get<0>(m.GetFunctions());
     }
 };
+
+template <class T>
+struct Simplification<
+    IntegralPolynomial<std::integer_sequence<T,(T)0> >,
+    /*ip_0*/0>
+{
+    static auto Combine(IntegralPolynomial<std::integer_sequence<T,(T)0> >)
+    {
+        return zero;
+    }
+};
+
 }
 
 #endif
