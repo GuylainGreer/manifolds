@@ -202,7 +202,7 @@ template <template <class...> class Variadic, class T1, class O1, class T2,
 struct Simplification<
     Variadic<Polynomial<T1, O1>,
              IntegralPolynomial<std::integer_sequence<T2, t2s...> > >,
-    /*var_p_ip*/ 1> {
+    /*var_p_ip*/2> {
   typedef Variadic<Polynomial<T1, O1>, Polynomial<T2, int_<sizeof...(t2s)> > >
   type;
 
@@ -276,7 +276,7 @@ struct Simplification<Multiplication<A, A>, /*mult_f_f*/ 3,
 template <class T, class U, U us>
 struct Simplification<
     Addition<T, IntegralPolynomial<std::integer_sequence<U, us> > >,
-    /*add_f_ip_1*/ 2> {
+    /*add_f_ip_1*/3> {
   typedef Composition<IntegralPolynomial<std::integer_sequence<U, us, (U)1> >,
                       T> type;
 
@@ -293,7 +293,7 @@ struct Simplification<
 template <class T, class U>
 struct Simplification<
     Multiplication<T, IntegralPolynomial<std::integer_sequence<U, (U)1> > >,
-    /*mult_f_ip_1*/ 0> {
+    /*mult_f_ip_1*/1> {
   static T Combine(Multiplication<
       T, IntegralPolynomial<std::integer_sequence<U, (U)1> > > m) {
     SIMPLIFY_INFO("Simplifying multiplication of function by 1");
