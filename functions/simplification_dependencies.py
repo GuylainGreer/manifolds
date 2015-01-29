@@ -18,6 +18,7 @@ def add_edge(preferred, less_preferred):
     preferred.edges_out.append(less_preferred)
     fix_levels(preferred)
 
+um_z = Vertex('UnaryMinus<Zero>')
 var_add = Vertex('Addition<Functions...>')
 com_add = Vertex('Composition<Addition<AFuncs...>,C>')
 add_nadd = Vertex('Addition<F, UnaryMinus<F>>')
@@ -102,8 +103,10 @@ all_simplifications = [var_add, com_add, add_nadd, nadd_add,
                        var_p_ip, mult_f_ip_1, add_f_ip_1,
                        var_ip_p, div_div_div, com_re_i, com_im_i,
                        com_re_f, com_im_f, com_ph_f, com_ph_i,
-                       com_nm_i, com_nm_f]
+                       com_nm_i, com_nm_f, um_z]
 
+add_edge(um_z, um_f)
+add_edge(mult_z_f, mult_f_ip_1)
 add_edge(com_nm_i, com_nm_f)
 add_edge(com_ph_i, com_ph_f)
 add_edge(com_im_i, com_im_f)
