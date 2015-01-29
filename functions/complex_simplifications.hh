@@ -47,7 +47,7 @@ struct Simplification<Composition<Phase, T>, /*com_ph_f*/ 1,
                                               NeverComplex>::type> {
   static auto Combine(Composition<Phase, T> t) {
     auto t2 = get<1>(t.GetFunctions());
-    return MultiplyRaw(Sign()(t2), GetPolynomial(M_PI));
+    return GetPolynomial(-M_PI/2, M_PI/2)(Sign()(t2));
   }
 };
 
@@ -174,29 +174,35 @@ struct Simplification<Composition<ImagN<Complex>, C...>, /*com_i_cs*/ 0> {
         }
     };
 
-    template <class F, class ... Fs>
+    template <class F1, class F2>
     struct Simplification<
         Composition<
-            F, Multiplication<Fs...> >, /*re_add_fs*/0,
-        typename std::enable_if<
-            std::is_same<F, Real>::value ||
-            std::is_same<F, Imag>::value
-            >::type>
+            Real, Multiplication<F1, F2> >, /*re_add_fs*/0>
     {
-        template <std::size_t ... is>
         static auto Combine(Composition<
-                                F, Multiplication<Fs...> > c,
-                            std::integer_sequence<
-                                std::size_t, is...>)
+                                Real, Multiplication<F1,F2> > c)
         {
             auto t = get<1>(c.GetFunctions()).GetFunctions();
-            return MultiplyRaw((F()(get<is>(t)))...);
+            auto left = get<0>(t);
+            auto right = get<1>(t);
+            return SubRaw(MultiplyRaw(Real()(left), Real()(right)),
+                          MultiplyRaw(Imag()(left), Imag()(right)));
         }
+    };
 
+    template <class F1, class F2>
+    struct Simplification<
+        Composition<
+            Imag, Multiplication<F1, F2> >, /*im_add_fs*/0>
+    {
         static auto Combine(Composition<
-                                F, Multiplication<Fs...> > c)
+                                Imag, Multiplication<F1, F2> > c)
         {
-            return Combine(c, std::index_sequence_for<Fs...>());
+            auto t = get<1>(c.GetFunctions()).GetFunctions();
+            auto left = get<0>(t);
+            auto right = get<1>(t);
+            return AddRaw(MultiplyRaw(Real()(left), Imag()(right)),
+                          MultiplyRaw(Imag()(left), Real()(right)));
         }
     };
 }
