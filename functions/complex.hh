@@ -94,7 +94,7 @@ struct Sign : Function<int_<31>, 1, 1>, FunctionCommon<Sign> {
   // The sign of a complex number isn't even defined
   static const ComplexOutputBehaviour complex_output = NeverComplex;
 
-  template <class T> auto eval(T t) const { return std::copysign(t, 1); }
+  template <class T> auto eval(T t) const { return std::copysign(1, t); }
 
   template <class T> bool operator==(T) const {
     return std::is_same<T, Sign>::value;
