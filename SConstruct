@@ -15,9 +15,10 @@ cpp_flags = ' '.join(['-std=c++1y',
                       '-mtune=native',
                       error_limit,
                       #'-DPRINT_SIMPLIFIES',
-                      #'-g',
-		      '-fvisibility=hidden',
+                      '-fvisibility=hidden',
                   ])
+if 'clang' not in compiler:
+    cpp_flags = cpp_flags + ' -g'
 
 sources = []
 for root, dirs, files in os.walk('.'):
