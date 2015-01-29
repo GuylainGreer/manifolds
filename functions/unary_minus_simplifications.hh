@@ -2,6 +2,7 @@
 #define MANIFOLDS_FUNCTIONS_UNARY_MINUS_SIMPLIFICATIONS_HH
 
 #include "unary_minus.hh"
+#include "zero.hh"
 
 namespace manifolds {
 template <class F>
@@ -24,6 +25,14 @@ template <class F> struct Simplification<UnaryMinus<F>, /*um_f*/ 1> {
 
   typedef decltype(Combine(std::declval<UnaryMinus<F> >())) type;
 };
+
+    template<>
+    struct Simplification<UnaryMinus<Zero>, /*um_z*/0> {
+        static auto Combine(UnaryMinus<Zero>){
+            SIMPLIFY_INFO("Simplifying unary minus of zero");
+            return zero;
+        }
+    };
 }
 
 #endif
