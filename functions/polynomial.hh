@@ -54,6 +54,8 @@ struct Polynomial : Function<int_<6>, 1, 1>,
     s << ")";
   }
 
+  const auto &operator[](std::size_t i) const { return coeffs[i]; }
+
 private:
   std::array<CoeffType, Order::value> coeffs;
 };
