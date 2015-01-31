@@ -26,13 +26,12 @@ template <class F> struct Simplification<UnaryMinus<F>, /*um_f*/ 1> {
   typedef decltype(Combine(std::declval<UnaryMinus<F> >())) type;
 };
 
-    template<>
-    struct Simplification<UnaryMinus<Zero>, /*um_z*/0> {
-        static auto Combine(UnaryMinus<Zero>){
-            SIMPLIFY_INFO("Simplifying unary minus of zero");
-            return zero;
-        }
-    };
+template <> struct Simplification<UnaryMinus<Zero>, /*um_z*/ 0> {
+  static auto Combine(UnaryMinus<Zero>) {
+    SIMPLIFY_INFO("Simplifying unary minus of zero");
+    return zero;
+  }
+};
 }
 
 #endif
