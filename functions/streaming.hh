@@ -187,25 +187,25 @@ struct Stream2Wrapper {
     auto coeffs = p.GetCoeffs();
     bool started = false;
     CoeffType z(0);
-    for(unsigned i = 0; i < coeffs.size(); i++)
-    {
-        CoeffType c = coeffs[i];
-        if(c == z) continue;
-        if(started)
-            s << (c > z ? " + " : " - ");
-        else
-        {
-            started = true;
-            if(c < z)
-                s << '-';
-        }
-        s << std::abs(c);
-        if(i == 1)
-            s << " * " << var;
-        else if(i > 1)
-            s << " * " << var << " ^ " << i;
+    for (unsigned i = 0; i < coeffs.size(); i++) {
+      CoeffType c = coeffs[i];
+      if (c == z)
+        continue;
+      if (started)
+        s << (c > z ? " + " : " - ");
+      else {
+        started = true;
+        if (c < z)
+          s << '-';
+      }
+      s << std::abs(c);
+      if (i == 1)
+        s << " * " << var;
+      else if (i > 1)
+        s << " * " << var << " ^ " << i;
     }
-    if(!started) s << '0';
+    if (!started)
+      s << '0';
   }
 
   template <class Func, class VNamer>
