@@ -88,6 +88,10 @@ struct ImagN : Function<int_<30>, 0, 1>, FunctionCommon<ImagN<Complex> > {
   template <class T> bool operator==(const T &) const { return false; }
 };
 
+/*
+ * Note that the Sign of 0 will be undefined,
+ * but you won't actually get NaN as a result of trying it.
+ */
 struct Sign : Function<int_<31>, 1, 1>, FunctionCommon<Sign> {
   using FunctionCommon<Sign>::operator();
   static const bool stateless = true;
