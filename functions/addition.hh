@@ -52,7 +52,9 @@ private:
 };
 
 template <class... Fs> auto AddRaw(Fs... fs) { return Addition<Fs...>(fs...); }
-    template <class F1, class F2> auto SubRaw(F1 f1, F2 f2) { return Addition<F1, UnaryMinus<F2> >(f1, UnaryMinus<F2>(f2));}
+template <class F1, class F2> auto SubRaw(F1 f1, F2 f2) {
+  return Addition<F1, UnaryMinus<F2> >(f1, UnaryMinus<F2>(f2));
+}
 }
 
 #endif
