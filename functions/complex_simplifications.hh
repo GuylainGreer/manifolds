@@ -7,6 +7,7 @@
 #include "zero.hh"
 #include "multiplication.hh"
 #include "integral_polynomial.hh"
+#include "polynomial.hh"
 
 namespace manifolds {
 template <class T>
@@ -47,7 +48,7 @@ struct Simplification<Composition<Phase, T>, /*com_ph_f*/ 1,
                                               NeverComplex>::type> {
   static auto Combine(Composition<Phase, T> t) {
     auto t2 = get<1>(t.GetFunctions());
-    return GetPolynomial(-M_PI/2, M_PI/2)(Sign()(t2));
+    return GetPolynomial(-M_PI / 2, M_PI / 2)(Sign()(t2));
   }
 };
 
@@ -148,63 +149,86 @@ struct Simplification<Composition<ImagN<Complex>, C...>, /*com_i_cs*/ 0> {
   static auto Combine(Composition<ImagN<Complex>, C...>) { return I; }
 };
 
-    template <class F, class ... Fs>
-    struct Simplification<
-        Composition<
-            F, Addition<Fs...> >, /*re_add_fs*/0,
-        typename std::enable_if<
-            std::is_same<F, Real>::value ||
-            std::is_same<F, Imag>::value
-            >::type>
-    {
-        template <std::size_t ... is>
-        static auto Combine(Composition<
-                                F, Addition<Fs...> > c,
-                            std::integer_sequence<
-                                std::size_t, is...>)
-        {
-            auto t = get<1>(c.GetFunctions()).GetFunctions();
-            return AddRaw((F()(get<is>(t)))...);
-        }
+template <class F, class... Fs>
+struct Simplification<
+    Composition<F, Addition<Fs...> >, /*re_add_fs*/ 0,
+    typename std::enable_if<std::is_same<F, Real>::value ||
+                            std::is_same<F, Imag>::value>::type> {
+  template <std::size_t... is>
+  static auto Combine(Composition<F, Addition<Fs...> > c,
+                      std::integer_sequence<std::size_t, is...>) {
+    auto t = get<1>(c.GetFunctions()).GetFunctions();
+    return AddRaw((F()(get<is>(t)))...);
+  }
 
-        static auto Combine(Composition<
-                                F, Addition<Fs...> > c)
-        {
-            return Combine(c, std::index_sequence_for<Fs...>());
-        }
-    };
+  static auto Combine(Composition<F, Addition<Fs...> > c) {
+    return Combine(c, std::index_sequence_for<Fs...>());
+  }
+};
 
-    template <class F1, class F2>
-    struct Simplification<
-        Composition<
-            Real, Multiplication<F1, F2> >, /*re_add_fs*/0>
-    {
-        static auto Combine(Composition<
-                                Real, Multiplication<F1,F2> > c)
-        {
-            auto t = get<1>(c.GetFunctions()).GetFunctions();
-            auto left = get<0>(t);
-            auto right = get<1>(t);
-            return SubRaw(MultiplyRaw(Real()(left), Real()(right)),
-                          MultiplyRaw(Imag()(left), Imag()(right)));
-        }
-    };
+template <class F1, class F2>
+struct Simplification<Composition<Real, Multiplication<F1, F2> >,
+                      /*re_add_fs*/ 0> {
+  static auto Combine(Composition<Real, Multiplication<F1, F2> > c) {
+    auto t = get<1>(c.GetFunctions()).GetFunctions();
+    auto left = get<0>(t);
+    auto right = get<1>(t);
+    return SubRaw(MultiplyRaw(Real()(left), Real()(right)),
+                  MultiplyRaw(Imag()(left), Imag()(right)));
+  }
+};
 
-    template <class F1, class F2>
-    struct Simplification<
-        Composition<
-            Imag, Multiplication<F1, F2> >, /*im_add_fs*/0>
-    {
-        static auto Combine(Composition<
-                                Imag, Multiplication<F1, F2> > c)
-        {
-            auto t = get<1>(c.GetFunctions()).GetFunctions();
-            auto left = get<0>(t);
-            auto right = get<1>(t);
-            return AddRaw(MultiplyRaw(Real()(left), Imag()(right)),
-                          MultiplyRaw(Imag()(left), Real()(right)));
-        }
-    };
+template <class F1, class F2>
+struct Simplification<Composition<Imag, Multiplication<F1, F2> >,
+                      /*im_add_fs*/ 0> {
+  static auto Combine(Composition<Imag, Multiplication<F1, F2> > c) {
+    auto t = get<1>(c.GetFunctions()).GetFunctions();
+    auto left = get<0>(t);
+    auto right = get<1>(t);
+    return AddRaw(MultiplyRaw(Real()(left), Imag()(right)),
+                  MultiplyRaw(Imag()(left), Real()(right)));
+  }
+};
+
+template <class T, T... coeffs>
+struct Simplification<
+    Composition<IntegralPolynomial<std::integer_sequence<T, coeffs...> >, Sign>,
+    0, typename std::enable_if<(sizeof...(coeffs) > 2)>::type> {
+  template <unsigned, T...> struct Accum;
+
+  template <unsigned index, T c, T... cs> struct Accum<index, c, cs...> {
+    static const T zeroth = index % 2 == 0 ? Accum<index + 1, cs...>::zeroth + c
+                                           : Accum<index + 1, cs...>::zeroth;
+    static const T first = index % 2 == 1 ? Accum<index + 1, cs...>::first + c
+                                          : Accum<index + 1, cs...>::first;
+  };
+
+  template <unsigned index> struct Accum<index> {
+    static const T zeroth = 0;
+    static const T first = 0;
+  };
+
+  static auto Combine(Composition<
+      IntegralPolynomial<std::integer_sequence<T, coeffs...> >, Sign>) {
+    static const T zeroth = Accum<0, coeffs...>::zeroth;
+    static const T first = Accum<0, coeffs...>::first;
+    return GetIPolynomial<zeroth, first>()(Sign());
+  }
+};
+
+template <class C, class O>
+struct Simplification<Composition<Polynomial<C, O>, Sign>, 0,
+                      typename std::enable_if<(O::value > 2)>::type> {
+  static auto Combine(const Composition<Polynomial<C, O>, Sign> &c) {
+    const auto &p = get<0>(c.GetFunctions());
+    C zeroth(0), first(0);
+    for (unsigned i = 0; i < O::value; i += 2)
+      zeroth += p[i];
+    for (unsigned i = 1; i < O::value; i += 2)
+      first += p[i];
+    return GetPolynomial(zeroth, first)(Sign());
+  }
+};
 }
 
 #endif
