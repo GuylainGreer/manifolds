@@ -49,7 +49,7 @@ template <class FunctionImpl> struct FunctionCommon {
   template <class T, std::size_t... Indices>
   auto helper(const T &t,
               std::integer_sequence<std::size_t, Indices...>) const {
-    return (*static_cast<const FunctionImpl *>(this))(get<Indices>(t)...);
+    return (*static_cast<const FunctionImpl *>(this))(std::get<Indices>(t)...);
   }
   template <class... Args> auto operator()(tuple<Args...> t) const {
     return helper(t, std::index_sequence_for<Args...>());

@@ -13,7 +13,7 @@ struct Simplification<Composition<Transpose, FunctionMatrix<r, c, Funcs...> >,
 
   template <std::size_t col> struct Inner1 {
     template <std::size_t row> struct Inner2 {
-      static auto apply(f_type m) { return get<row *c::value + col>(m); }
+      static auto apply(f_type m) { return std::get<row *c::value + col>(m); }
     };
     template <std::size_t... is>
     static auto apply(f_type m, std::integer_sequence<std::size_t, is...>) {
@@ -30,7 +30,7 @@ struct Simplification<Composition<Transpose, FunctionMatrix<r, c, Funcs...> >,
     SIMPLIFY_INFO("Simplifying transpose of function matrix\n");
     std::make_index_sequence<r::value> s;
     return GetFunctionMatrix<c::value, r::value>(
-        apply(get<1>(co.GetFunctions()).GetFunctions(), s));
+        apply(std::get<1>(co.GetFunctions()).GetFunctions(), s));
   }
 };
 }

@@ -82,11 +82,12 @@ struct Stream2Wrapper {
   template <class VNamer>
   static void Stream2Tuple(std::ostream &s, tuple<>, VNamer) {}
 
-  template <class Tuple, class VNamer, class = typename std::enable_if<
-                                           tuple_size<Tuple>::value != 0>::type>
+  template <
+      class Tuple, class VNamer,
+      class = typename std::enable_if<std::tuple_size<Tuple>::value != 0>::type>
   static void Stream2Tuple(std::ostream &s, const Tuple &t, VNamer vn) {
-    Stream2(s, get<0>(t), vn);
-    if (tuple_size<Tuple>::value > 1)
+    Stream2(s, std::get<0>(t), vn);
+    if (std::tuple_size<Tuple>::value > 1)
       s << ", ";
     Stream2Tuple(s, remove_element<0>(t), vn);
   }
@@ -125,7 +126,7 @@ struct Stream2Wrapper {
 
   template <class Func, class VNamer>
   static void Stream2(std::ostream &s, Composition<Func> c, VNamer vn) {
-    Stream2(s, get<0>(c.GetFunctions()), vn);
+    Stream2(s, std::get<0>(c.GetFunctions()), vn);
   }
 
   template <class CType, class Order, class... Funcs, class VNamer,
@@ -142,17 +143,16 @@ struct Stream2Wrapper {
         break;
       }
     }
-    Stream2(s, get<0>(c.GetFunctions()), vn, var);
+    Stream2(s, std::get<0>(c.GetFunctions()), vn, var);
   }
 
-  template <class Seq, class... Funcs, class VNamer,
+  template <IPInt_t... ts, class... Funcs, class VNamer,
             class = typename std::enable_if<(sizeof...(Funcs) > 0)>::type>
   static void Stream2(std::ostream &s,
-                      Composition<IntegralPolynomial<Seq>, Funcs...> c,
+                      Composition<IntegralPolynomial<ts...>, Funcs...> c,
                       VNamer vn) {
-    auto p = get<0>(c.GetFunctions()).ToPoly();
-    Composition<Polynomial<typename Seq::value_type, int_<Seq::size()> >,
-                Funcs...> c2 =
+    auto p = std::get<0>(c.GetFunctions()).ToPoly();
+    Composition<Polynomial<IPInt_t, int_<(sizeof...(ts))> >, Funcs...> c2 =
         insert_element<0>(remove_element<0>(c.GetFunctions()), p);
     Stream2(s, c2, vn);
   }
@@ -161,7 +161,7 @@ struct Stream2Wrapper {
             class = typename std::enable_if<(sizeof...(Funcs) > 0) &&
                                             !is_polynomial<F>::value>::type>
   static void Stream2(std::ostream &s, Composition<F, Funcs...> c, VNamer vn) {
-    Stream2(s, get<0>(c.GetFunctions()), vn);
+    Stream2(s, std::get<0>(c.GetFunctions()), vn);
     s << '(';
     Stream2(s, Composition<Funcs...>(remove_element<0>(c.GetFunctions())), vn);
     s << ')';
@@ -174,8 +174,9 @@ struct Stream2Wrapper {
     s << ")";
   }
 
-  template <class Seq, class VNamer>
-  static void Stream2(std::ostream &s, IntegralPolynomial<Seq> ip, VNamer vn) {
+  template <IPInt_t... ts, class VNamer>
+  static void Stream2(std::ostream &s, IntegralPolynomial<ts...> ip,
+                      VNamer vn) {
     return Stream2(s, ip.ToPoly(), vn);
   }
 
@@ -184,11 +185,10 @@ struct Stream2Wrapper {
                       VNamer vn, std::string var = "") {
     if (var == "")
       var = "p";
-    auto coeffs = p.GetCoeffs();
     bool started = false;
     CoeffType z(0);
-    for (unsigned i = 0; i < coeffs.size(); i++) {
-      CoeffType c = coeffs[i];
+    for (unsigned i = 0; i < Order::value; i++) {
+      CoeffType c = p[i];
       if (c == z)
         continue;
       if (started)
@@ -198,11 +198,14 @@ struct Stream2Wrapper {
         if (c < z)
           s << '-';
       }
-      s << std::abs(c);
+      if (i == 0 || c != 1)
+        s << std::abs(c);
+      if (i > 0 && c != 1)
+        s << " * ";
       if (i == 1)
-        s << " * " << var;
+        s << var;
       else if (i > 1)
-        s << " * " << var << " ^ " << i;
+        s << var << " ^ " << i;
     }
     if (!started)
       s << '0';
@@ -210,13 +213,13 @@ struct Stream2Wrapper {
 
   template <class Func, class VNamer>
   static void Stream2(std::ostream &s, Addition<Func> a, VNamer vn) {
-    Stream2(s, get<0>(a.GetFunctions()), vn);
+    Stream2(s, std::get<0>(a.GetFunctions()), vn);
   }
 
   template <class F, class... Funcs, class VNamer,
             class = typename std::enable_if<(sizeof...(Funcs) > 0)>::type>
   static void Stream2(std::ostream &s, Addition<F, Funcs...> a, VNamer vn) {
-    Stream2(s, get<0>(a.GetFunctions()), vn);
+    Stream2(s, std::get<0>(a.GetFunctions()), vn);
     s << " + ";
     Stream2(s, Addition<Funcs...>(remove_element<0>(a.GetFunctions())), vn);
   }
@@ -235,14 +238,14 @@ struct Stream2Wrapper {
 
   template <class F, class VNamer>
   static void Stream2(std::ostream &s, Multiplication<F> m, VNamer vn) {
-    PrintMultElem(s, get<0>(m.GetFunctions()), vn);
+    PrintMultElem(s, std::get<0>(m.GetFunctions()), vn);
   }
 
   template <class F, class... Funcs, class VNamer,
             class = typename std::enable_if<(sizeof...(Funcs) > 0)>::type>
   static void Stream2(std::ostream &s, Multiplication<F, Funcs...> m,
                       VNamer vn) {
-    PrintMultElem(s, get<0>(m.GetFunctions()), vn);
+    PrintMultElem(s, std::get<0>(m.GetFunctions()), vn);
     s << " * ";
     Stream2(s, Multiplication<Funcs...>(remove_element<0>(m.GetFunctions())),
             vn);
@@ -265,7 +268,8 @@ struct CustomVariableNamer {
   CustomVariableNamer(std::initializer_list<tuple<int, bool, std::string> > l) {
     std::transform(std::begin(l), std::end(l),
                    std::inserter(names, names.begin()), [](auto x) {
-      return std::make_pair(std::make_pair(get<0>(x), get<1>(x)), get<2>(x));
+      return std::make_pair(std::make_pair(std::get<0>(x), std::get<1>(x)),
+                            std::get<2>(x));
     });
   }
 
@@ -310,8 +314,8 @@ std::ostream &operator<<(std::ostream &s, Polynomial<CType, int_<N> > p) {
   return Stream2(s, p);
 }
 
-template <class Seq>
-std::ostream &operator<<(std::ostream &s, IntegralPolynomial<Seq> ip) {
+template <IPInt_t... ts>
+std::ostream &operator<<(std::ostream &s, IntegralPolynomial<ts...> ip) {
   return s << ip.ToPoly();
 }
 

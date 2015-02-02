@@ -43,7 +43,7 @@ struct FunctionMatrix
   auto eval(std::integer_sequence<std::size_t, indices...>,
             Args... args) const {
     return GetMatrix<rows::value, cols::value>(
-        get<indices>(functions)(args...)...);
+        std::get<indices>(functions)(args...)...);
   }
 
   template <class... Args> auto eval(Args... args) const {
@@ -70,7 +70,7 @@ auto GetFunctionMatrix(tuple<Functions...> functions) {
 template <class... Rows> auto GetFunctionMatrix(Rows... rows) {
   return GetFunctionMatrix<
       sizeof...(Rows),
-      tuple_size<decltype(
+      std::tuple_size<decltype(
           std::declval<typename first<Rows...>::type>()
               .GetFunctions())>::value>(tuple_cat(rows.GetFunctions()...));
 }

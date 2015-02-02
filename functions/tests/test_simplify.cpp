@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_CASE(simplify_test) {
 
   static_assert(
       std::is_same<decltype(Sin() + Sin()),
-                   Composition<IntegralPolynomial<iseq<0, 2> >, Sin> >::value,
+                   Composition<IntegralPolynomial<0, 2>, Sin> >::value,
       "Failed to make sin+sin == 2 * sin");
 
   auto ps = Sin() + Sin();
@@ -33,9 +33,8 @@ BOOST_AUTO_TEST_CASE(simplify_test) {
   auto ss = Sin()(Sin());
   auto mss = ss * ss;
   static_assert(
-      std::is_same<
-          decltype(mss),
-          Composition<IntegralPolynomial<iseq<0, 0, 1> >, Sin, Sin> >::value,
+      std::is_same<decltype(mss),
+                   Composition<IntegralPolynomial<0, 0, 1>, Sin, Sin> >::value,
       "Failed to simplify multiplication of "
       "composition of functions.");
 }

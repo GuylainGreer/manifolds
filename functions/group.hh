@@ -13,7 +13,7 @@ struct Group : Function<list<int_<5>, typename Funcs::indices...>,
 
   template <std::size_t... is, class... Args>
   auto eval(std::integer_sequence<std::size_t, is...>, Args... args) const {
-    return make_my_tuple(get<is>(functions)(args...)...);
+    return make_my_tuple(std::get<is>(functions)(args...)...);
   }
 
   template <class... Args> auto dispatch(std::false_type, Args... args) const {

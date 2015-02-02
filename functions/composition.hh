@@ -38,7 +38,7 @@ template <int output_dim> struct ToTuple {
   template <class X, std::size_t... indices>
   auto eval(X x, std::integer_sequence<std::size_t, indices...>,
             int_<4>) const {
-    return make_my_tuple(get<indices>(x)...);
+    return make_my_tuple(std::get<indices>(x)...);
   }
 
   template <class X> auto operator()(X x) const {
@@ -98,17 +98,17 @@ struct Composition : Function<list<int_<1>, typename Functions::indices...>,
   auto operator()() const {
     static const int last = sizeof...(Functions) - 1;
     ToTuple<nth<last - 1, Functions...>::type::input_dim> t;
-    return eval(int_<last - 1>(), t(get<last>(functions)()));
+    return eval(int_<last - 1>(), t(std::get<last>(functions)()));
   }
 
   template <class... Args> auto eval(int_<0>, Args... args) const {
-    return get<0>(functions)(args...);
+    return std::get<0>(functions)(args...);
   }
 
   template <int N, class... Args> auto eval(int_<N>, Args... args) const {
     static const int next_ins = nth<N - 1, Functions...>::type::input_dim;
     ToTuple<next_ins> t;
-    return eval(int_<N - 1>(), t(get<N>(functions)(args...)));
+    return eval(int_<N - 1>(), t(std::get<N>(functions)(args...)));
   }
 
   template <class InnerFunc>
@@ -136,7 +136,7 @@ struct Composition : Function<list<int_<1>, typename Functions::indices...>,
   void stream(std::ostream &s, int_<sizeof...(Functions)>) {}
 
   template <int N> void stream(std::ostream &s, int_<N>) {
-    get<N>(functions).Print(s);
+    std::get<N>(functions).Print(s);
     s << "(";
     stream(s, int_<N + 1>());
     s << ")";

@@ -31,11 +31,11 @@ struct Addition : Function<list<int_<0>, typename Functions::indices...>,
 
   template <class... Args>
   auto eval(int_<sizeof...(Functions) - 1>, Args... args) const {
-    return get<sizeof...(Functions) - 1>(functions)(args...);
+    return std::get<sizeof...(Functions) - 1>(functions)(args...);
   }
 
   template <int N, class... Args> auto eval(int_<N>, Args... args) const {
-    return get<N>(functions)(args...) + eval(int_<N + 1>(), args...);
+    return std::get<N>(functions)(args...) + eval(int_<N + 1>(), args...);
   }
 
   auto GetFunctions() const { return functions; }

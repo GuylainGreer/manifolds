@@ -60,8 +60,8 @@ BOOST_AUTO_TEST_CASE(polynomial_test) {
 
   BOOST_CHECK_EQUAL(ps(2), 3 * manifolds::sin(2));
 
-  IntegralPolynomial<std::integer_sequence<int, 1, -2, 3> > ip;
-  IntegralPolynomial<std::integer_sequence<unsigned, 3, 3, 7, 4> > ip2;
+  IntegralPolynomial<1, -2, 3> ip;
+  IntegralPolynomial<3, 3, 7, 4> ip2;
 
   auto ip3 = ip + ip2;
 
@@ -81,8 +81,7 @@ BOOST_AUTO_TEST_CASE(polynomial_test) {
   BOOST_CHECK_EQUAL(ip4(5), ip(5) * ip2(5));
   BOOST_CHECK_EQUAL(ip4(6), ip(6) * ip2(6));
 
-  auto ip5 = ip4 + IntegralPolynomial<
-                       std::integer_sequence<int, -1, -1, -1, 0, -13, -12> >();
+  auto ip5 = ip4 + IntegralPolynomial<-1, -1, -1, 0, -13, -12>();
   static_assert(decltype(ip5)::num_coeffs == 4,
                 "Failed to remove extraneous coefficients");
 

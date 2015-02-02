@@ -15,14 +15,14 @@
 namespace manifolds {
 
 template <class Tuple>
-void PrintTuple(const Tuple &t, int_<tuple_size<Tuple>::value>) {
+void PrintTuple(const Tuple &t, int_<std::tuple_size<Tuple>::value>) {
   std::cout << '\n';
 }
 
-template <class Tuple, int i,
-          class = typename std::enable_if<i != tuple_size<Tuple>::value>::type>
+template <class Tuple, int i, class = typename std::enable_if<
+                                  i != std::tuple_size<Tuple>::value>::type>
 void PrintTuple(const Tuple &t, int_<i>) {
-  std::cout << '(' << get<i>(t) << ") ";
+  std::cout << '(' << std::get<i>(t) << ") ";
   PrintTuple(t, int_<i + 1>());
 }
 
@@ -42,7 +42,7 @@ auto FlattenVariadic(const tuple<Functions...> &v,
                      std::integer_sequence<std::size_t, indices...>) {
   SIMPLIFY_INFO("Flattening: ");
   auto f = tuple_cat(WrapIf(bool_<IsVariadic<Variadic, Functions>::value>(),
-                            get<indices>(v), indices)...);
+                            std::get<indices>(v), indices)...);
   SIMPLIFY_INFO("\nFlattened: ");
 #ifdef PRINT_SIMPLIFIES
   PrintTuple(f, int_<0>());
@@ -55,9 +55,9 @@ template <template <class...> class Variadic, std::size_t i, std::size_t j,
 auto MergeV(const Tuple &t, std::false_type) {
   static const std::size_t max = i > j ? i : j;
   static const std::size_t min = i + j - max;
-  auto middle =
-      Variadic<typename tuple_element<i, Tuple>::type,
-               typename tuple_element<j, Tuple>::type>(get<i>(t), get<j>(t));
+  auto middle = Variadic<typename std::tuple_element<i, Tuple>::type,
+                         typename std::tuple_element<j, Tuple>::type>(
+      std::get<i>(t), std::get<j>(t));
   return insert_element<i>(remove_element<min>(remove_element<max>(t)),
                            Simplify(middle));
 }
@@ -68,17 +68,17 @@ auto MergeV(const Tuple &t, std::true_type) {
 }
 
 template <template <class...> class Variadic, class Tuple>
-auto SimplifyVHelper(const Tuple &t, int_<tuple_size<Tuple>::value - 1>) {
+auto SimplifyVHelper(const Tuple &t, int_<std::tuple_size<Tuple>::value - 1>) {
   return MakeVariadic<Variadic>(t);
 }
 
 template <template <class...> class Variadic, int i, class Tuple,
-          class =
-              typename std::enable_if<i + 1 != tuple_size<Tuple>::value>::type>
+          class = typename std::enable_if<i + 1 !=
+                                          std::tuple_size<Tuple>::value>::type>
 auto SimplifyVHelper(const Tuple &t, int_<i>) {
-  typedef Variadic<typename tuple_element<i, Tuple>::type,
-                   typename tuple_element<i + 1, Tuple>::type> VType;
-  SIMPLIFY_INFO("Checking if " << VType(get<i>(t), get<i + 1>(t))
+  typedef Variadic<typename std::tuple_element<i, Tuple>::type,
+                   typename std::tuple_element<i + 1, Tuple>::type> VType;
+  SIMPLIFY_INFO("Checking if " << VType(std::get<i>(t), std::get<i + 1>(t))
                                << " simplifies: ");
   typedef SimplifiedType<VType> SType;
   typedef typename std::is_same<VType, SType>::type Simplified;
@@ -88,34 +88,35 @@ auto SimplifyVHelper(const Tuple &t, int_<i>) {
 
 template <std::size_t iter = 0> struct Wrapper {
   template <template <class...> class Variadic, int i, class Tuple, int j,
-            class =
-                typename std::enable_if<i + 1 != tuple_size<Tuple>::value &&j !=
-                                        tuple_size<Tuple>::value>::type>
+            class = typename std::enable_if<
+                i + 1 != std::tuple_size<Tuple>::value &&j !=
+                std::tuple_size<Tuple>::value>::type>
   static auto MergeAllV(const Tuple &t, int_<i>, int_<j>) {
-    typedef Variadic<typename tuple_element<i, Tuple>::type,
-                     typename tuple_element<j, Tuple>::type> VType;
+    typedef Variadic<typename std::tuple_element<i, Tuple>::type,
+                     typename std::tuple_element<j, Tuple>::type> VType;
     typedef SimplifiedType<VType> SType;
     SIMPLIFY_INFO(
-        "Simplifying:\n  " << (get<i>(t)) << "\n  " << (get<j>(t)) << "\ninto "
+        "Simplifying:\n  " << (std::get<i>(t)) << "\n  " << (std::get<j>(t))
+                           << "\ninto "
                            << Simplify(MakeVariadic<Variadic>(make_my_tuple(
-                                  get<i>(t), get<j>(t)))) << "\n");
+                                  std::get<i>(t), std::get<j>(t)))) << "\n");
     typedef typename std::is_same<SType, VType>::type Simplified;
     auto next = MergeV<Variadic, i, j>(t, Simplified());
     return Wrapper<iter + 1>::template MergeAllV<Variadic>(
         next, int_<i>(), int_<j + Simplified::value>());
   }
 
-  template <
-      template <class...> class Variadic, int i, class Tuple,
-      class = typename std::enable_if<i + 1 != tuple_size<Tuple>::value>::type>
+  template <template <class...> class Variadic, int i, class Tuple,
+            class = typename std::enable_if<
+                i + 1 != std::tuple_size<Tuple>::value>::type>
   static auto MergeAllV(const Tuple &t, int_<i>,
-                        int_<tuple_size<Tuple>::value>) {
+                        int_<std::tuple_size<Tuple>::value>) {
     return Wrapper<iter + 1>::template MergeAllV<Variadic>(t, int_<i + 1>(),
                                                            int_<i + 2>());
   }
 
   template <template <class...> class Variadic, int i, class Tuple>
-  static auto MergeAllV(const Tuple &t, int_<tuple_size<Tuple>::value - 1>,
+  static auto MergeAllV(const Tuple &t, int_<std::tuple_size<Tuple>::value - 1>,
                         int_<i>) {
     return t;
   }
@@ -124,7 +125,7 @@ template <std::size_t iter = 0> struct Wrapper {
 template <class Tuple, std::size_t... indices>
 auto SimplifyIndividuals(const Tuple &t,
                          std::integer_sequence<std::size_t, indices...>) {
-  return make_my_tuple(Simplify(get<indices>(t))...);
+  return make_my_tuple(Simplify(std::get<indices>(t))...);
 }
 
 template <class... indices> struct FunctionReOrgComparator {
@@ -201,22 +202,23 @@ auto SortElements(V<Functions...> v,
                   std::integer_sequence<std::size_t, tis...>) {
   auto t = v.GetFunctions();
   typedef decltype(t) Tuple;
-  typedef boost::mpl::range_c<std::size_t, 0, tuple_size<Tuple>::value> indices;
+  typedef boost::mpl::range_c<std::size_t, 0, std::tuple_size<Tuple>::value>
+  indices;
   typedef typename boost::mpl::copy<
       indices, boost::mpl::back_inserter<boost::mpl::vector<> > >::type
   indices_v;
   typedef typename boost::mpl::sort<
-      indices_v, FunctionReOrgComparator<typename tuple_element<
+      indices_v, FunctionReOrgComparator<typename std::tuple_element<
                      tis, Tuple>::type::indices...> >::type sorted_indices;
   return V<typename nth<boost::mpl::at_c<sorted_indices, tis>::type::value,
                         Functions...>::
                type...>(make_my_tuple(
-      get<boost::mpl::at_c<sorted_indices, tis>::type::value>(t)...));
+      std::get<boost::mpl::at_c<sorted_indices, tis>::type::value>(t)...));
 }
 
 template <template <class...> class V, class Tuple, bool b>
 auto SimplifyTheV(const Tuple &t, int_<1>, bool_<b>) {
-  return get<0>(t);
+  return std::get<0>(t);
 }
 
 template <template <class...> class V, class Tuple>
@@ -233,7 +235,7 @@ template <template <class...> class V, class Tuple, int i,
           class = typename std::enable_if<(i > 2)>::type>
 auto SimplifyTheV(const Tuple &t, int_<i>, std::true_type) {
   auto result = Wrapper<>::template MergeAllV<V>(t, int_<0>(), int_<1>());
-  static const int size = tuple_size<decltype(result)>::value;
+  static const int size = std::tuple_size<decltype(result)>::value;
   return SortElements(MakeVariadic<V>(result),
                       std::make_index_sequence<size>());
 }
@@ -247,17 +249,17 @@ auto SimplifyTheV(const Tuple &t, int_<i>, std::false_type) {
 template <template <class...> class V, class Tuple, bool abelian>
 auto SimplifyV(const Tuple &t, bool_<abelian> b) {
   auto t2 = FlattenVariadic<V>(
-      t, std::make_index_sequence<tuple_size<Tuple>::value>());
+      t, std::make_index_sequence<std::tuple_size<Tuple>::value>());
   auto t3 = SimplifyIndividuals(
-      t2, std::make_index_sequence<tuple_size<decltype(t2)>::value>());
-  static const int size = tuple_size<decltype(t3)>::value;
+      t2, std::make_index_sequence<std::tuple_size<decltype(t2)>::value>());
+  static const int size = std::tuple_size<decltype(t3)>::value;
   return SimplifyTheV<V>(t3, int_<size>(), b);
 }
 
 template <class TupleOut, class TupleIn, std::size_t... iouts>
 auto DistributeComposition(TupleOut to, TupleIn ti,
                            std::integer_sequence<std::size_t, iouts...>) {
-  return make_my_tuple(get<iouts>(to)(ti)...);
+  return make_my_tuple(std::get<iouts>(to)(ti)...);
 }
 
 // Careful when calling this!
@@ -267,10 +269,10 @@ template <template <class...> class Variadic,
           template <class...> class Composition, class Outer, class Inner>
 auto DistributeComposition(Composition<Outer, Inner> c) {
   auto t = c.GetFunctions();
-  auto it = get<1>(t);
-  auto ot = get<0>(t).GetFunctions();
+  auto it = std::get<1>(t);
+  auto ot = std::get<0>(t).GetFunctions();
   auto tr = DistributeComposition(
-      ot, it, std::make_index_sequence<tuple_size<decltype(ot)>::value>());
+      ot, it, std::make_index_sequence<std::tuple_size<decltype(ot)>::value>());
   return MakeVariadic<Variadic>(tr);
 }
 }

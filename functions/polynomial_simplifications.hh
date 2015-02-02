@@ -37,8 +37,8 @@ struct Simplification<Addition<Polynomial<CoeffType1, int_<order1> >,
   static type Combine(Addition<Polynomial<CoeffType1, int_<order1> >,
                                Polynomial<CoeffType2, int_<order2> > > p) {
     SIMPLIFY_INFO("Simplifying addition of two polynomials\n");
-    auto p1 = get<0>(p.GetFunctions());
-    auto p2 = get<1>(p.GetFunctions());
+    auto p1 = std::get<0>(p.GetFunctions());
+    auto p2 = std::get<1>(p.GetFunctions());
     typedef std::integral_constant<bool, (order1 > order2)> yes_no;
     if (order1 > order2) {
       std::array<coeff_type, new_order> r = Init(p1, p2, yes_no());
@@ -67,8 +67,8 @@ struct Simplification<Multiplication<Polynomial<CoeffType1, int_<order1> >,
                          Polynomial<CoeffType2, int_<order2> > > p) {
     SIMPLIFY_INFO("Simplifying multiplication "
                   "of two polynomials\n");
-    auto p1 = get<0>(p.GetFunctions());
-    auto p2 = get<1>(p.GetFunctions());
+    auto p1 = std::get<0>(p.GetFunctions());
+    auto p2 = std::get<1>(p.GetFunctions());
     std::array<coeff_type, new_order> r;
     std::fill(r.begin(), r.end(), 0);
     for (unsigned j = 0; j < order1; j++)
@@ -104,7 +104,7 @@ struct Simplification<Composition<Polynomial<CoeffType1, int_<order1> >,
     auto t_coeffs = t.GetCoeffs();
     static const int last_coeff =
         std::tuple_size<decltype(t_coeffs)>::value - 1;
-    auto m1 = GetPolynomial(get<last_coeff - index>(t_coeffs));
+    auto m1 = GetPolynomial(std::get<last_coeff - index>(t_coeffs));
     auto m2 = u;
     auto m3 = Accumulate(t, u, int_<index - 1>());
     auto m4 = Multiply(m2, m3);
@@ -114,8 +114,8 @@ struct Simplification<Composition<Polynomial<CoeffType1, int_<order1> >,
   static auto Combine(Composition<Polynomial<CoeffType1, int_<order1> >,
                                   Polynomial<CoeffType2, int_<order2> > > p) {
     SIMPLIFY_INFO("Simplifying composition of two polynomials\n");
-    auto p1 = get<0>(p.GetFunctions());
-    auto p2 = get<1>(p.GetFunctions());
+    auto p1 = std::get<0>(p.GetFunctions());
+    auto p2 = std::get<1>(p.GetFunctions());
     return Accumulate(p1, p2, int_<order1 - 1>());
   }
 };
@@ -152,12 +152,13 @@ struct Simplification<
     SIMPLIFY_INFO("Simplifying multiplication of composed "
                   "polynomial by a constant\n");
     std::array<CoeffType, Order::value> cs;
-    auto p = get<0>(get<0>(m.GetFunctions()).GetFunctions()).GetCoeffs();
-    CoeffType2 c = get<1>(m.GetFunctions()).GetCoeffs()[0];
+    auto p =
+        std::get<0>(std::get<0>(m.GetFunctions()).GetFunctions()).GetCoeffs();
+    CoeffType2 c = std::get<1>(m.GetFunctions()).GetCoeffs()[0];
     std::transform(p.begin(), p.end(), cs.begin(),
                    [&c](auto x) { return x * c; });
     return { insert_element<0>(
-        remove_element<0>(get<0>(m.GetFunctions()).GetFunctions()),
+        remove_element<0>(std::get<0>(m.GetFunctions()).GetFunctions()),
         Polynomial<CoeffType, Order>(cs)) };
   }
 };
@@ -176,8 +177,8 @@ struct Simplification<
     SIMPLIFY_INFO("Simplifying variadic operation of "
                   "composition of "
                   "simplifiable functions\n");
-    auto first = get<0>(get<0>(a.GetFunctions()).GetFunctions());
-    auto second = get<0>(get<1>(a.GetFunctions()).GetFunctions());
+    auto first = std::get<0>(std::get<0>(a.GetFunctions()).GetFunctions());
+    auto second = std::get<0>(std::get<1>(a.GetFunctions()).GetFunctions());
     Variadic<decltype(first), decltype(second)> m(first, second);
     auto s = Simplify(m);
     return { s, Args()... };
@@ -198,7 +199,7 @@ struct Simplification<
   Combine(Addition<Composition<Polynomial<CType, int_<order> >, T>, T> a) {
     SIMPLIFY_INFO("Simplifying addition of composed polynomial "
                   "by inner function\n");
-    auto p = get<0>(get<0>(a.GetFunctions()).GetFunctions());
+    auto p = std::get<0>(std::get<0>(a.GetFunctions()).GetFunctions());
     return Simplify(Add(GetPolynomial(0, 1), p))(T());
   }
 };
@@ -220,7 +221,7 @@ struct Simplification<
     SIMPLIFY_INFO("Simplifying multiplication of composed "
                   "polynomial by inner function\n");
     auto m = Mult(GetPolynomial(0, 1),
-                  get<0>(get<0>(a.GetFunctions()).GetFunctions()));
+                  std::get<0>(std::get<0>(a.GetFunctions()).GetFunctions()));
     T t;
     return m(t);
   }
@@ -239,9 +240,9 @@ struct Simplification<
     SIMPLIFY_INFO("Simplifying inverted composed "
                   "polynomial operation\n");
     auto t = a.GetFunctions();
-    typedef typename std::remove_reference<decltype(get<1>(t))>::type T1;
-    typedef typename std::remove_reference<decltype(get<0>(t))>::type T2;
-    Variadic<T1, T2> v(get<1>(t), get<0>(t));
+    typedef typename std::remove_reference<decltype(std::get<1>(t))>::type T1;
+    typedef typename std::remove_reference<decltype(std::get<0>(t))>::type T2;
+    Variadic<T1, T2> v(std::get<1>(t), std::get<0>(t));
     return Simplify(v);
   }
 };
@@ -256,7 +257,7 @@ struct Simplification<
   Combine(Composition<Polynomial<CoeffType, int_<1> >, Functions...> p) {
     SIMPLIFY_INFO("Simplifying composition of "
                   "constant polynomial\n");
-    return get<0>(p.GetFunctions());
+    return std::get<0>(p.GetFunctions());
   }
 };
 
@@ -268,7 +269,7 @@ struct Simplification<Addition<T, Polynomial<C, int_<1> > >,
     SIMPLIFY_INFO("Simplifying adddition of constant "
                   "and another function\n");
     auto t = a.GetFunctions();
-    return GetPolynomial(get<1>(t).GetCoeffs()[0], (C)1)(get<0>(t));
+    return GetPolynomial(std::get<1>(t).GetCoeffs()[0], (C)1)(std::get<0>(t));
   }
   typedef decltype(Combine(std::declval<in_type>())) type;
 };
@@ -324,8 +325,8 @@ struct Simplification<Composition<Polynomial<C, O>, Addition<Fs...> >,
 
   template <std::size_t... orders>
   static auto Addem(in_type c, std::integer_sequence<std::size_t, orders...>) {
-    auto a = get<1>(c.GetFunctions());
-    auto coeffs = get<0>(c.GetFunctions()).GetCoeffs();
+    auto a = std::get<1>(c.GetFunctions());
+    auto coeffs = std::get<0>(c.GetFunctions()).GetCoeffs();
     return Add(Mult(coeffs[orders], a, std::make_index_sequence<orders>())...);
   }
 
@@ -346,7 +347,7 @@ struct Simplification<
   static type Combine(UnaryMinus<Composition<T, Fs...> > f) {
     SIMPLIFY_INFO("Simplifying unary minus of composition\n");
     auto t = f.GetFunction().GetFunctions();
-    auto ut = make_my_tuple(Simplify(UnaryMinus<T>(get<0>(t))));
+    auto ut = make_my_tuple(Simplify(UnaryMinus<T>(std::get<0>(t))));
     return tuple_cat(ut, remove_element<0>(t));
   }
 };
@@ -357,7 +358,7 @@ template <class F> struct Simplification<Composition<F, Zero>, /*com_f_z*/ 1> {
   static type Combine(Composition<F, Zero> c) {
     SIMPLIFY_INFO("Simplifying composition of "
                   "function with 0");
-    return GetPolynomial(get<0>(c.GetFunctions())(0));
+    return GetPolynomial(std::get<0>(c.GetFunctions())(0));
   }
 };
 
@@ -371,7 +372,7 @@ struct Simplification<Composition<F, Polynomial<C, int_<1> > >,
     SIMPLIFY_INFO("Simplifying composition of "
                   "function by constant polynomial");
     auto t = c.GetFunctions();
-    return GetPolynomial(get<0>(t)(get<1>(t).GetCoeffs()[0]));
+    return GetPolynomial(std::get<0>(t)(std::get<1>(t).GetCoeffs()[0]));
   }
 };
 }

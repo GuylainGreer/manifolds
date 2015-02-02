@@ -26,7 +26,7 @@ struct Simplification<Composition<FunctionMatrix<r1, c1, F1s...>,
   static auto CombineHelper(TupleO t1, TupleI t2,
                             std::integer_sequence<std::size_t, iouts...>,
                             std::integer_sequence<std::size_t, iins...>) {
-    return make_my_tuple(get<iouts>(t1)(get<iins>(t2)...)...);
+    return make_my_tuple(std::get<iouts>(t1)(std::get<iins>(t2)...)...);
   }
 
   typedef Composition<FunctionMatrix<r1, c1, F1s...>,
@@ -37,7 +37,7 @@ struct Simplification<Composition<FunctionMatrix<r1, c1, F1s...>,
                   "function matrices\n");
     auto t = c.GetFunctions();
     return GetFunctionMatrix<r1::value, c1::value>(CombineHelper(
-        get<0>(t).GetFunctions(), get<1>(t).GetFunctions(),
+        std::get<0>(t).GetFunctions(), std::get<1>(t).GetFunctions(),
         std::index_sequence_for<F1s...>(), std::index_sequence_for<F2s...>()));
   }
 
@@ -53,7 +53,7 @@ struct Simplification<Composition<Variable<i, a>, FunctionMatrix<FMFuncs...> >,
   Combine(Composition<Variable<i, a>, FunctionMatrix<FMFuncs...> > c) {
     SIMPLIFY_INFO("Simplifying composition of "
                   "variable and function matrix\n");
-    return get<i>(get<1>(c.GetFunctions()).GetFunctions());
+    return std::get<i>(std::get<1>(c.GetFunctions()).GetFunctions());
   }
 };
 
@@ -65,7 +65,7 @@ struct Simplification<FunctionMatrix<r, c, Fs...>, /*var_fm*/ 1> {
                   "of function matrix\n");
     auto t = m.GetFunctions();
     return GetFunctionMatrix<r::value, c::value>(SimplifyIndividuals(
-        t, std::make_index_sequence<tuple_size<decltype(t)>::value>()));
+        t, std::make_index_sequence<std::tuple_size<decltype(t)>::value>()));
   }
 
   typedef decltype(Combine(std::declval<in_type>())) type;
@@ -79,9 +79,9 @@ struct Simplification<
   typedef Multiplication<F, Composition<Pow, FunctionMatrix<r, c, F, P> > >
   in_type;
   static auto Combine(in_type f) {
-    auto p =
-        get<1>(get<1>(get<1>(f.GetFunctions()).GetFunctions()).GetFunctions());
-    return Pow()(F(), AddRaw(p, 1_c));
+    auto p = std::get<1>(std::get<1>(
+        std::get<1>(f.GetFunctions()).GetFunctions()).GetFunctions());
+    return Pow()(F(), AddRaw(p, GetIPolynomial<1>()));
   }
 
   typedef decltype(Combine(std::declval<in_type>())) type;
@@ -97,10 +97,10 @@ struct Simplification<Multiplication<FunctionMatrix<r1, c1, F1s...>,
     template <std::size_t col> struct Inner2 {
       template <std::size_t... is>
       static auto apply(in_type m, std::integer_sequence<std::size_t, is...>) {
-        auto l = get<0>(m.GetFunctions()).GetFunctions();
-        auto r = get<1>(m.GetFunctions()).GetFunctions();
-        return Add(
-            (get<row *c1::value + is>(l) * get<is *c2::value + col>(r))...);
+        auto l = std::get<0>(m.GetFunctions()).GetFunctions();
+        auto r = std::get<1>(m.GetFunctions()).GetFunctions();
+        return Add((std::get<row *c1::value + is>(l) *
+                    std::get<is *c2::value + col>(r))...);
       }
     };
     template <std::size_t... is>
@@ -128,7 +128,7 @@ template <class F>
 struct Simplification<FunctionMatrix<int_<1>, int_<1>, F>, /*fm_1_1*/ 0> {
   typedef F type;
   static type Combine(FunctionMatrix<int_<1>, int_<1>, F> f) {
-    return get<0>(f.GetFunctions());
+    return std::get<0>(f.GetFunctions());
   }
 };
 

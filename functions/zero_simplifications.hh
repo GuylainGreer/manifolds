@@ -11,7 +11,7 @@ template <class T> struct Simplification<Addition<T, Zero>, /*add_f_z*/ 0> {
 
   static type Combine(Addition<T, Zero> t) {
     SIMPLIFY_INFO("Simplifying adding zero\n");
-    return get<0>(t.GetFunctions());
+    return std::get<0>(t.GetFunctions());
   }
 };
 
@@ -23,7 +23,7 @@ struct Simplification<
 
   static type Combine(Addition<Zero, T> t) {
     SIMPLIFY_INFO("Simplifying adding zero inverse\n");
-    return get<1>(t.GetFunctions());
+    return std::get<1>(t.GetFunctions());
   }
 };
 

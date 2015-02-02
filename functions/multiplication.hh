@@ -27,12 +27,12 @@ struct Multiplication : Function<list<int_<5>, typename Functions::indices...>,
 
   template <class... Args>
   auto eval(int_<sizeof...(Functions) - 1>, Args... args) const {
-    return get<sizeof...(Functions) - 1>(functions)(args...);
+    return std::get<sizeof...(Functions) - 1>(functions)(args...);
   }
 
   template <int N, class... Args> auto eval(int_<N>, Args... args) const {
-    typedef decltype(get<N>(functions)(args...)) result;
-    return std::forward<result>(get<N>(functions)(args...)) *
+    typedef decltype(std::get<N>(functions)(args...)) result;
+    return std::forward<result>(std::get<N>(functions)(args...)) *
            eval(int_<N + 1>(), std::forward<Args>(args)...);
   }
 

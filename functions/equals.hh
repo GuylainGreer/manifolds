@@ -17,8 +17,8 @@ template <template <class...> class Variadic, class... Functions,
           std::size_t... indices>
 bool VariadicEqualHelper(Variadic<Functions...> f1, Variadic<Functions...> f2,
                          std::integer_sequence<std::size_t, indices...>) {
-  return and_helper(
-      (get<indices>(f1.GetFunctions()) == get<indices>(f2.GetFunctions()))...);
+  return and_helper((std::get<indices>(f1.GetFunctions()) ==
+                     std::get<indices>(f2.GetFunctions()))...);
 }
 
 template <template <class...> class Variadic, class... Functions>

@@ -6,28 +6,22 @@
 
 namespace manifolds {
 
-template <int... coeffs> using iseq = std::integer_sequence<int, coeffs...>;
+typedef std::intmax_t IPInt_t;
+template <IPInt_t... coeffs>
+using iseq = std::integer_sequence<IPInt_t, coeffs...>;
+template <std::size_t size>
+using miseq = std::make_integer_sequence<IPInt_t, size>;
 
-template <std::size_t size> using miseq = std::make_integer_sequence<int, size>;
-
-template <class C> struct IntegralPolynomial {
-  static_assert(!std::is_same<C, C>::value,
-                "Integral polynomial is only instantiable "
-                "from a std::integer_sequence<...>");
-};
-
-template <class Type, Type... coeffs>
-struct IntegralPolynomial<std::integer_sequence<
-    Type, coeffs...> > : Function<int_<31>, 1, 1>,
-                         FunctionCommon<IntegralPolynomial<
-                             std::integer_sequence<Type, coeffs...> > > {
+template <IPInt_t... coeffs>
+struct IntegralPolynomial : Function<int_<31>, 1, 1>,
+                            FunctionCommon<IntegralPolynomial<coeffs...> > {
   using FunctionCommon<IntegralPolynomial>::operator();
   static const int num_coeffs = sizeof...(coeffs);
   static const bool stateless = true;
   static const ComplexOutputBehaviour complex_output = SameAsInput;
-  typedef std::integer_sequence<Type, coeffs...> coeff_sequence;
+  typedef std::integer_sequence<IPInt_t, coeffs...> coeff_sequence;
 
-  std::array<Type, sizeof...(coeffs)> GetCoeffs() const {
+  std::array<IPInt_t, sizeof...(coeffs)> GetCoeffs() const {
     return { { coeffs... } };
   }
 
@@ -36,8 +30,8 @@ struct IntegralPolynomial<std::integer_sequence<
                   "Can only call polynomial "
                   "with multiple arguments when "
                   "polynomial is a constant");
-    typename std::common_type<Type, T>::type result = 0, t2 = t;
-    Type a_coeffs[] = { coeffs... };
+    typename std::common_type<IPInt_t, T>::type result = 0, t2 = t;
+    IPInt_t a_coeffs[] = { coeffs... };
     std::reverse(std::begin(a_coeffs), std::end(a_coeffs));
     for (auto i = std::begin(a_coeffs); i != std::end(a_coeffs); i++) {
       result = result * t2 + *i;
@@ -45,27 +39,26 @@ struct IntegralPolynomial<std::integer_sequence<
     return result;
   }
 
-  Polynomial<Type, int_<sizeof...(coeffs)> > ToPoly() const {
-    std::array<Type, sizeof...(coeffs)> c = { { coeffs... } };
+  Polynomial<IPInt_t, int_<sizeof...(coeffs)> > ToPoly() const {
+    std::array<IPInt_t, sizeof...(coeffs)> c = { { coeffs... } };
     return { c };
   }
 };
 
-template <class C>
-struct is_polynomial<IntegralPolynomial<C> > : std::true_type {};
+template <IPInt_t... coeffs>
+struct is_polynomial<IntegralPolynomial<coeffs...> > : std::true_type {};
 
-template <int... is> auto GetIPolynomial() {
-  return IntegralPolynomial<iseq<is...> >();
+template <IPInt_t... is> auto GetIPolynomial() {
+  return IntegralPolynomial<is...>();
 }
 
-template <class T, T... ts, class U>
-bool operator==(IntegralPolynomial<std::integer_sequence<T, ts...> >,
-                IntegralPolynomial<std::integer_sequence<U, (U)ts...> >) {
+template <IPInt_t... ts>
+bool operator==(IntegralPolynomial<ts...>, IntegralPolynomial<ts...>) {
   return true;
 }
 
-template <class T, T... ts, class U>
-bool operator==(IntegralPolynomial<std::integer_sequence<T, ts...> >, U) {
+template <IPInt_t... ts, class U>
+bool operator==(IntegralPolynomial<ts...>, U) {
   return false;
 }
 }

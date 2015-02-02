@@ -15,11 +15,11 @@ struct Simplification<Multiplication<Division<N1, D1>, Division<N2, D2> >,
   static type Combine(Multiplication<Division<N1, D1>, Division<N2, D2> > a) {
     SIMPLIFY_INFO("Simplifying multiplication of division "
                   "by division\n");
-    Multiplication<N1, N2> mn(get<0>(a.GetFunctions()).GetNumerator(),
-                              get<1>(a.GetFunctions()).GetNumerator());
+    Multiplication<N1, N2> mn(std::get<0>(a.GetFunctions()).GetNumerator(),
+                              std::get<1>(a.GetFunctions()).GetNumerator());
 
-    Multiplication<D1, D2> md(get<0>(a.GetFunctions()).GetDenominator(),
-                              get<1>(a.GetFunctions()).GetDenominator());
+    Multiplication<D1, D2> md(std::get<0>(a.GetFunctions()).GetDenominator(),
+                              std::get<1>(a.GetFunctions()).GetDenominator());
 
     return { mn, md };
   }
@@ -32,9 +32,9 @@ struct Simplification<Multiplication<Division<N, D>, F>, /*mult_div_f*/ 1> {
   static type Combine(Multiplication<Division<N, D>, F> a) {
     SIMPLIFY_INFO("Simplifying multiplication of division "
                   "by function\n");
-    Multiplication<N, F> m(get<0>(a.GetFunctions()).GetNumerator(),
-                           get<1>(a.GetFunctions()));
-    return { m, get<0>(a.GetFunctions()).GetDenominator() };
+    Multiplication<N, F> m(std::get<0>(a.GetFunctions()).GetNumerator(),
+                           std::get<1>(a.GetFunctions()));
+    return { m, std::get<0>(a.GetFunctions()).GetDenominator() };
   }
 };
 
@@ -83,7 +83,7 @@ struct Simplification<Composition<Division<N, D>, Fs...>, /*com_div_fs*/ 0> {
 
   static type Combine(Composition<Division<N, D>, Fs...> c) {
     auto t = c.GetFunctions();
-    auto ds = get<0>(t).GetFunctions();
+    auto ds = std::get<0>(t).GetFunctions();
     auto fs = remove_element<0>(t);
     auto n = Composition<N, Fs...>(tuple_cat(remove_element<1>(ds), fs));
     auto d = Composition<D, Fs...>(tuple_cat(remove_element<0>(ds), fs));

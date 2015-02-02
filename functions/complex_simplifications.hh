@@ -31,7 +31,7 @@ struct Simplification<Composition<Real, T>, /*com_re_f*/ 1,
                       typename std::enable_if<ComplexOutputType<T>::value ==
                                               NeverComplex>::type> {
   static auto Combine(Composition<Real, T> t) {
-    return get<1>(t.GetFunctions());
+    return std::get<1>(t.GetFunctions());
   }
 };
 
@@ -47,7 +47,7 @@ struct Simplification<Composition<Phase, T>, /*com_ph_f*/ 1,
                       typename std::enable_if<ComplexOutputType<T>::value ==
                                               NeverComplex>::type> {
   static auto Combine(Composition<Phase, T> t) {
-    auto t2 = get<1>(t.GetFunctions());
+    auto t2 = std::get<1>(t.GetFunctions());
     return GetPolynomial(-M_PI / 2, M_PI / 2)(Sign()(t2));
   }
 };
@@ -71,7 +71,7 @@ struct Simplification<Composition<Norm, T>, /*com_nm_f*/ 1,
                       typename std::enable_if<ComplexOutputType<T>::value ==
                                               NeverComplex>::type> {
   static auto Combine(Composition<Norm, T> t) {
-    return GetIPolynomial<0, 0, 1>()(get<1>(t.GetFunctions()));
+    return GetIPolynomial<0, 0, 1>()(std::get<1>(t.GetFunctions()));
   }
 };
 
@@ -87,60 +87,44 @@ struct Simplification<Composition<Conjugate, T>, /*com_con_f*/ 1,
                       typename std::enable_if<ComplexOutputType<T>::value ==
                                               NeverComplex>::type> {
   static auto Combine(Composition<Conjugate, T> t) {
-    return get<1>(t.GetFunctions());
+    return std::get<1>(t.GetFunctions());
   }
 };
 
-template <class T, class T2, T2... cs>
-struct Simplification<
-    Composition<IntegralPolynomial<std::integer_sequence<T2, cs...> >,
-                ImagN<T> >,
-    /**/ 0, typename std::enable_if<(sizeof...(cs) > 2)>::type> {
+template <class T, IPInt_t... cs>
+struct Simplification<Composition<IntegralPolynomial<cs...>, ImagN<T> >,
+                      /**/ 0,
+                      typename std::enable_if<(sizeof...(cs) > 2)>::type> {
 
-  typedef typename std::conditional<std::is_unsigned<T2>::value,
-                                    typename std::make_signed<T2>::type,
-                                    T2>::type Tout;
-
-  template <Tout c0, Tout c1, Tout... c_outs>
-  static auto Add(
-      int_<1>,
-      IntegralPolynomial<std::integer_sequence<Tout, c0, c1, c_outs...> > p) {
-    return AddRaw(
-        IntegralPolynomial<std::integer_sequence<Tout, c0> >(),
-        MultiplyRaw(IntegralPolynomial<std::integer_sequence<Tout, c1> >(), I));
+  template <IPInt_t c0, IPInt_t c1, IPInt_t... c_outs>
+  static auto Add(int_<1>, IntegralPolynomial<c0, c1, c_outs...> p) {
+    return AddRaw(IntegralPolynomial<c0>(),
+                  MultiplyRaw(IntegralPolynomial<c1>(), I));
   }
 
-  template <Tout c0, Tout c1, Tout... c_outs, int N>
-  static auto Add(
-      int_<N>,
-      IntegralPolynomial<std::integer_sequence<Tout, c0, c1, c_outs...> >) {
-    static const Tout c0_2 =
-        c0 +
-        ((N % 2 == 0)
-             ? ((N % 4 == 0)
-                    ? nth<N - 2,
-                          std::integral_constant<Tout, c_outs>...>::type::value
-                    : -nth<N - 2, std::integral_constant<
-                                      Tout, c_outs>...>::type::value)
-             : 0);
-    static const Tout c1_2 =
-        c1 +
-        ((N % 2 == 1)
-             ? ((N % 4 == 1)
-                    ? nth<N - 2,
-                          std::integral_constant<Tout, c_outs>...>::type::value
-                    : -nth<N - 2, std::integral_constant<
-                                      Tout, c_outs>...>::type::value)
-             : 0);
-    return Add(int_<N - 1>(),
-               IntegralPolynomial<
-                   std::integer_sequence<Tout, c0_2, c1_2, c_outs...> >());
+  template <IPInt_t c0, IPInt_t c1, IPInt_t... c_outs, int N>
+  static auto Add(int_<N>, IntegralPolynomial<c0, c1, c_outs...>) {
+    static const IPInt_t c0_2 =
+        c0 + ((N % 2 == 0)
+                  ? ((N % 4 == 0)
+                         ? nth<N - 2, std::integral_constant<
+                                          IPInt_t, c_outs>...>::type::value
+                         : -nth<N - 2, std::integral_constant<
+                                           IPInt_t, c_outs>...>::type::value)
+                  : 0);
+    static const IPInt_t c1_2 =
+        c1 + ((N % 2 == 1)
+                  ? ((N % 4 == 1)
+                         ? nth<N - 2, std::integral_constant<
+                                          IPInt_t, c_outs>...>::type::value
+                         : -nth<N - 2, std::integral_constant<
+                                           IPInt_t, c_outs>...>::type::value)
+                  : 0);
+    return Add(int_<N - 1>(), IntegralPolynomial<c0_2, c1_2, c_outs...>());
   }
 
-  static auto Combine(Composition<
-      IntegralPolynomial<std::integer_sequence<T2, cs...> >, ImagN<T> >) {
-    return Add(int_<sizeof...(cs) - 1>(),
-               IntegralPolynomial<std::integer_sequence<Tout, (Tout)cs...> >());
+  static auto Combine(Composition<IntegralPolynomial<cs...>, ImagN<T> >) {
+    return Add(int_<sizeof...(cs) - 1>(), IntegralPolynomial<cs...>());
   }
 };
 
@@ -157,8 +141,8 @@ struct Simplification<
   template <std::size_t... is>
   static auto Combine(Composition<F, Addition<Fs...> > c,
                       std::integer_sequence<std::size_t, is...>) {
-    auto t = get<1>(c.GetFunctions()).GetFunctions();
-    return AddRaw((F()(get<is>(t)))...);
+    auto t = std::get<1>(c.GetFunctions()).GetFunctions();
+    return AddRaw((F()(std::get<is>(t)))...);
   }
 
   static auto Combine(Composition<F, Addition<Fs...> > c) {
@@ -170,9 +154,9 @@ template <class F1, class F2>
 struct Simplification<Composition<Real, Multiplication<F1, F2> >,
                       /*re_add_fs*/ 0> {
   static auto Combine(Composition<Real, Multiplication<F1, F2> > c) {
-    auto t = get<1>(c.GetFunctions()).GetFunctions();
-    auto left = get<0>(t);
-    auto right = get<1>(t);
+    auto t = std::get<1>(c.GetFunctions()).GetFunctions();
+    auto left = std::get<0>(t);
+    auto right = std::get<1>(t);
     return SubRaw(MultiplyRaw(Real()(left), Real()(right)),
                   MultiplyRaw(Imag()(left), Imag()(right)));
   }
@@ -182,36 +166,37 @@ template <class F1, class F2>
 struct Simplification<Composition<Imag, Multiplication<F1, F2> >,
                       /*im_add_fs*/ 0> {
   static auto Combine(Composition<Imag, Multiplication<F1, F2> > c) {
-    auto t = get<1>(c.GetFunctions()).GetFunctions();
-    auto left = get<0>(t);
-    auto right = get<1>(t);
+    auto t = std::get<1>(c.GetFunctions()).GetFunctions();
+    auto left = std::get<0>(t);
+    auto right = std::get<1>(t);
     return AddRaw(MultiplyRaw(Real()(left), Imag()(right)),
                   MultiplyRaw(Imag()(left), Real()(right)));
   }
 };
 
-template <class T, T... coeffs>
-struct Simplification<
-    Composition<IntegralPolynomial<std::integer_sequence<T, coeffs...> >, Sign>,
-    0, typename std::enable_if<(sizeof...(coeffs) > 2)>::type> {
-  template <unsigned, T...> struct Accum;
+template <IPInt_t... coeffs>
+struct Simplification<Composition<IntegralPolynomial<coeffs...>, Sign>, 0,
+                      typename std::enable_if<(sizeof...(coeffs) > 2)>::type> {
+  template <unsigned, IPInt_t...> struct Accum;
 
-  template <unsigned index, T c, T... cs> struct Accum<index, c, cs...> {
-    static const T zeroth = index % 2 == 0 ? Accum<index + 1, cs...>::zeroth + c
-                                           : Accum<index + 1, cs...>::zeroth;
-    static const T first = index % 2 == 1 ? Accum<index + 1, cs...>::first + c
-                                          : Accum<index + 1, cs...>::first;
+  template <unsigned index, IPInt_t c, IPInt_t... cs>
+  struct Accum<index, c, cs...> {
+    static const IPInt_t zeroth = index % 2 == 0
+                                      ? Accum<index + 1, cs...>::zeroth + c
+                                      : Accum<index + 1, cs...>::zeroth;
+    static const IPInt_t first = index % 2 == 1
+                                     ? Accum<index + 1, cs...>::first + c
+                                     : Accum<index + 1, cs...>::first;
   };
 
   template <unsigned index> struct Accum<index> {
-    static const T zeroth = 0;
-    static const T first = 0;
+    static const IPInt_t zeroth = 0;
+    static const IPInt_t first = 0;
   };
 
-  static auto Combine(Composition<
-      IntegralPolynomial<std::integer_sequence<T, coeffs...> >, Sign>) {
-    static const T zeroth = Accum<0, coeffs...>::zeroth;
-    static const T first = Accum<0, coeffs...>::first;
+  static auto Combine(Composition<IntegralPolynomial<coeffs...>, Sign>) {
+    static const IPInt_t zeroth = Accum<0, coeffs...>::zeroth;
+    static const IPInt_t first = Accum<0, coeffs...>::first;
     return GetIPolynomial<zeroth, first>()(Sign());
   }
 };
@@ -220,7 +205,7 @@ template <class C, class O>
 struct Simplification<Composition<Polynomial<C, O>, Sign>, 0,
                       typename std::enable_if<(O::value > 2)>::type> {
   static auto Combine(const Composition<Polynomial<C, O>, Sign> &c) {
-    const auto &p = get<0>(c.GetFunctions());
+    const auto &p = std::get<0>(c.GetFunctions());
     C zeroth(0), first(0);
     for (unsigned i = 0; i < O::value; i += 2)
       zeroth += p[i];

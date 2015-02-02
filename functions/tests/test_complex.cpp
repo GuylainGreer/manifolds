@@ -25,11 +25,12 @@ BOOST_AUTO_TEST_CASE(complex_test) {
   BOOST_CHECK_EQUAL(Simplify(GetIPolynomial<0, 0, 1>()(I)),
                     GetIPolynomial<-1>());
   BOOST_CHECK_EQUAL(Simplify(Real()(GetIPolynomial<1>() * I + x)), x);
-  BOOST_CHECK_EQUAL(Simplify(Imag()(GetIPolynomial<1>() * I + x)), GetIPolynomial<1>());
+  BOOST_CHECK_EQUAL(Simplify(Imag()(GetIPolynomial<1>() * I + x)),
+                    GetIPolynomial<1>());
   BOOST_CHECK_EQUAL(Simplify(Real()((I + Sin()(x)) * (I + Cos()(x)))),
-                    (Sin()*Cos())(x) - GetIPolynomial<1>());
-  BOOST_CHECK_EQUAL(Simplify(GetIPolynomial<1,2,3,4,5,6,7>()(Sign())),
-                    (GetIPolynomial<16,12>()(Sign())));
-  BOOST_CHECK_EQUAL(Simplify(GetPolynomial(1,2,3,4,5,6,7)(Sign())),
-                    GetPolynomial(16,12)(Sign()));
+                    (Sin() * Cos())(x) - GetIPolynomial<1>());
+  BOOST_CHECK_EQUAL(Simplify(GetIPolynomial<1, 2, 3, 4, 5, 6, 7>()(Sign())),
+                    (GetIPolynomial<16, 12>()(Sign())));
+  BOOST_CHECK_EQUAL(Simplify(GetPolynomial(1, 2, 3, 4, 5, 6, 7)(Sign())),
+                    GetPolynomial(16, 12)(Sign()));
 }

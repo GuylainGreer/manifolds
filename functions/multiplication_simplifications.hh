@@ -45,7 +45,7 @@ struct Simplification<Multiplication<F1, UnaryMinus<F2> >,
                   "by negative of another function");
     auto t = m.GetFunctions();
     Multiplication<F1, F2> r =
-        Multiplication<F1, F2>(get<0>(t), get<1>(t).GetFunction());
+        Multiplication<F1, F2>(std::get<0>(t), std::get<1>(t).GetFunction());
     return UnaryMinus<decltype(r)>(r);
   }
 };
@@ -56,8 +56,8 @@ struct Simplification<Multiplication<UnaryMinus<F1>, F2>, /*mult_um_f1_f2*/ 1> {
   static type Combine(Multiplication<UnaryMinus<F1>, F2> m) {
     SIMPLIFY_INFO("Simplifying multiplication of negative "
                   "of function by another function");
-    auto l = get<0>(m.GetFunctions()).GetFunction();
-    auto r = get<1>(m.GetFunctions());
+    auto l = std::get<0>(m.GetFunctions()).GetFunction();
+    auto r = std::get<1>(m.GetFunctions());
     auto mr = Multiplication<decltype(l), decltype(r)>(l, r);
     return UnaryMinus<decltype(mr)>(mr);
   }
@@ -69,14 +69,15 @@ struct Simplification<Multiplication<Addition<F1s...>, Addition<F2s...> >,
   template <class T1, class T2, std::size_t... indices>
   static auto Second(T1 t1, T2 t2,
                      std::integer_sequence<std::size_t, indices...>) {
-    return AddRaw(Multiply(t1, get<indices>(t2))...);
+    return AddRaw(Multiply(t1, std::get<indices>(t2))...);
   }
 
   template <class T1, class T2, std::size_t... indices>
   static auto First(T1 t1, T2 t2,
                     std::integer_sequence<std::size_t, indices...>) {
-    return AddRaw(Second(get<indices>(t1), t2,
-                         std::make_index_sequence<tuple_size<T2>::value>())...);
+    return AddRaw(
+        Second(std::get<indices>(t1), t2,
+               std::make_index_sequence<std::tuple_size<T2>::value>())...);
   }
 
   typedef Multiplication<Addition<F1s...>, Addition<F2s...> > in_type;
@@ -84,9 +85,10 @@ struct Simplification<Multiplication<Addition<F1s...>, Addition<F2s...> >,
   static auto Combine(in_type m) {
     SIMPLIFY_INFO("Simplifying multiplication of "
                   "addition of functions");
-    auto t1 = get<0>(m.GetFunctions()).GetFunctions();
-    return First(t1, get<1>(m.GetFunctions()).GetFunctions(),
-                 std::make_index_sequence<tuple_size<decltype(t1)>::value>());
+    auto t1 = std::get<0>(m.GetFunctions()).GetFunctions();
+    return First(
+        t1, std::get<1>(m.GetFunctions()).GetFunctions(),
+        std::make_index_sequence<std::tuple_size<decltype(t1)>::value>());
   }
 
   typedef decltype(Combine(std::declval<in_type>())) type;

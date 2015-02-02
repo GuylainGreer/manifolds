@@ -27,7 +27,7 @@ template <int iter> struct DerivativeWrapper {
   static auto GroupDeriv(const Group<Funcs...> &g, Variable<i> v,
                          std::integer_sequence<std::size_t, is...>) {
     return GetGroup(DerivativeWrapper<iter + 1>::Derivative(
-        get<is>(g.GetFunctions()), v)...);
+        std::get<is>(g.GetFunctions()), v)...);
   }
 
   template <class... Funcs, int i>
@@ -148,41 +148,38 @@ template <int iter> struct DerivativeWrapper {
 
   template <class, class, int> struct IPDeriv;
 
-  template <class T, T... output, int t>
-  struct IPDeriv<std::integer_sequence<T>, std::integer_sequence<T, output...>,
-                 t> {
-    typedef std::integer_sequence<T, output...> type;
+  template <IPInt_t... output, int t>
+  struct IPDeriv<std::integer_sequence<IPInt_t>,
+                 std::integer_sequence<IPInt_t, output...>, t> {
+    typedef IntegralPolynomial<output...> type;
   };
 
-  template <class T, T next, T... rest, T... output, int term_order>
-  struct IPDeriv<std::integer_sequence<T, next, rest...>,
-                 std::integer_sequence<T, output...>, term_order> {
+  template <IPInt_t next, IPInt_t... rest, IPInt_t... output, int term_order>
+  struct IPDeriv<std::integer_sequence<IPInt_t, next, rest...>,
+                 std::integer_sequence<IPInt_t, output...>, term_order> {
     typedef typename IPDeriv<
-        std::integer_sequence<T, rest...>,
-        std::integer_sequence<T, output..., next *term_order>,
+        std::integer_sequence<IPInt_t, rest...>,
+        std::integer_sequence<IPInt_t, output..., next *term_order>,
         term_order + 1>::type type;
   };
 
-  template <class T, T f, T... coeffs,
+  template <IPInt_t f, IPInt_t... coeffs,
             class = typename std::enable_if<(sizeof...(coeffs) > 0)>::type>
-  static auto Derivative(
-      IntegralPolynomial<std::integer_sequence<T, f, coeffs...> > ip,
-      Variable<0> v) {
-    IntegralPolynomial<typename IPDeriv<std::integer_sequence<T, coeffs...>,
-                                        std::integer_sequence<T>, 1>::type> r;
+  static auto Derivative(IntegralPolynomial<f, coeffs...> ip, Variable<0> v) {
+    typename IPDeriv<std::integer_sequence<IPInt_t, coeffs...>,
+                     std::integer_sequence<IPInt_t>, 1>::type r;
     PRINT_DERIV(ip, v, "non-constant integral polynomial", r);
     return r;
   }
 
-  template <class T, T f>
-  static auto Derivative(IntegralPolynomial<std::integer_sequence<T, f> > ip,
-                         Variable<0> v) {
+  template <IPInt_t f>
+  static auto Derivative(IntegralPolynomial<f> ip, Variable<0> v) {
     PRINT_DERIV(ip, v, "constant integral polynomial", zero);
     return zero;
   }
 
-  template <class Seq, int i>
-  static auto Derivative(IntegralPolynomial<Seq> ip, Variable<i> v) {
+  template <IPInt_t... ts, int i>
+  static auto Derivative(IntegralPolynomial<ts...> ip, Variable<i> v) {
     PRINT_DERIV(ip, v, "non-constant integral polynomial", zero);
     return zero;
   }
@@ -234,7 +231,7 @@ template <int iter> struct DerivativeWrapper {
   }
 
   template <int i> static auto Derivative(Variable<i> v1, Variable<i> v2) {
-    IntegralPolynomial<iseq<1> > r;
+    IntegralPolynomial<1> r;
     PRINT_DERIV(v1, v2, "variable", r);
     return r;
   }

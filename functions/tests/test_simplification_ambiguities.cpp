@@ -101,5 +101,5 @@ BOOST_AUTO_TEST_CASE(simplification_ambiguities_test) {
   // Tests com_z_z
   TESTCASE(Composition<Zero C Zero>);
 
-  TESTCASE(Multiplication<Zero C IntegralPolynomial<iseq<1> > >);
+  TESTCASE(Multiplication<Zero C IntegralPolynomial<1> >);
 }
