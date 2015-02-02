@@ -9,6 +9,7 @@ env = Environment(CXX = compiler)
 cpp_flags = ' '.join(['-std=c++1y',
                       '-Wall',
                       '-Wpedantic',
+                      '-Werror',
                       '-ftemplate-depth=512',
                       '-ftemplate-backtrace-limit=0',
                       '-msse4 -march=native',
@@ -16,7 +17,7 @@ cpp_flags = ' '.join(['-std=c++1y',
                       error_limit,
                       #'-DPRINT_SIMPLIFIES',
                       '-fvisibility=hidden',
-                  ])
+                      ])
 if 'clang' not in compiler:
     cpp_flags = cpp_flags + ' -g'
 
