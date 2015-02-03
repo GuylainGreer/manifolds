@@ -286,6 +286,17 @@ struct Simplification<IntegralPolynomial<0>,
                       /*ip_0*/ 0> {
   static auto Combine(IntegralPolynomial<0>) { return zero; }
 };
+
+template <class C>
+struct Simplification<Composition<IntegralPolynomial<0,1>, C>,
+                      /*com_ip01_f*/0>
+{
+    static auto Combine(Composition<IntegralPolynomial<0,1>, C> a)
+    {
+        return std::get<1>(a.GetFunctions());
+    }
+};
+
 }
 
 #endif
