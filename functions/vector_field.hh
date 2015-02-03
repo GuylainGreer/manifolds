@@ -14,7 +14,7 @@ template <class... Functions> struct VectorField {
   template <class F, std::size_t... indices>
   auto eval(F f, std::integer_sequence<std::size_t, indices...>) const {
     return AddRaw(
-        (get<indices>(functions) * Derivative(f, Variable<indices>()))...);
+        (std::get<indices>(functions) * Derivative(f, Variable<indices>()))...);
   }
 
   template <class F,

@@ -22,13 +22,13 @@ BOOST_AUTO_TEST_CASE(simplify_test) {
       "Failed to make sin+sin == 2 * sin");
 
   auto ps = Sin() + Sin();
-  BOOST_CHECK_EQUAL(get<0>(ps.GetFunctions()).GetCoeffs()[0], 0);
-  BOOST_CHECK_EQUAL(get<0>(ps.GetFunctions()).GetCoeffs()[1], 2);
+  BOOST_CHECK_EQUAL(std::get<0>(ps.GetFunctions()).GetCoeffs()[0], 0);
+  BOOST_CHECK_EQUAL(std::get<0>(ps.GetFunctions()).GetCoeffs()[1], 2);
 
   auto ms = Sin() * Sin();
-  BOOST_CHECK_EQUAL(get<0>(ms.GetFunctions()).GetCoeffs()[0], 0);
-  BOOST_CHECK_EQUAL(get<0>(ms.GetFunctions()).GetCoeffs()[1], 0);
-  BOOST_CHECK_EQUAL(get<0>(ms.GetFunctions()).GetCoeffs()[2], 1);
+  BOOST_CHECK_EQUAL(std::get<0>(ms.GetFunctions()).GetCoeffs()[0], 0);
+  BOOST_CHECK_EQUAL(std::get<0>(ms.GetFunctions()).GetCoeffs()[1], 0);
+  BOOST_CHECK_EQUAL(std::get<0>(ms.GetFunctions()).GetCoeffs()[2], 1);
 
   auto ss = Sin()(Sin());
   auto mss = ss * ss;

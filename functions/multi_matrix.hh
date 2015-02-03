@@ -25,7 +25,7 @@ template <class CoeffType, int... sizes> struct MultiMatrix {
   typedef CoeffType CoefficientType;
 
   template <int N> struct dimension {
-    typedef typename tuple_element<N, tuple<int_<sizes>...> >::type type;
+    typedef typename std::tuple_element<N, tuple<int_<sizes>...> >::type type;
     static const int value = type::value;
   };
 
@@ -100,12 +100,12 @@ template <class... MMatrices> struct MultiMatrixGroup {
       typename MMatrices::CoefficientType...>::type CoefficientType;
 
   template <int N>
-  using dim_helper = typename tuple_element<N, tuple<MMatrices...> >::type;
+  using dim_helper = typename std::tuple_element<N, tuple<MMatrices...> >::type;
 
   template <int N, int index = 0, bool = (N < dim_helper<index>::dimensions)>
   struct dimension
-      : tuple_element<index, tuple<MMatrices...> >::type::template dimension<
-            N>::type {};
+      : std::tuple_element<
+            index, tuple<MMatrices...> >::type::template dimension<N>::type {};
 
   template <int N, int index>
   struct dimension<N, index,
@@ -141,10 +141,10 @@ template <class... MMatrices> struct MultiMatrixGroup {
                 std::integer_sequence<int, individual_indices...>, int_<offset>,
                 int_<index>) const {
     static const int dims =
-        tuple_element<index, tuple<MMatrices...> >::type::dimensions;
+        std::tuple_element<index, tuple<MMatrices...> >::type::dimensions;
     return GetCoeff(a, std::make_integer_sequence<int, dims>(),
                     int_<offset + dims>(), int_<index + 1>()) *
-           get<index>(matrices).Coeff(a[individual_indices + offset]...);
+           std::get<index>(matrices).Coeff(a[individual_indices + offset]...);
   }
 
   template <class T, class = typename std::enable_if<array_size<T>::value ==
@@ -154,7 +154,8 @@ template <class... MMatrices> struct MultiMatrixGroup {
     std::copy(std::begin(indices), std::end(indices), a.begin());
     return GetCoeff(
         a, std::make_integer_sequence<
-               int, tuple_element<0, tuple<MMatrices...> >::type::dimensions>(),
+               int,
+               std::tuple_element<0, tuple<MMatrices...> >::type::dimensions>(),
         int_<0>(), int_<0>());
   }
 
@@ -162,7 +163,8 @@ template <class... MMatrices> struct MultiMatrixGroup {
     std::array<int, sizeof...(Indices)> a{ { int(indices)... } };
     return GetCoeff(
         a, std::make_integer_sequence<
-               int, tuple_element<0, tuple<MMatrices...> >::type::dimensions>(),
+               int,
+               std::tuple_element<0, tuple<MMatrices...> >::type::dimensions>(),
         int_<0>(), int_<0>());
   }
 

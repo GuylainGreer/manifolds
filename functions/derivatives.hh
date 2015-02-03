@@ -39,7 +39,7 @@ template <int iter> struct DerivativeWrapper {
   static auto Derivative(const Addition<Funcs...> &a, Variable<i> v,
                          std::integer_sequence<std::size_t, indices...>) {
     return AddRaw(DerivativeWrapper<iter + 1>::Derivative(
-        get<indices>(a.GetFunctions()), v)...);
+        std::get<indices>(a.GetFunctions()), v)...);
   }
 
   template <class... Funcs, int i>
@@ -59,8 +59,8 @@ template <int iter> struct DerivativeWrapper {
 
   template <class Func, int i>
   static auto Derivative(const Composition<Func> &c, Variable<i> v) {
-    auto r =
-        DerivativeWrapper<iter + 1>::Derivative(get<0>(c.GetFunctions()), v);
+    auto r = DerivativeWrapper<iter + 1>::Derivative(
+        std::get<0>(c.GetFunctions()), v);
     PRINT_DERIV(c, v, "last composition", r);
     return r;
   }
@@ -69,7 +69,7 @@ template <int iter> struct DerivativeWrapper {
             class = typename std::enable_if<(sizeof...(Funcs) > 0)>::type>
   static auto Derivative(const Composition<Func, Funcs...> &c, Variable<i> v) {
     auto funcs = remove_element<0>(c.GetFunctions());
-    auto d = FullDeriv(get<0>(c.GetFunctions()));
+    auto d = FullDeriv(std::get<0>(c.GetFunctions()));
     auto next = tuple_cat(make_my_tuple(d), funcs);
     auto r = Composition<decltype(d), Funcs...>(next) *
              DerivativeWrapper<iter + 1>::Derivative(
@@ -96,9 +96,9 @@ template <int iter> struct DerivativeWrapper {
                                std::integer_sequence<std::size_t, lefts...>,
                                std::integer_sequence<std::size_t, rights...>) {
     auto t = a.GetFunctions();
-    return Multiply(get<lefts>(t)...,
-                    DerivativeWrapper<iter + 1>::Derivative(get<i>(t), v),
-                    get<rights + i + 1>(t)...);
+    return Multiply(std::get<lefts>(t)...,
+                    DerivativeWrapper<iter + 1>::Derivative(std::get<i>(t), v),
+                    std::get<rights + i + 1>(t)...);
   }
 
   template <int i, class... Funcs, int d_i>
@@ -247,12 +247,13 @@ template <int iter> struct DerivativeWrapper {
                          std::integer_sequence<std::size_t, indices...>) {
     typedef FunctionMatrix<Functions...> M;
     return GetFunctionMatrix<M::num_rows, M::num_cols>(
-        make_my_tuple(Derivative(get<indices>(m.GetFunctions()), v)...));
+        make_my_tuple(Derivative(std::get<indices>(m.GetFunctions()), v)...));
   }
 
   template <class... Functions, int i>
   static auto Derivative(FunctionMatrix<Functions...> m, Variable<i> v) {
-    static const int size = tuple_size<decltype(m.GetFunctions())>::type::value;
+    static const int size =
+        std::tuple_size<decltype(m.GetFunctions())>::type::value;
     auto r = Derivative(m, v, std::make_index_sequence<size>());
     PRINT_DERIV(m, v, "function matrix", r);
     return r;
@@ -280,14 +281,14 @@ template <int iter> struct DerivativeWrapper {
             class = typename std::enable_if<col != T::output_dim>::type>
   static auto FullDerivHelper(T t, int_<col>,
                               std::integer_sequence<std::size_t, ins...> b) {
-    auto r =
-        make_my_tuple(Derivative(get<col>(GetOutputs(t)), Variable<ins>())...);
+    auto r = make_my_tuple(
+        Derivative(std::get<col>(GetOutputs(t)), Variable<ins>())...);
     return tuple_cat(
         r, DerivativeWrapper<iter + 1>::FullDerivHelper(t, int_<col + 1>(), b));
   }
 
   template <class T> static auto FullDerivOutput(tuple<T> t, int_<1>, int_<1>) {
-    return get<0>(t);
+    return std::get<0>(t);
   }
 
   template <class... Ts, int rows, int cols>

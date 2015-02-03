@@ -34,8 +34,8 @@ template <class F> void ComparePoint(F f1, F f2, double tolerance) {
 inline void PrintTupleIter(const tuple<> &) {}
 
 template <class Tuple> void PrintTupleIter(const Tuple &t) {
-  std::cout << get<0>(t);
-  if (tuple_size<Tuple>::value > 1)
+  std::cout << std::get<0>(t);
+  if (std::tuple_size<Tuple>::value > 1)
     std::cout << ", ";
   PrintTupleIter(remove_element<0>(t));
 }
