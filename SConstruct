@@ -20,6 +20,8 @@ cpp_flags = ' '.join(['-std=c++1y',
                       ])
 if 'clang' not in compiler:
     cpp_flags = cpp_flags + ' -g'
+else:
+    cpp_flags = cpp_flags + ' -O3'
 
 sources = []
 for root, dirs, files in os.walk('.'):
