@@ -2,6 +2,7 @@
 #include "functions/trig.hh"
 #include "functions/full_function_defs.hh"
 #include "pointwise_equal.hh"
+#include "functions/all_simplifications.hh"
 #include <boost/test/unit_test.hpp>
 #include <limits>
 
@@ -48,4 +49,12 @@ BOOST_AUTO_TEST_CASE(trig_tests) {
                  1, 25);
   PointwiseEqual(ath, [](auto x) { return std::atanh(std::get<0>(x)); }, 100, 0,
                  min, max);
+
+  BOOST_CHECK_EQUAL(Simplify(ACos()(Cos())(x)), x);
+  BOOST_CHECK_EQUAL(Simplify(ASin()(Sin())(x)), x);
+  BOOST_CHECK_EQUAL(Simplify(ATan()(Tan())(x)), x);
+
+  BOOST_CHECK_EQUAL(Simplify(ACosh()(Cosh())(x)), x);
+  BOOST_CHECK_EQUAL(Simplify(ASinh()(Sinh())(x)), x);
+  BOOST_CHECK_EQUAL(Simplify(ATanh()(Tanh())(x)), x);
 }
