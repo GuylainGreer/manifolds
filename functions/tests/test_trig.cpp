@@ -4,6 +4,7 @@
 #include "pointwise_equal.hh"
 #include "functions/all_simplifications.hh"
 #include <boost/test/unit_test.hpp>
+#include "functions/operators.hh"
 #include <limits>
 
 BOOST_AUTO_TEST_CASE(trig_tests) {
@@ -57,4 +58,13 @@ BOOST_AUTO_TEST_CASE(trig_tests) {
   BOOST_CHECK_EQUAL(Simplify(ACosh()(Cosh())(x)), x);
   BOOST_CHECK_EQUAL(Simplify(ASinh()(Sinh())(x)), x);
   BOOST_CHECK_EQUAL(Simplify(ATanh()(Tanh())(x)), x);
+  static_assert(is_all_but_last_0<0,0,2>::value, "");
+
+  BOOST_CHECK_EQUAL(Simplify(Sin()(GetIPolynomial<0,-2>())(x)),
+                    (GetIPolynomial<0,-2>()((Sin()*Cos()))(x)));
+  BOOST_CHECK_EQUAL(Simplify(Cos()(GetIPolynomial<0,-2>())(x)),
+                    (Cos()*Cos()-Sin()*Sin())(x));
+  auto p = Simplify(Sin()(GetIPolynomial<0,3>()(x)));
+  std::cout << get_cpp_name<decltype(p)>() << '\n';
+  std::cout << '\n' << p << '\n';
 }
