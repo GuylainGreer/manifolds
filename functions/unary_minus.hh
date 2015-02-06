@@ -31,5 +31,7 @@ template <class T, class U> bool operator==(UnaryMinus<T>, U) { return false; }
 template <class T> bool operator==(UnaryMinus<T> u1, UnaryMinus<T> u2) {
   return u1.GetFunction() == u2.GetFunction();
 }
+
+template <class F> UnaryMinus<F> Negative(F f) { return UnaryMinus<F>(f); }
 }
 #endif
