@@ -64,7 +64,9 @@ BOOST_AUTO_TEST_CASE(trig_tests) {
                     (GetIPolynomial<0,-2>()((Sin()*Cos()))(x)));
   BOOST_CHECK_EQUAL(Simplify(Cos()(GetIPolynomial<0,-2>())(x)),
                     (Cos()*Cos()-Sin()*Sin())(x));
-  auto p = Simplify(Sin()(GetIPolynomial<0,3>()(x)));
-  std::cout << get_cpp_name<decltype(p)>() << '\n';
-  std::cout << '\n' << p << '\n';
+  BOOST_CHECK_EQUAL(Simplify(Sin()(GetIPolynomial<0,3>()(x))),
+                    ComposeRaw(GetIPolynomial<0,3,0,-4>(), Sin(), x));
+  PointwiseEqual(Simplify(Cos()(GetIPolynomial<0,3>())(x)),
+                 (Composition<Cos,IntegralPolynomial<0,3>, decltype(x)>()),
+                 100, 1E-9);
 }
