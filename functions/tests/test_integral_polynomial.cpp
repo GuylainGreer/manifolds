@@ -17,6 +17,6 @@ BOOST_AUTO_TEST_CASE(integral_polynomial_test) {
   auto ip3 = ip1 + ip1 * ip2;
   auto p3 = p1 + p1 * p2;
   PointwiseEqual(ip3, p3, 4);
-
+  static_assert(is_polynomial<IntegralPolynomial<0,1> >::value, "");
   BOOST_CHECK_EQUAL(-GetIPolynomial<0>(), zero);
 }
