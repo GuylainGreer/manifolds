@@ -4,6 +4,7 @@
 #include "simplify_variadic.hh"
 #include "unary_minus.hh"
 #include "addition.hh"
+#include "integral_polynomial.hh"
 
 namespace manifolds {
 template <class... Fs> auto Multiply(Fs... fs) {
@@ -92,6 +93,18 @@ struct Simplification<Multiplication<Addition<F1s...>, Addition<F2s...> >,
   }
 
   typedef decltype(Combine(std::declval<in_type>())) type;
+};
+
+template <class F, class... Fs, IPInt_t i>
+struct Simplification<Multiplication<F, Composition<IntegralPolynomial<0, i>,
+                                                    Multiplication<Fs...> > >,
+                      0> {
+  static auto Combine(Multiplication<
+      F, Composition<IntegralPolynomial<0, i>, Multiplication<Fs...> > > m) {
+    return IntegralPolynomial<0, i>()(
+        MultiplyRaw(std::get<0>(m.GetFunctions()),
+                    std::get<1>(std::get<1>(m.GetFunctions()).GetFunctions())));
+  }
 };
 }
 
