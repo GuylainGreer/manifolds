@@ -294,6 +294,34 @@ struct Simplification<Composition<IntegralPolynomial<0, 1>, C>,
     return std::get<1>(a.GetFunctions());
   }
 };
+
+template <class C, IPInt_t i>
+struct Simplification<Composition<C, IntegralPolynomial<i> >, 0> {
+  static auto Combine(Composition<C, IntegralPolynomial<i> > c) {
+    return GetPolynomial((std::get<0>(c.GetFunctions()))(i));
+  }
+};
+
+template <class C, IPInt_t... coeffs>
+struct Simplification<
+    Multiplication<C, Composition<IntegralPolynomial<coeffs...>, C> >, 0,
+    typename std::enable_if<C::stateless>::type> {
+  static auto Combine(
+      Multiplication<C, Composition<IntegralPolynomial<coeffs...>, C> >) {
+    return GetIPolynomial<0, coeffs...>()(C{});
+  }
+};
+
+template <class... Fs, IPInt_t... coeffs>
+struct Simplification<
+    Multiplication<Composition<Fs...>,
+                   Composition<IntegralPolynomial<coeffs...>, Fs...> >,
+    0, typename std::enable_if<Composition<Fs...>::stateless>::type> {
+  static auto Combine(Multiplication<
+      Composition<Fs...>, Composition<IntegralPolynomial<coeffs...>, Fs...> >) {
+    return GetIPolynomial<0, coeffs...>()(Composition<Fs...>());
+  }
+};
 }
 
 #endif
