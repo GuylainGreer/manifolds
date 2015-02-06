@@ -198,8 +198,9 @@ struct Stream2Wrapper {
         if (c < z)
           s << '-';
       }
+      c = std::abs(c);
       if (i == 0 || c != 1)
-        s << std::abs(c);
+        s << c;
       if (i > 0 && c != 1)
         s << " * ";
       if (i == 1)
@@ -224,11 +225,27 @@ struct Stream2Wrapper {
     Stream2(s, Addition<Funcs...>(remove_element<0>(a.GetFunctions())), vn);
   }
 
+  template <class, class = void> struct RequiresParens : bool_<false> {};
+
+  template <class F, class... Fs>
+  struct RequiresParens<Composition<F, Fs...> > : RequiresParens<F> {};
+
+  template <class... Fs>
+  struct RequiresParens<Addition<Fs...> > : bool_<true> {};
+
+  template <class C, class O>
+  struct RequiresParens<
+      Polynomial<C, O>,
+      typename std::enable_if<(O::value > 1)>::type> : bool_<true> {};
+
+  template <IPInt_t... coeffs>
+  struct RequiresParens<
+      IntegralPolynomial<coeffs...>,
+      typename std::enable_if<(sizeof...(coeffs) > 1)>::type> : bool_<true> {};
+
   template <class T, class VNamer>
   static void PrintMultElem(std::ostream &s, T t, VNamer vn) {
-    static const bool b =
-        IsVariadic<Addition, T>::value ||
-        (is_polynomial<T>::value && PolynomialOrder<T>::value != 1);
+    static const bool b = RequiresParens<T>::value;
     if (b)
       s << '(';
     Stream2(s, t, vn);
