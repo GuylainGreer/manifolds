@@ -184,6 +184,12 @@ auto ToArray(const tuple<Types...> &t,
 template <class... Types> auto ToArray(const tuple<Types...> &t) {
   return ToArray(t, std::index_sequence_for<Types...>());
 }
+
+    template <int i, class ... Args, class A>
+    auto replace_element(const tuple<Args...> & t, const A & a)
+    {
+        return insert_element<i>(remove_element<i>(t), a);
+    }
 }
 
 #endif
