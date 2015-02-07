@@ -53,6 +53,7 @@ struct Stream2Wrapper {
   STD_STREAM2(Phase, phase)
   STD_STREAM2(Sign, sign)
   STD_STREAM2(Norm, norm)
+  STD_STREAM2(Conjugate, conj)
 
 #undef STD_STREAM2
 
@@ -305,69 +306,11 @@ struct CustomVariableNamer {
   }
 };
 
-template <class Arg, class... Args>
-std::ostream &operator<<(std::ostream &s, Composition<Arg, Args...> c) {
-  return Stream2(s, c);
-}
+    template <class F, class = typename std::enable_if<is_function<F>::type::value>::type>
+    std::ostream &operator<<(std::ostream &s, const F & f) {
+        return Stream2(s, f);
+    }
 
-template <class A, class B>
-std::ostream &operator<<(std::ostream &s, Division<A, B> d) {
-  return Stream2(s, d);
-}
-
-template <class rows, class cols, class... Functions>
-std::ostream &operator<<(std::ostream &s,
-                         FunctionMatrix<rows, cols, Functions...> f) {
-  return Stream2(s, f);
-}
-
-template <class F, class... Funcs>
-std::ostream &operator<<(std::ostream &s, Group<F, Funcs...> g) {
-  return Stream2(s, g);
-}
-
-template <class CType, int N>
-std::ostream &operator<<(std::ostream &s, Polynomial<CType, int_<N> > p) {
-  return Stream2(s, p);
-}
-
-template <IPInt_t... ts>
-std::ostream &operator<<(std::ostream &s, IntegralPolynomial<ts...> ip) {
-  return s << ip.ToPoly();
-}
-
-template <class Func, class... Functions>
-std::ostream &operator<<(std::ostream &s,
-                         Multiplication<Func, Functions...> m) {
-  return Stream2(s, m);
-}
-
-inline std::ostream &operator<<(std::ostream &s, Transpose t) {
-  return Stream2(s, t);
-}
-
-template <class T> std::ostream &operator<<(std::ostream &s, UnaryMinus<T> u) {
-  return Stream2(s, u);
-}
-
-inline std::ostream &operator<<(std::ostream &s, Zero z) {
-  return Stream2(s, z);
-}
-
-template <class Func, class... Functions>
-std::ostream &operator<<(std::ostream &s, Addition<Func, Functions...> m) {
-  return Stream2(s, m);
-}
-
-#define EASY_STREAM(Func, name)                                                \
-  inline std::ostream &operator<<(std::ostream &s, Func) { return s << #name; }
-
-EASY_STREAM(Real, real)
-EASY_STREAM(Imag, imag)
-EASY_STREAM(Phase, phase)
-EASY_STREAM(Sign, sign)
-EASY_STREAM(Norm, norm)
-template <class T> EASY_STREAM(ImagN<T>, I)
 }
 
 #endif
