@@ -69,4 +69,8 @@ BOOST_AUTO_TEST_CASE(trig_tests) {
   PointwiseEqual(Simplify(Cos()(GetIPolynomial<0,3>())(x)),
                  (Composition<Cos,IntegralPolynomial<0,3>, decltype(x)>()),
                  100, 1E-9);
+
+  BOOST_CHECK_EQUAL(Simplify(Sin()(GetIPolynomial<0,1,1>())(x)),
+                    Sin()(x) * Cos()(x*x) + Cos()(x) * Sin()(x*x));
+
 }
