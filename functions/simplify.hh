@@ -25,7 +25,7 @@ public:
     return { push_back(t, c) };
   }
   void Flush() const {
-    std::cout << get<0>(t);
+      std::cout << std::get<0>(t);
     OutputHolder<decltype(remove_element<0>(t))>(remove_element<0>(t)).Flush();
   }
 };
