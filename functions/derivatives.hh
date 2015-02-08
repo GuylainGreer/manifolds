@@ -194,21 +194,21 @@ template <int iter> struct DerivativeWrapper {
     return zero;                                                               \
   }
 
-  TRIG_DERIV(Sin, Cos())
-  TRIG_DERIV(Cos, -Sin())
-  TRIG_DERIV(Tan, 1_c / (Cos() * Cos()))
+  TRIG_DERIV(Sin, cos_)
+  TRIG_DERIV(Cos, -sin_)
+  TRIG_DERIV(Tan, 1_c / (cos_ *cos_))
   TRIG_DERIV(Log, 1_c / x)
-  TRIG_DERIV(Sinh, Cosh())
-  TRIG_DERIV(Cosh, Sinh())
-  TRIG_DERIV(Tanh, 1_c / (Cosh() * Cosh()))
-  TRIG_DERIV(ASin, 1_c / Sqrt()(1_c - x *x))
-  TRIG_DERIV(ACos, -1_c / Sqrt()(1_c - x *x))
+  TRIG_DERIV(Sinh, cosh_)
+  TRIG_DERIV(Cosh, sinh_)
+  TRIG_DERIV(Tanh, 1_c / (cosh_ *cosh_))
+  TRIG_DERIV(ASin, 1_c / sqrt_(1_c - x *x))
+  TRIG_DERIV(ACos, -1_c / sqrt_(1_c - x *x))
   TRIG_DERIV(ATan, 1_c / (1_c + x *x))
-  TRIG_DERIV(ASinh, 1_c / Sqrt()(1_c + x *x))
-  TRIG_DERIV(ACosh, 1_c / Sqrt()(-1_c + x *x))
+  TRIG_DERIV(ASinh, 1_c / sqrt_(1_c + x *x))
+  TRIG_DERIV(ACosh, 1_c / sqrt_(-1_c + x *x))
   TRIG_DERIV(ATanh, 1_c / (1_c - x *x))
-  TRIG_DERIV(Exp, Exp())
-  TRIG_DERIV(Sqrt, 0.5_c / Sqrt())
+  TRIG_DERIV(Exp, exp_)
+  TRIG_DERIV(Sqrt, 0.5_c / sqrt_)
   TRIG_DERIV(Zero, zero)
 
 #undef TRIG_DERIV
@@ -219,13 +219,13 @@ template <int iter> struct DerivativeWrapper {
   }
 
   static auto Derivative(Pow p, Variable<0> v) {
-    auto r = y * Pow()(x, y - 1_c);
+    auto r = y * pow_(x, y - 1_c);
     PRINT_DERIV(p, v, "Pow", r);
     return r;
   }
 
   static auto Derivative(Pow p, Variable<1> v) {
-    auto r = (Log()(x)) * Pow()(x, y);
+    auto r = (log_(x)) * pow_(x, y);
     PRINT_DERIV(p, v, "Pow", r);
     return r;
   }

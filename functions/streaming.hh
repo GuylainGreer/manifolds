@@ -306,11 +306,11 @@ struct CustomVariableNamer {
   }
 };
 
-    template <class F, class = typename std::enable_if<is_function<F>::type::value>::type>
-    std::ostream &operator<<(std::ostream &s, const F & f) {
-        return Stream2(s, f);
-    }
-
+template <class F,
+          class = typename std::enable_if<is_function<F>::type::value>::type>
+std::ostream &operator<<(std::ostream &s, const F &f) {
+  return Stream2(s, f);
+}
 }
 
 #endif

@@ -49,16 +49,16 @@ BOOST_AUTO_TEST_CASE(polynomial_test) {
   using namespace std::literals;
   BOOST_CHECK_EQUAL(pc(1i), 0i);
 
-  auto ps = manifolds::sin + manifolds::sin + manifolds::sin;
+  auto ps = sin_ + sin_ + sin_;
 
-  BOOST_CHECK_EQUAL(ps(2), 3 * manifolds::sin(2));
+  BOOST_CHECK_EQUAL(ps(2), 3 * sin_(2));
 
-  ps = manifolds::sin + (manifolds::sin + manifolds::sin);
+  ps = sin_ + (sin_ + sin_);
   // The fact that the line above compiles means that
   // the reverse generic simplification worked and gave
   // the expected type.
 
-  BOOST_CHECK_EQUAL(ps(2), 3 * manifolds::sin(2));
+  BOOST_CHECK_EQUAL(ps(2), 3 * sin_(2));
 
   IntegralPolynomial<1, -2, 3> ip;
   IntegralPolynomial<3, 3, 7, 4> ip2;

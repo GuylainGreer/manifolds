@@ -19,7 +19,7 @@
   template <class T> bool operator==(classname, T) {                           \
     return std::is_same<T, classname>::value;                                  \
   }                                                                            \
-  static const classname funcname = classname();                               \
+  static const classname BOOST_JOIN(funcname, _) = classname();                \
   inline std::ostream &operator<<(std::ostream &s, classname) {                \
     return s << #funcname;                                                     \
   }
@@ -52,6 +52,7 @@ struct Pow : Function<int_<23>, 2, 1>, FunctionCommon<Pow> {
 };
 
 inline std::ostream &operator<<(std::ostream &s, Pow p) { return s << "pow"; }
+static const Pow pow_ = Pow();
 }
 
 #endif

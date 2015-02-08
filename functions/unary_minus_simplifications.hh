@@ -28,9 +28,23 @@ template <class F> struct Simplification<UnaryMinus<F>, /*um_f*/ 1> {
 
 template <> struct Simplification<UnaryMinus<Zero>, /*um_z*/ 0> {
   static auto Combine(UnaryMinus<Zero>) {
-    SIMPLIFY_INFO("Simplifying unary minus of zero");
+    SIMPLIFY_INFO("Simplifying unary minus of zero\n");
     return zero;
   }
+};
+
+template <class F, class... Fs>
+struct Simplification<Composition<UnaryMinus<F>, Fs...>, 0> {
+  template <class T, std::size_t... indices>
+  static auto Process(T t, std::integer_sequence<std::size_t, indices...>) {
+    auto tu = t.GetFunctions();
+    return Negative(ComposeRaw(std::get<0>(tu).GetFunction(),
+                               std::get<indices + 1>(tu)...));
+  }
+  static auto Combine(Composition<UnaryMinus<F>, Fs...> c) {
+    SIMPLIFY_INFO("Simplifying Composition of UnaryMinus and Functions\n");
+    return Process(c, std::index_sequence_for<Fs...>());
+  };
 };
 }
 

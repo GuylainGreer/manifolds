@@ -323,43 +323,42 @@ struct Simplification<
   }
 };
 
-    template <IPInt_t ... c1s, IPInt_t ... c2s>
-    struct Simplification<Composition<IntegralPolynomial<c1s...>, IntegralPolynomial<c2s...> >, 0>
-    {
-        typedef IntegralPolynomial<c2s...> inner;
+template <IPInt_t... c1s, IPInt_t... c2s>
+struct Simplification<
+    Composition<IntegralPolynomial<c1s...>, IntegralPolynomial<c2s...> >, 0> {
+  typedef IntegralPolynomial<c2s...> inner;
 
-        template <int i>
-        using ith = typename nth<i, std::integral_constant<IPInt_t, c1s>...>::type;
+  template <int i>
+  using ith = typename nth<i, std::integral_constant<IPInt_t, c1s>...>::type;
 
-        template <IPInt_t, class> struct Term2{};
+  template <IPInt_t, class> struct Term2 {};
 
-        template <int i, class F>
-        struct Class{typedef F type;};
+  template <int i, class F> struct Class {
+    typedef F type;
+  };
 
-        template <IPInt_t c, std::size_t ... is>
-        struct Term2<c, std::integer_sequence<std::size_t, is...> >
-        {
-            typedef Multiplication<IntegralPolynomial<c>, typename Class<is, inner>::type...> type;
-        };
+  template <IPInt_t c, std::size_t... is>
+  struct Term2<c, std::integer_sequence<std::size_t, is...> > {
+    typedef Multiplication<IntegralPolynomial<c>,
+                           typename Class<is, inner>::type...> type;
+  };
 
-        template <int i>
-        struct Term
-        {
-            typedef typename Term2<ith<i>::value, std::make_index_sequence<i> >::type type;
-        };
+  template <int i> struct Term {
+    typedef typename Term2<ith<i>::value, std::make_index_sequence<i> >::type
+    type;
+  };
 
-        template <class> struct Add{};
-        template <std::size_t ... is>
-        struct Add<std::integer_sequence<std::size_t, is...> >
-        {
-            typedef Addition<typename Term<is>::type...> type;
-        };
+  template <class> struct Add {};
+  template <std::size_t... is>
+  struct Add<std::integer_sequence<std::size_t, is...> > {
+    typedef Addition<typename Term<is>::type...> type;
+  };
 
-        static auto Combine(Composition<IntegralPolynomial<c1s...>, IntegralPolynomial<c2s...> >)
-        {
-            return typename Add<std::make_index_sequence<sizeof...(c1s)> >::type();
-        }
-    };
+  static auto Combine(
+      Composition<IntegralPolynomial<c1s...>, IntegralPolynomial<c2s...> >) {
+    return typename Add<std::make_index_sequence<sizeof...(c1s)> >::type();
+  }
+};
 }
 
 #endif
