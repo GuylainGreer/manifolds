@@ -264,6 +264,96 @@ struct Simplification<
     return Negative(tan_(Negative(GetIPolynomial<coeffs...>())));
   }
 };
+
+    template <IPInt_t ... coeffs>
+    struct Simplification<
+        Composition<Tan, IntegralPolynomial<coeffs...> >, 1,
+        typename std::enable_if<is_all_but_last_0<coeffs...>::value &&(
+        last<ic<coeffs>...>::type::value > 1)>::type>
+    {
+        template <class T, std::size_t ... indices>
+        static auto Process(T, std::integer_sequence<std::size_t, indices...>)
+        {
+            return GetIPolynomial<std::tuple_element<indices, T>::type::value...>();
+        }
+        static auto Combine(Composition<Tan, IntegralPolynomial<coeffs...> >)
+        {
+            static const IPInt_t last_c = last<ic<coeffs>...>::type::value;
+            static const int last_i = sizeof...(coeffs) - 1;
+            static const IPInt_t left = last_c / 2;
+            static const IPInt_t right = last_c - left;
+            typedef std::tuple<std::integral_constant<IPInt_t, coeffs>...> tup;
+            typedef std::integral_constant<IPInt_t, left> Left;
+            typedef std::integral_constant<IPInt_t, right> Right;
+            std::make_index_sequence<sizeof...(coeffs)> indices;
+            auto left_p = Process(replace_element<last_i>(tup(), Left()), indices);
+            auto right_p = Process(replace_element<last_i>(tup(), Right()), indices);
+            return DivideRaw(AddRaw(tan_(left_p), tan_(right_p)),
+                             GetIPolynomial<1,1>()(MultiplyRaw(tan_(left_p), tan_(right_p))));
+        }
+    };
+
+    template <IPInt_t ... coeffs>
+    struct Simplification<
+        Composition<Tan, IntegralPolynomial<coeffs...> >, 0,
+        typename std::enable_if<!is_all_but_last_0<coeffs...>::value>::type>
+    {
+        static auto Combine(Composition<Tan, IntegralPolynomial<coeffs...> >)
+        {
+            typedef typename SplitPoly<coeffs...>::type Pair;
+            typename Pair::first left;
+            typename Pair::second right;
+            return DivideRaw(AddRaw(tan_(left), tan_(right)),
+                             GetIPolynomial<1,1>()(MultiplyRaw(tan_(left), tan_(right))));
+        }
+    };
+
+    template <IPInt_t ... coeffs>
+    struct Simplification<Composition<IntegralPolynomial<coeffs...>, Sqrt>, 0,
+                          typename std::enable_if<(sizeof...(coeffs)>2)>::type>
+    {
+        template <int i>
+        using ith = typename nth<i, std::integral_constant<IPInt_t, coeffs>...>::type;
+
+        template <int, class, class>
+        struct Process;
+
+        template <int i, IPInt_t ... evens, IPInt_t ... odds>
+        struct Process<i, std::integer_sequence<IPInt_t, evens...>,
+                       std::integer_sequence<IPInt_t, odds...> >
+        {
+            typedef typename std::conditional<
+                i % 2 == 0,
+                std::integer_sequence<IPInt_t, ith<i>::value, evens...>,
+                std::integer_sequence<IPInt_t, evens...> >::type nes;
+
+            typedef typename std::conditional<
+                i % 2 == 1,
+                std::integer_sequence<IPInt_t, ith<i>::value, odds...>,
+                std::integer_sequence<IPInt_t, odds...> >::type nos;
+
+            typedef typename Process<i-1, nes, nos>::type type;
+        };
+
+        template <IPInt_t ... evens, IPInt_t ... odds>
+        struct Process<-1, std::integer_sequence<IPInt_t, evens...>,
+                       std::integer_sequence<IPInt_t, odds...> >
+        {
+            typedef boost::mpl::pair<
+                IntegralPolynomial<evens...>,
+                IntegralPolynomial<odds...> > type;
+        };
+
+        static auto Combine(Composition<IntegralPolynomial<coeffs...>, Sqrt>)
+        {
+            typedef typename Process<sizeof...(coeffs)-1,
+                                     std::integer_sequence<IPInt_t>,
+                                     std::integer_sequence<IPInt_t> >::type Pair;
+            typedef typename Pair::first Evens;
+            typedef typename Pair::second Odds;
+            return AddRaw(Evens(), MultiplyRaw(Odds(), sqrt_));
+        }
+    };
 }
 
 #endif
