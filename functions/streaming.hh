@@ -71,7 +71,7 @@ struct Stream2Wrapper {
   static void Stream2(std::ostream &s, Division<N, D> d, VNamer v) {
     s << '(';
     Stream2(s, d.GetNumerator(), v);
-    s << " / ";
+    s << ") / (";
     Stream2(s, d.GetDenominator(), v);
     s << ')';
   }
