@@ -91,43 +91,34 @@ struct Simplification<Composition<Division<N, D>, Fs...>, /*com_div_fs*/ 0> {
   }
 };
 
-    template <class N, class D>
-    struct Simplification<Division<N, D>, /*div_n_d*/1>
-    {
-        static auto Combine(Division<N, D> d)
-        {
-            return DivideRaw(Simplify(d.GetNumerator()),
-                             Simplify(d.GetDenominator()));
-        }
-    };
+template <class N, class D>
+struct Simplification<Division<N, D>, /*div_n_d*/ 1> {
+  static auto Combine(Division<N, D> d) {
+    return DivideRaw(Simplify(d.GetNumerator()), Simplify(d.GetDenominator()));
+  }
+};
 
-    template <class F, class N, class D>
-    struct Simplification<
-        Addition<F, Division<N, D> >, 0>
-    {
-        static auto Combine(Addition<F, Division<N, D> > a)
-        {
-            auto d = std::get<1>(a.GetFunctions());
-            return DivideRaw(AddRaw(MultiplyRaw(std::get<0>(a.GetFunctions()),
-                                                d.GetDenominator()),
-                                    d.GetNumerator()),
-                             d.GetDenominator());
-        }
-    };
+template <class F, class N, class D>
+struct Simplification<Addition<F, Division<N, D> >, 0> {
+  static auto Combine(Addition<F, Division<N, D> > a) {
+    auto d = std::get<1>(a.GetFunctions());
+    return DivideRaw(
+        AddRaw(MultiplyRaw(std::get<0>(a.GetFunctions()), d.GetDenominator()),
+               d.GetNumerator()),
+        d.GetDenominator());
+  }
+};
 
-    template <class F, class N, class D>
-    struct Simplification<
-        Addition<F, UnaryMinus<Division<N, D> > >, 0>
-    {
-        static auto Combine(Addition<F, UnaryMinus<Division<N, D> > > a)
-        {
-            auto d = (std::get<1>(a.GetFunctions())).GetFunction();
-            return DivideRaw(SubRaw(MultiplyRaw(std::get<0>(a.GetFunctions()),
-                                                d.GetDenominator()),
-                                    d.GetNumerator()),
-                             d.GetDenominator());
-        }
-    };
+template <class F, class N, class D>
+struct Simplification<Addition<F, UnaryMinus<Division<N, D> > >, 0> {
+  static auto Combine(Addition<F, UnaryMinus<Division<N, D> > > a) {
+    auto d = (std::get<1>(a.GetFunctions())).GetFunction();
+    return DivideRaw(
+        SubRaw(MultiplyRaw(std::get<0>(a.GetFunctions()), d.GetDenominator()),
+               d.GetNumerator()),
+        d.GetDenominator());
+  }
+};
 }
 
 #endif
