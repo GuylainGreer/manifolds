@@ -308,7 +308,7 @@ struct Simplification<
     typename std::enable_if<C::stateless>::type> {
   static auto Combine(
       Multiplication<C, Composition<IntegralPolynomial<coeffs...>, C> >) {
-    return GetIPolynomial<0, coeffs...>()(C{});
+    return IP<0, coeffs...>()(C{});
   }
 };
 
@@ -319,7 +319,7 @@ struct Simplification<
     0, typename std::enable_if<Composition<Fs...>::stateless>::type> {
   static auto Combine(Multiplication<
       Composition<Fs...>, Composition<IntegralPolynomial<coeffs...>, Fs...> >) {
-    return GetIPolynomial<0, coeffs...>()(Composition<Fs...>());
+    return IP<0, coeffs...>()(Composition<Fs...>());
   }
 };
 
@@ -360,33 +360,27 @@ struct Simplification<
   }
 };
 
-    template <IPInt_t ... coeffs, class F>
-    struct Simplification<Composition<IntegralPolynomial<coeffs...>, UnaryMinus<F> >, 0>
-    {
-        template <int i, class T, IPInt_t ... ncoeffs>
-        struct NewCoeffs
-        {
-            static const IPInt_t c =
-                std::tuple_element<i, T>::type::value;
-            static const IPInt_t nc =
-                i % 2 == 0 ? c : -c;
-            typedef typename NewCoeffs<i-1, T, nc, ncoeffs...>::type type;
-        };
+template <IPInt_t... coeffs, class F>
+struct Simplification<
+    Composition<IntegralPolynomial<coeffs...>, UnaryMinus<F> >, 0> {
+  template <int i, class T, IPInt_t... ncoeffs> struct NewCoeffs {
+    static const IPInt_t c = std::tuple_element<i, T>::type::value;
+    static const IPInt_t nc = i % 2 == 0 ? c : -c;
+    typedef typename NewCoeffs<i - 1, T, nc, ncoeffs...>::type type;
+  };
 
-        template <class T, IPInt_t ... ncoeffs>
-        struct NewCoeffs<0, T, ncoeffs...>
-        {
-            typedef IntegralPolynomial<ncoeffs...> type;
-        };
+  template <class T, IPInt_t... ncoeffs> struct NewCoeffs<0, T, ncoeffs...> {
+    typedef IntegralPolynomial<ncoeffs...> type;
+  };
 
-        static auto Combine(Composition<IntegralPolynomial<coeffs...>, UnaryMinus<F> > c)
-        {
-            typename NewCoeffs<
-                sizeof...(coeffs)-1,
-                std::tuple<std::integral_constant<IPInt_t, coeffs>...> >::type np;
-            return np(std::get<1>(c.GetFunctions()).GetFunction());
-        }
-    };
+  static auto Combine(
+      Composition<IntegralPolynomial<coeffs...>, UnaryMinus<F> > c) {
+    typename NewCoeffs<
+        sizeof...(coeffs) - 1,
+        std::tuple<std::integral_constant<IPInt_t, coeffs>...> >::type np;
+    return np(std::get<1>(c.GetFunctions()).GetFunction());
+  }
+};
 }
 
 #endif

@@ -48,9 +48,7 @@ struct IntegralPolynomial : Function<int_<31>, 1, 1>,
 template <IPInt_t... coeffs>
 struct is_polynomial<IntegralPolynomial<coeffs...> > : std::true_type {};
 
-template <IPInt_t... is> auto GetIPolynomial() {
-  return IntegralPolynomial<is...>();
-}
+template <IPInt_t... coeffs> using IP = IntegralPolynomial<coeffs...>;
 
 template <IPInt_t... ts>
 bool operator==(IntegralPolynomial<ts...>, IntegralPolynomial<ts...>) {

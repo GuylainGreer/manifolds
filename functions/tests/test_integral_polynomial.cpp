@@ -8,8 +8,8 @@
 
 BOOST_AUTO_TEST_CASE(integral_polynomial_test) {
   using namespace manifolds;
-  auto ip1 = GetIPolynomial<1, -2>();
-  auto ip2 = GetIPolynomial<3, 4>();
+  auto ip1 = IP<1, -2>();
+  auto ip2 = IP<3, 4>();
   auto p1 = GetPolynomial(1, -2);
   auto p2 = GetPolynomial(3, 4);
   PointwiseEqual(ip1, p1, 2);
@@ -18,5 +18,5 @@ BOOST_AUTO_TEST_CASE(integral_polynomial_test) {
   auto p3 = p1 + p1 * p2;
   PointwiseEqual(ip3, p3, 4);
   static_assert(is_polynomial<IntegralPolynomial<0, 1> >::value, "");
-  BOOST_CHECK_EQUAL(-GetIPolynomial<0>(), zero);
+  BOOST_CHECK_EQUAL(-IP<0>(), zero);
 }

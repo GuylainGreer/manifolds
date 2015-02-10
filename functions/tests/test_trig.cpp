@@ -47,23 +47,23 @@ BOOST_AUTO_TEST_CASE(trig_tests) {
   BOOST_CHECK_EQUAL(Simplify(atanh_(tanh_(x))), x);
   static_assert(is_all_but_last_0<0, 0, 2>::value, "");
 
-  BOOST_CHECK_EQUAL(Simplify(sin_(GetIPolynomial<0, -2>())(x)),
-                    (GetIPolynomial<0, -2>()((sin_ * cos_))(x)));
-  BOOST_CHECK_EQUAL(Simplify(Cos()(GetIPolynomial<0, -2>())(x)),
+  BOOST_CHECK_EQUAL(Simplify(sin_(IP<0, -2>())(x)),
+                    (IP<0, -2>()((sin_ * cos_))(x)));
+  BOOST_CHECK_EQUAL(Simplify(Cos()(IP<0, -2>())(x)),
                     (cos_ * cos_ - sin_ * sin_)(x));
-  BOOST_CHECK_EQUAL(Simplify(sin_(GetIPolynomial<0, 3>()(x))),
-                    ComposeRaw(GetIPolynomial<0, 3, 0, -4>(), sin_, x));
-  PointwiseEqual(Simplify(cos_(GetIPolynomial<0, 3>())(x)),
+  BOOST_CHECK_EQUAL(Simplify(sin_(IP<0, 3>()(x))),
+                    ComposeRaw(IP<0, 3, 0, -4>(), sin_, x));
+  PointwiseEqual(Simplify(cos_(IP<0, 3>())(x)),
                  (Composition<Cos, IntegralPolynomial<0, 3>, decltype(x)>()),
                  100, 1E-9);
 
-  BOOST_CHECK_EQUAL(Simplify(sin_(GetIPolynomial<0, 1, 1>())(x)),
+  BOOST_CHECK_EQUAL(Simplify(sin_(IP<0, 1, 1>())(x)),
                     sin_(x) * cos_(x * x) + cos_(x) * sin_(x * x));
 
-  BOOST_CHECK_EQUAL(Simplify(tan_(GetIPolynomial<0, -1>()(x))),
-                    Simplify(-tan_(x)));
+  BOOST_CHECK_EQUAL(Simplify(tan_(IP<0, -1>()(x))), Simplify(-tan_(x)));
 
-  BOOST_CHECK_EQUAL(Simplify(tan_(x + x)), Simplify(((tan_+tan_)/(GetIPolynomial<1>() + tan_*tan_))(x)));
+  BOOST_CHECK_EQUAL(Simplify(tan_(x + x)),
+                    Simplify(((tan_ + tan_) / (IP<1>() + tan_ * tan_))(x)));
 
-  BOOST_CHECK_EQUAL(Simplify((sqrt_*sqrt_)(x)), x);
+  BOOST_CHECK_EQUAL(Simplify((sqrt_ * sqrt_)(x)), x);
 }

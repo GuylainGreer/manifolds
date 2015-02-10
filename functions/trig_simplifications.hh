@@ -18,7 +18,7 @@ struct Simplification<Composition<IntegralPolynomial<0, 0, 1>, Cos>,
                       /*mult_cos_cos*/ 0> {
   static auto Combine(Composition<IntegralPolynomial<0, 0, 1>, Cos>) {
     SIMPLIFY_INFO("Simplifying cos**2\n");
-    return ComposeRaw(GetIPolynomial<1, 0, -1>(), sin_);
+    return ComposeRaw(IP<1, 0, -1>(), sin_);
   }
 };
 
@@ -48,50 +48,50 @@ struct Simplification<
     Composition<F1, F2>, /*com_f_f_inv*/ 0,
     typename std::enable_if<boost::mpl::contains<
         Inverses, boost::mpl::pair<F1, F2> >::type::value>::type> {
-  static auto Combine(Composition<F1, F2>) { return GetIPolynomial<0, 1>(); }
+  static auto Combine(Composition<F1, F2>) { return IP<0, 1>(); }
 };
 
 template <> struct Simplification<Composition<Sin, ACos>, 0> {
   static auto Combine(Composition<Sin, ACos>) {
     SIMPLIFY_INFO("Simplifying Sin(ACos)\n");
-    return sqrt_(GetIPolynomial<1, 0, -1>());
+    return sqrt_(IP<1, 0, -1>());
   }
 };
 
 template <> struct Simplification<Composition<Sin, ATan>, 0> {
   static auto Combine(Composition<Sin, ATan>) {
     SIMPLIFY_INFO("Simplifying Sin(ATan)\n");
-    auto hypo = sqrt_(GetIPolynomial<1, 0, 1>());
-    return DivideRaw(GetIPolynomial<0, 1>(), hypo);
+    auto hypo = sqrt_(IP<1, 0, 1>());
+    return DivideRaw(IP<0, 1>(), hypo);
   }
 };
 
 template <> struct Simplification<Composition<Cos, ASin>, 0> {
   static auto Combine(Composition<Cos, ASin>) {
     SIMPLIFY_INFO("Simplifying Cos(ASin)\n");
-    return sqrt_(GetIPolynomial<1, 0, -1>());
+    return sqrt_(IP<1, 0, -1>());
   }
 };
 
 template <> struct Simplification<Composition<Cos, ATan>, 0> {
   static auto Combine(Composition<Cos, ATan>) {
     SIMPLIFY_INFO("Simplifying Cos(ATan)\n");
-    auto hypo = sqrt_(GetIPolynomial<1, 0, 1>());
-    return DivideRaw(GetIPolynomial<1>(), hypo);
+    auto hypo = sqrt_(IP<1, 0, 1>());
+    return DivideRaw(IP<1>(), hypo);
   }
 };
 
 template <> struct Simplification<Composition<Tan, ASin>, 0> {
   static auto Combine(Composition<Tan, ASin>) {
     SIMPLIFY_INFO("Simplifying Tan(ASin)\n");
-    return DivideRaw(GetIPolynomial<0, 1>(), GetIPolynomial<1, 0, -1>());
+    return DivideRaw(IP<0, 1>(), IP<1, 0, -1>());
   }
 };
 
 template <> struct Simplification<Composition<Tan, ACos>, 0> {
   static auto Combine(Composition<Tan, ACos>) {
     SIMPLIFY_INFO("Simplifying Tan(ACos)\n");
-    return DivideRaw(GetIPolynomial<1>(), GetIPolynomial<1, 0, -1>());
+    return DivideRaw(IP<1>(), IP<1, 0, -1>());
   }
 };
 
@@ -132,8 +132,8 @@ struct Simplification<
   template <std::size_t... indices>
   static auto Combine(std::integer_sequence<std::size_t, indices...>) {
     SIMPLIFY_INFO("Simplifying Sin(n*x^m)\n");
-    return std::make_pair(GetIPolynomial<(indices * 0)..., left>(),
-                          GetIPolynomial<(indices * 0)..., right>());
+    return std::make_pair(IP<(indices * 0)..., left>(),
+                          IP<(indices * 0)..., right>());
   }
 
   static auto Combine(Composition<Sin, IntegralPolynomial<coeffs...> >) {
@@ -170,8 +170,8 @@ struct Simplification<
 
   template <std::size_t... indices>
   static auto Combine(std::integer_sequence<std::size_t, indices...>) {
-    return std::make_pair(GetIPolynomial<(indices * 0)..., left>(),
-                          GetIPolynomial<(indices * 0)..., right>());
+    return std::make_pair(IP<(indices * 0)..., left>(),
+                          IP<(indices * 0)..., right>());
   }
 
   static auto Combine(Composition<Cos, IntegralPolynomial<coeffs...> >) {
@@ -261,99 +261,86 @@ struct Simplification<
     typename std::enable_if<is_all_but_last_0<coeffs...>::value &&(
         last<ic<coeffs>...>::type::value < 0)>::type> {
   static auto Combine(Composition<Tan, IntegralPolynomial<coeffs...> >) {
-    return Negative(tan_(Negative(GetIPolynomial<coeffs...>())));
+    return Negative(tan_(Negative(IP<coeffs...>())));
   }
 };
 
-    template <IPInt_t ... coeffs>
-    struct Simplification<
-        Composition<Tan, IntegralPolynomial<coeffs...> >, 1,
-        typename std::enable_if<is_all_but_last_0<coeffs...>::value &&(
-        last<ic<coeffs>...>::type::value > 1)>::type>
-    {
-        template <class T, std::size_t ... indices>
-        static auto Process(T, std::integer_sequence<std::size_t, indices...>)
-        {
-            return GetIPolynomial<std::tuple_element<indices, T>::type::value...>();
-        }
-        static auto Combine(Composition<Tan, IntegralPolynomial<coeffs...> >)
-        {
-            static const IPInt_t last_c = last<ic<coeffs>...>::type::value;
-            static const int last_i = sizeof...(coeffs) - 1;
-            static const IPInt_t left = last_c / 2;
-            static const IPInt_t right = last_c - left;
-            typedef std::tuple<std::integral_constant<IPInt_t, coeffs>...> tup;
-            typedef std::integral_constant<IPInt_t, left> Left;
-            typedef std::integral_constant<IPInt_t, right> Right;
-            std::make_index_sequence<sizeof...(coeffs)> indices;
-            auto left_p = Process(replace_element<last_i>(tup(), Left()), indices);
-            auto right_p = Process(replace_element<last_i>(tup(), Right()), indices);
-            return DivideRaw(AddRaw(tan_(left_p), tan_(right_p)),
-                             GetIPolynomial<1,1>()(MultiplyRaw(tan_(left_p), tan_(right_p))));
-        }
-    };
+template <IPInt_t... coeffs>
+struct Simplification<
+    Composition<Tan, IntegralPolynomial<coeffs...> >, 1,
+    typename std::enable_if<is_all_but_last_0<coeffs...>::value &&(
+        last<ic<coeffs>...>::type::value > 1)>::type> {
+  template <class T, std::size_t... indices>
+  static auto Process(T, std::integer_sequence<std::size_t, indices...>) {
+    return IP<std::tuple_element<indices, T>::type::value...>();
+  }
+  static auto Combine(Composition<Tan, IntegralPolynomial<coeffs...> >) {
+    static const IPInt_t last_c = last<ic<coeffs>...>::type::value;
+    static const int last_i = sizeof...(coeffs) - 1;
+    static const IPInt_t left = last_c / 2;
+    static const IPInt_t right = last_c - left;
+    typedef std::tuple<std::integral_constant<IPInt_t, coeffs>...> tup;
+    typedef std::integral_constant<IPInt_t, left> Left;
+    typedef std::integral_constant<IPInt_t, right> Right;
+    std::make_index_sequence<sizeof...(coeffs)> indices;
+    auto left_p = Process(replace_element<last_i>(tup(), Left()), indices);
+    auto right_p = Process(replace_element<last_i>(tup(), Right()), indices);
+    return DivideRaw(AddRaw(tan_(left_p), tan_(right_p)),
+                     IP<1, 1>()(MultiplyRaw(tan_(left_p), tan_(right_p))));
+  }
+};
 
-    template <IPInt_t ... coeffs>
-    struct Simplification<
-        Composition<Tan, IntegralPolynomial<coeffs...> >, 0,
-        typename std::enable_if<!is_all_but_last_0<coeffs...>::value>::type>
-    {
-        static auto Combine(Composition<Tan, IntegralPolynomial<coeffs...> >)
-        {
-            typedef typename SplitPoly<coeffs...>::type Pair;
-            typename Pair::first left;
-            typename Pair::second right;
-            return DivideRaw(AddRaw(tan_(left), tan_(right)),
-                             GetIPolynomial<1,1>()(MultiplyRaw(tan_(left), tan_(right))));
-        }
-    };
+template <IPInt_t... coeffs>
+struct Simplification<
+    Composition<Tan, IntegralPolynomial<coeffs...> >, 0,
+    typename std::enable_if<!is_all_but_last_0<coeffs...>::value>::type> {
+  static auto Combine(Composition<Tan, IntegralPolynomial<coeffs...> >) {
+    typedef typename SplitPoly<coeffs...>::type Pair;
+    typename Pair::first left;
+    typename Pair::second right;
+    return DivideRaw(AddRaw(tan_(left), tan_(right)),
+                     IP<1, 1>()(MultiplyRaw(tan_(left), tan_(right))));
+  }
+};
 
-    template <IPInt_t ... coeffs>
-    struct Simplification<Composition<IntegralPolynomial<coeffs...>, Sqrt>, 0,
-                          typename std::enable_if<(sizeof...(coeffs)>2)>::type>
-    {
-        template <int i>
-        using ith = typename nth<i, std::integral_constant<IPInt_t, coeffs>...>::type;
+template <IPInt_t... coeffs>
+struct Simplification<Composition<IntegralPolynomial<coeffs...>, Sqrt>, 0,
+                      typename std::enable_if<(sizeof...(coeffs) > 2)>::type> {
+  template <int i>
+  using ith = typename nth<i, std::integral_constant<IPInt_t, coeffs>...>::type;
 
-        template <int, class, class>
-        struct Process;
+  template <int, class, class> struct Process;
 
-        template <int i, IPInt_t ... evens, IPInt_t ... odds>
-        struct Process<i, std::integer_sequence<IPInt_t, evens...>,
-                       std::integer_sequence<IPInt_t, odds...> >
-        {
-            typedef typename std::conditional<
-                i % 2 == 0,
-                std::integer_sequence<IPInt_t, ith<i>::value, evens...>,
-                std::integer_sequence<IPInt_t, evens...> >::type nes;
+  template <int i, IPInt_t... evens, IPInt_t... odds>
+  struct Process<i, std::integer_sequence<IPInt_t, evens...>,
+                 std::integer_sequence<IPInt_t, odds...> > {
+    typedef typename std::conditional<
+        i % 2 == 0, std::integer_sequence<IPInt_t, ith<i>::value, evens...>,
+        std::integer_sequence<IPInt_t, evens...> >::type nes;
 
-            typedef typename std::conditional<
-                i % 2 == 1,
-                std::integer_sequence<IPInt_t, ith<i>::value, odds...>,
-                std::integer_sequence<IPInt_t, odds...> >::type nos;
+    typedef typename std::conditional<
+        i % 2 == 1, std::integer_sequence<IPInt_t, ith<i>::value, odds...>,
+        std::integer_sequence<IPInt_t, odds...> >::type nos;
 
-            typedef typename Process<i-1, nes, nos>::type type;
-        };
+    typedef typename Process<i - 1, nes, nos>::type type;
+  };
 
-        template <IPInt_t ... evens, IPInt_t ... odds>
-        struct Process<-1, std::integer_sequence<IPInt_t, evens...>,
-                       std::integer_sequence<IPInt_t, odds...> >
-        {
-            typedef boost::mpl::pair<
-                IntegralPolynomial<evens...>,
-                IntegralPolynomial<odds...> > type;
-        };
+  template <IPInt_t... evens, IPInt_t... odds>
+  struct Process<-1, std::integer_sequence<IPInt_t, evens...>,
+                 std::integer_sequence<IPInt_t, odds...> > {
+    typedef boost::mpl::pair<IntegralPolynomial<evens...>,
+                             IntegralPolynomial<odds...> > type;
+  };
 
-        static auto Combine(Composition<IntegralPolynomial<coeffs...>, Sqrt>)
-        {
-            typedef typename Process<sizeof...(coeffs)-1,
-                                     std::integer_sequence<IPInt_t>,
-                                     std::integer_sequence<IPInt_t> >::type Pair;
-            typedef typename Pair::first Evens;
-            typedef typename Pair::second Odds;
-            return AddRaw(Evens(), MultiplyRaw(Odds(), sqrt_));
-        }
-    };
+  static auto Combine(Composition<IntegralPolynomial<coeffs...>, Sqrt>) {
+    typedef typename Process<sizeof...(coeffs) - 1,
+                             std::integer_sequence<IPInt_t>,
+                             std::integer_sequence<IPInt_t> >::type Pair;
+    typedef typename Pair::first Evens;
+    typedef typename Pair::second Odds;
+    return AddRaw(Evens(), MultiplyRaw(Odds(), sqrt_));
+  }
+};
 }
 
 #endif

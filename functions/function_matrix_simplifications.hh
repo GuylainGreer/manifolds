@@ -81,7 +81,7 @@ struct Simplification<
   static auto Combine(in_type f) {
     auto p = std::get<1>(std::get<1>(
         std::get<1>(f.GetFunctions()).GetFunctions()).GetFunctions());
-    return pow_(F(), AddRaw(p, GetIPolynomial<1>()));
+    return pow_(F(), AddRaw(p, IP<1>()));
   }
 
   typedef decltype(Combine(std::declval<in_type>())) type;

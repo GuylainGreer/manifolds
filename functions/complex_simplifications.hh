@@ -21,9 +21,7 @@ struct Simplification<Composition<Real, ImagN<T> >, /*com_re_i*/ 0> {
 
 template <class T>
 struct Simplification<Composition<Imag, ImagN<T> >, /*com_im_i*/ 0> {
-  static auto Combine(Composition<Imag, ImagN<T> >) {
-    return GetIPolynomial<1>();
-  }
+  static auto Combine(Composition<Imag, ImagN<T> >) { return IP<1>(); }
 };
 
 template <class T>
@@ -61,9 +59,7 @@ struct Simplification<Composition<Phase, ImagN<T> >, /*com_ph_i*/ 0> {
 
 template <class T>
 struct Simplification<Composition<Norm, ImagN<T> >, /*com_nm_i*/ 0> {
-  static auto Combine(Composition<Norm, ImagN<T> >) {
-    return GetIPolynomial<1>();
-  }
+  static auto Combine(Composition<Norm, ImagN<T> >) { return IP<1>(); }
 };
 
 template <class T>
@@ -71,7 +67,7 @@ struct Simplification<Composition<Norm, T>, /*com_nm_f*/ 1,
                       typename std::enable_if<ComplexOutputType<T>::value ==
                                               NeverComplex>::type> {
   static auto Combine(Composition<Norm, T> t) {
-    return GetIPolynomial<0, 0, 1>()(std::get<1>(t.GetFunctions()));
+    return IP<0, 0, 1>()(std::get<1>(t.GetFunctions()));
   }
 };
 
@@ -197,7 +193,7 @@ struct Simplification<Composition<IntegralPolynomial<coeffs...>, Sign>, 0,
   static auto Combine(Composition<IntegralPolynomial<coeffs...>, Sign>) {
     static const IPInt_t zeroth = Accum<0, coeffs...>::zeroth;
     static const IPInt_t first = Accum<0, coeffs...>::first;
-    return GetIPolynomial<zeroth, first>()(Sign());
+    return IP<zeroth, first>()(Sign());
   }
 };
 
