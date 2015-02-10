@@ -62,4 +62,8 @@ BOOST_AUTO_TEST_CASE(trig_tests) {
 
   BOOST_CHECK_EQUAL(Simplify(tan_(GetIPolynomial<0, -1>()(x))),
                     Simplify(-tan_(x)));
+
+  BOOST_CHECK_EQUAL(Simplify(tan_(x + x)), Simplify(((tan_+tan_)/(GetIPolynomial<1>() + tan_*tan_))(x)));
+
+  BOOST_CHECK_EQUAL(Simplify((sqrt_*sqrt_)(x)), x);
 }
