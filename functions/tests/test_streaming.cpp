@@ -10,6 +10,7 @@
 BOOST_AUTO_TEST_CASE(streaming_test) {
   using namespace manifolds;
   auto p1 = x * x;
-  auto p = p1(x - 1_c) + x * x * x;
+  auto p = p1(IP<1>() + x * x) + x * x * x;
   Stream2(std::cout, p) << "\n\n";
+  std::cout << get_cpp_name<decltype(p)>() << "\n\n";
 }

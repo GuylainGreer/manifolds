@@ -166,10 +166,18 @@ struct Simplification<IntegralPolynomial<ts...>,
 
   template <class> struct stopping_condition;
 
+  template <class D, IPInt_t... touts> struct last_s {
+    static const bool value = last<ic<touts>...>::type::value != 0;
+  };
+
+  template <class D> struct last_s<D> {
+    static const bool value = true;
+  };
+
   template <IPInt_t... touts>
   struct stopping_condition<std::integer_sequence<IPInt_t, touts...> > {
     static const bool value =
-        sizeof...(ts) == 1 || last<ic<touts>...>::type::value != 0;
+        sizeof...(ts) == 1 || last_s<void, touts...>::value;
   };
 
   template <IPInt_t... touts>
@@ -379,6 +387,29 @@ struct Simplification<
         sizeof...(coeffs) - 1,
         std::tuple<std::integral_constant<IPInt_t, coeffs>...> >::type np;
     return np(std::get<1>(c.GetFunctions()).GetFunction());
+  }
+};
+
+template <IPInt_t... coeffs, class F>
+struct Simplification<
+    Addition<Composition<IP<coeffs...>, F>, F>, 0,
+    typename std::enable_if<F::stateless &&(sizeof...(coeffs) > 1)>::type> {
+  template <class... Coeffs> static auto Process(std::tuple<Coeffs...>) {
+    return IP<Coeffs::value...>();
+  }
+  static auto Combine(Addition<Composition<IP<coeffs...>, F>, F>) {
+    typedef std::tuple<std::integral_constant<IPInt_t, coeffs>...> Input;
+    typedef std::integral_constant<
+        IPInt_t, 1 + std::tuple_element<1, Input>::type::value> New;
+    return Process(replace_element<1>(Input(), New()))(F());
+  }
+};
+
+template <IPInt_t... coeffs, class F>
+struct Simplification<Multiplication<Composition<IP<coeffs...>, F>, F>, 0,
+                      typename std::enable_if<F::stateless>::type> {
+  static auto Combine(Multiplication<Composition<IP<coeffs...>, F>, F>) {
+    return IP<0, coeffs...>()(F());
   }
 };
 }
