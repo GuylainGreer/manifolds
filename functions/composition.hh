@@ -155,11 +155,6 @@ private:
   tuple<Functions...> functions;
 };
 
-template <class> struct is_composition : std::false_type {};
-
-template <class... Args>
-struct is_composition<Composition<Args...> > : std::true_type {};
-
 template <class... Fs> auto ComposeRaw(Fs... fs) {
   return Composition<Fs...>(fs...);
 }
