@@ -150,6 +150,14 @@ template <class... Types> struct common_type {
                                     typename make_signed<std_type>::type,
                                     std_type>::type type;
 };
+
+template <bool, class T, class> struct eval_if_t {
+  typedef typename T::type type;
+};
+
+template <class T, class F> struct eval_if_t<false, T, F> {
+  typedef F type;
+};
 }
 
 #endif
