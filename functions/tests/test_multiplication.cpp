@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE(multiplication_test) {
   BOOST_CHECK_EQUAL(a(1, 2, 4, 8, 16), 4);
 
   auto f = Cos()(x * x) * y;
-  BOOST_CHECK_EQUAL(f(2, 1), std::cos(4.0));
+  BOOST_CHECK_EQUAL(f(2, 3), std::cos(4.0) * 3);
   auto f2 = -2_c * x * Sin()(x * x) * y;
   BOOST_CHECK_EQUAL((-2_c)(1), -2);
   BOOST_CHECK_EQUAL((-2_c * x * y)(2, 1), -4);
