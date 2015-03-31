@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(polynomial_test) {
   std::complex<double> c{ 1, 2 };
   auto pc = GetPolynomial(c, 2.0 * c, c * c);
 
-  BOOST_CHECK_EQUAL(pc(0), c);
+  BOOST_CHECK_EQUAL(pc(0.0), c);
   using namespace std::literals;
   BOOST_CHECK_EQUAL(pc(1i), 0i);
 
