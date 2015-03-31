@@ -59,7 +59,8 @@ struct Simplification<Multiplication<Polynomial<CoeffType1, int_<order1> >,
                                      Polynomial<CoeffType2, int_<order2> > >,
                       /*mult_p1_p2*/ 0> {
   static const int new_order = order1 + order2 - 1;
-  typedef typename std::common_type<CoeffType1, CoeffType2>::type coeff_type;
+    typedef decltype(std::declval<CoeffType1>()*std::declval<CoeffType2>()) coeff_type;
+    //typedef typename std::common_type<CoeffType1, CoeffType2>::type coeff_type;
   typedef Polynomial<coeff_type, int_<new_order> > type;
 
   static type
@@ -70,7 +71,7 @@ struct Simplification<Multiplication<Polynomial<CoeffType1, int_<order1> >,
     auto p1 = std::get<0>(p.GetFunctions());
     auto p2 = std::get<1>(p.GetFunctions());
     std::array<coeff_type, new_order> r;
-    std::fill(r.begin(), r.end(), 0);
+    std::fill(r.begin(), r.end(), coeff_type{});
     for (unsigned j = 0; j < order1; j++)
       for (unsigned i = 0; i < order2; i++)
         r[i + j] += p1.GetCoeffs()[j] * p2.GetCoeffs()[i];
