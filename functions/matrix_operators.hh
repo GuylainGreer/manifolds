@@ -8,16 +8,24 @@ namespace manifolds {
 
 template <std::size_t rows1, std::size_t cols1, class CoeffType1,
           class CoeffType2>
-auto operator+(Matrix<rows1, cols1, CoeffType1> a,
+auto & operator+=(Matrix<rows1, cols1, CoeffType1> & a,
                Matrix<rows1, cols1, CoeffType2> b) {
   typedef typename std::common_type<CoeffType1, CoeffType2>::type OutCoeff;
 
-  Matrix<rows1, cols1, OutCoeff> r;
   for (std::size_t i = 0; i < rows1; i++)
     for (std::size_t j = 0; j < cols1; j++)
-      r.Coeff(i, j) = a.Coeff(i, j) + b.Coeff(i, j);
-  return r;
+      a.Coeff(i, j) += b.Coeff(i, j);
+  return a;
 }
+
+    template <std::size_t rows1, std::size_t cols1, class CoeffType1,
+              class CoeffType2>
+    auto operator+(Matrix<rows1, cols1, CoeffType1> a,
+                   Matrix<rows1, cols1, CoeffType2> b)
+    {
+        a += b;
+        return a;
+    }
 
 template <class T> auto MassageMultiplicationOutput(T t, int_<1>, int_<1>) {
   return t.Coeff(0, 0);
