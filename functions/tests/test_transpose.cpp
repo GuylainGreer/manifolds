@@ -1,6 +1,6 @@
 #include "functions/transpose.hh"
 #include <boost/test/unit_test.hpp>
-#include "functions/matrix.hh"
+#include "data/matrix.hh"
 
 BOOST_AUTO_TEST_CASE(tranpose_test) {
   using namespace manifolds;

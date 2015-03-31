@@ -1,11 +1,11 @@
 #include <boost/test/unit_test.hpp>
-#include "functions/matrix.hh"
+#include "data/matrix.hh"
 #include "functions/function_matrix.hh"
 #include "functions/trig.hh"
 #include "functions/operators.hh"
 #include "functions/transpose.hh"
 #include "functions/streaming.hh"
-#include "functions/matrix_operators.hh"
+#include "data/matrix_operators.hh"
 
 BOOST_AUTO_TEST_CASE(matrix_test) {
   using namespace manifolds;

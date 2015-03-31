@@ -5,7 +5,7 @@
 #include <complex>
 #include "functions/trig.hh"
 #include "functions/all_simplifications.hh"
-#include "functions/matrix.hh"
+#include "data/matrix.hh"
 
 BOOST_AUTO_TEST_CASE(matrix_polynomial_test) {
   using namespace manifolds;

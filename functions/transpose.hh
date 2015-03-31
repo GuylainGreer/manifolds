@@ -3,7 +3,7 @@
 
 #include "function.hh"
 #include "full_function_defs.hh"
-#include "matrix.hh"
+#include "data/matrix.hh"
 
 namespace manifolds {
 struct Transpose : Function<int_<7>, 1, 1>, FunctionCommon<Transpose> {

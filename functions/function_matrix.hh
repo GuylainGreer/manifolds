@@ -4,7 +4,7 @@
 #include "tuple_util.hh"
 #include "full_function_defs.hh"
 #include "function.hh"
-#include "matrix.hh"
+#include "data/matrix.hh"
 
 namespace manifolds {
 

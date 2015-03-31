@@ -3,7 +3,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <random>
-#include "functions/matrix.hh"
+#include "data/matrix.hh"
 
 namespace manifolds {
 template <class Eng, class Rand, int... Ns>

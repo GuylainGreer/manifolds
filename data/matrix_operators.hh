@@ -1,8 +1,8 @@
 #ifndef MANIFOLD_MATRIX_SIMPLICATIONS_HH
 #define MANIFOLD_MATRIX_SIMPLICATIONS_HH
 
-#include "addition.hh"
-#include "multiplication.hh"
+#include "functions/tmp_utils.hh"
+#include "functions/tuple_util.hh"
 
 namespace manifolds {
 

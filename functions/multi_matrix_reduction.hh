@@ -1,7 +1,7 @@
 #ifndef MANIFOLDS_FUNCTIONS_MULTI_MATRIX_REDUCTION_HH
 #define MANIFOLDS_FUNCTIONS_MULTI_MATRIX_REDUCTION_HH
 
-#include "multi_matrix.hh"
+#include "data/multi_matrix.hh"
 #include "function.hh"
 #include "full_function_defs.hh"
 #include <boost/mpl/find.hpp>

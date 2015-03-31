@@ -1,5 +1,5 @@
 #include <boost/test/unit_test.hpp>
-#include "functions/multi_matrix.hh"
+#include "data/multi_matrix.hh"
 
 BOOST_AUTO_TEST_CASE(MultiMatrixTest) {
   using namespace manifolds;
