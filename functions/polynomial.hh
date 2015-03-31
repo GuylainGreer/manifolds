@@ -30,17 +30,22 @@ struct Polynomial : Function<int_<6>, 1, 1>,
     std::copy(t.GetCoeffs().begin(), t.GetCoeffs().end(), coeffs.begin());
   }
 
-  template <class T, class... Ts> auto eval(T t, Ts...) const {
-    static_assert(sizeof...(Ts) == 0 || Order::value == 1,
-                  "Can only call polynomial "
-                  "with multiple arguments when "
-                  "polynomial is a constant");
-    typename common_type<T, CoeffType>::type result = 0, t2 = t;
-    for (auto i = coeffs.rbegin(); i != coeffs.rend(); i++) {
-      result = result * t2 + *i;
+    template <class T> auto eval2impl(T t, int_<1>) const {
+        return coeffs[Order::value-1];
     }
-    return result;
-  }
+
+    template <class T, int i> auto eval2impl(T t, int_<i>) const {
+        static const int index = Order::value - i;
+        return eval2impl(t, int_<i-1>{}) * t + coeffs[index];
+    }
+
+    template <class T, class... Ts> auto eval(T t, Ts...) const {
+        static_assert(sizeof...(Ts) == 0 || Order::value == 1,
+                      "Can only call polynomial "
+                      "with multiple arguments when "
+                      "polynomial is a constant");
+        return eval2impl(t, int_<Order::value>{});
+    }
 
   const auto &GetCoeffs() const { return coeffs; }
 
