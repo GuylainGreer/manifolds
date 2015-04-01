@@ -4,7 +4,7 @@
 #include <array>
 #include <algorithm>
 #include <iterator>
-#include "functions/tuple_util.hh"
+#include "misc/tuple_util.hh"
 
 namespace manifolds {
 template <int n, int... ns> struct product {

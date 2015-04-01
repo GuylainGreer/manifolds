@@ -1,7 +1,7 @@
 #ifndef MANIFOLDS_FUNCTIONS_FUNCTION_MATRIX_HH
 #define MANIFOLDS_FUNCTIONS_FUNCTION_MATRIX_HH
 
-#include "tuple_util.hh"
+#include "misc/tuple_util.hh"
 #include "full_function_defs.hh"
 #include "function.hh"
 #include "data/matrix.hh"

@@ -8,7 +8,6 @@
 #include <ostream>
 #include <iostream>
 #include <algorithm>
-#include "typename.hh"
 
 namespace manifolds {
 // Somewhat confusingly,

@@ -3,7 +3,7 @@
 
 #include "function.hh"
 #include "full_function_defs.hh"
-#include "tuple_util.hh"
+#include "misc/tuple_util.hh"
 #include <string>
 
 namespace manifolds {

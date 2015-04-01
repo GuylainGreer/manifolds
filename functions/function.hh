@@ -2,7 +2,7 @@
 #define MANIFOLDS_FUNCTION_INTERFACE_HH
 
 #include <utility>
-#include "tmp_utils.hh"
+#include "misc/tmp_utils.hh"
 
 namespace manifolds {
 

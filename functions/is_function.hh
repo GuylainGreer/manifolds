@@ -1,7 +1,7 @@
 #ifndef MANIFOLDS_FUNCTIONS_IS_FUNCTION_HH
 #define MANIFOLDS_FUNCTIONS_IS_FUNCTION_HH
 
-#include "tuple_util.hh"
+#include "misc/tuple_util.hh"
 #include <type_traits>
 #include <utility>
 

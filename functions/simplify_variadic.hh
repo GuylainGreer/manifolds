@@ -2,7 +2,6 @@
 #define MANIFOLDS_FUNCTIONS_SIMPLIFY_VARIADIC_HH
 
 #include "simplify.hh"
-#include "typename.hh"
 #include <iostream>
 #include <boost/mpl/range_c.hpp>
 #include <boost/mpl/bool.hpp>

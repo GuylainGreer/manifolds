@@ -2,7 +2,6 @@
 #define MANIFOLDS_FUNCTIONS_TUPLE_UTILITIES_HH
 
 #include <utility>
-#include "function.hh"
 #include "tmp_utils.hh"
 #include <boost/mpl/vector_c.hpp>
 #include <boost/mpl/sort.hpp>
