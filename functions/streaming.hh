@@ -17,7 +17,7 @@
 #include "zero.hh"
 #include "integral_polynomial.hh"
 #include "unary_minus.hh"
-#include "trig.hh"
+#include "std_functions.hh"
 #include "complex.hh"
 
 namespace manifolds {

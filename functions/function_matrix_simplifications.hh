@@ -2,7 +2,7 @@
 #define MANIFOLDS_FUNCTIONS_FUNCTION_MATRIX_SIMPLIFICATIONS_HH
 
 #include "variables.hh"
-#include "trig.hh"
+#include "std_functions.hh"
 #include "transpose.hh"
 
 namespace manifolds {

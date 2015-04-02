@@ -4,7 +4,7 @@
 #include "functions/operators.hh"
 #include <boost/test/unit_test.hpp>
 #include <complex>
-#include "functions/trig.hh"
+#include "functions/std_functions.hh"
 #include "functions/all_simplifications.hh"
 
 BOOST_AUTO_TEST_CASE(polynomial_test) {

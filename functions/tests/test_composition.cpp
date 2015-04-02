@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include "functions/composition.hh"
 #include "functions/full_function_defs.hh"
-#include "functions/trig.hh"
+#include "functions/std_functions.hh"
 #include "functions/variables.hh"
 
 BOOST_AUTO_TEST_CASE(composition_test) {

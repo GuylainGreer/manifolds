@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include "functions/vector_field.hh"
-#include "functions/trig.hh"
+#include "functions/std_functions.hh"
 #include "functions/polynomial.hh"
 
 BOOST_AUTO_TEST_CASE(vector_field_test) {

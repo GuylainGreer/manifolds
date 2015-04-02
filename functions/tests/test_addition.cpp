@@ -2,7 +2,7 @@
 #include "functions/addition.hh"
 #include "functions/variables.hh"
 #include "functions/full_function_defs.hh"
-#include "functions/trig.hh"
+#include "functions/std_functions.hh"
 #include "functions/polynomial.hh"
 #include "functions/operators.hh"
 #include <iostream>

@@ -1,6 +1,6 @@
 #include "functions/operators.hh"
 #include <boost/test/unit_test.hpp>
-#include "functions/trig.hh"
+#include "functions/std_functions.hh"
 
 BOOST_AUTO_TEST_CASE(operators_test) {
   using namespace manifolds;

@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include "functions/unary_minus.hh"
 #include "functions/addition.hh"
-#include "functions/trig.hh"
+#include "functions/std_functions.hh"
 #include "functions/zero.hh"
 #include "functions/polynomial.hh"
 #include "functions/function_matrix.hh"

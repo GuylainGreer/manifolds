@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include "functions/streaming.hh"
-#include "functions/trig.hh"
+#include "functions/std_functions.hh"
 #include "functions/polynomial.hh"
 #include "functions/variables.hh"
 #include "functions/operators.hh"

@@ -6,7 +6,7 @@
 #include "variables.hh"
 #include "division.hh"
 #include "polynomial.hh"
-#include "trig.hh"
+#include "std_functions.hh"
 #include "function_matrix.hh"
 #include "all_simplifications.hh"
 #include "operators.hh"

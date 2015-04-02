@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include "functions/zero.hh"
-#include "functions/trig.hh"
+#include "functions/std_functions.hh"
 #include "functions/operators.hh"
 #include "functions/all_simplifications.hh"
 

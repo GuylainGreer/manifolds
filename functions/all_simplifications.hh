@@ -12,7 +12,7 @@
 #include "polynomial_simplifications.hh"
 #include "simplify_variadic.hh"
 #include "transpose_simplifications.hh"
-#include "trig_simplifications.hh"
+#include "std_functions_simplifications.hh"
 #include "unary_minus_simplifications.hh"
 #include "zero_simplifications.hh"
 

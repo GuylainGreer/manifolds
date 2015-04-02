@@ -1,5 +1,5 @@
 #include <complex>
-#include "functions/trig.hh"
+#include "functions/std_functions.hh"
 #include "functions/full_function_defs.hh"
 #include "pointwise_equal.hh"
 #include "functions/all_simplifications.hh"

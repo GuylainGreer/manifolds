@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include "functions/full_function_defs.hh"
 #include "functions/variables.hh"
-#include "functions/trig.hh"
+#include "functions/std_functions.hh"
 
 struct ReturnTwo : manifolds::Function<manifolds::int_<1000000>, 1, 2> {
   auto operator()() const { return manifolds::make_my_tuple(1, 2); }
